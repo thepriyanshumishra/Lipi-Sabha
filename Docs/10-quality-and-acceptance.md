@@ -1,60 +1,49 @@
 # 10 — Quality, Privacy, and Acceptance Checklist
 
-## 1. Critical user journeys
+This checklist defines the rigorous release criteria for the Lipi Sabha MVP. Every vertical slice must verify compliance against these gates before being marked complete.
 
-- [ ] Signed-out visitor can view only public approved project information.
-- [ ] Eligible user can submit a project proposal.
-- [ ] Proposal moves through review states with actor, time and reason.
-- [ ] A proposer cannot approve their own proposal unless independently assigned a permitted review role by a documented policy.
-- [ ] Only active approved projects can collect official test responses.
-- [ ] A reviewer can mark a stimulus or orthography profile reviewed, disputed, or in need of revision.
-- [ ] A participant can complete a quest and responses are stored against the exact item/profile version.
-- [ ] Blind-first responses are required before showing aggregate answers.
-- [ ] Low-sample subgroup breakdowns are suppressed.
-- [ ] “Not scored” and “multiple forms accepted” states display correctly.
-- [ ] XP grants are idempotent on refresh/retry.
-- [ ] A poll rejects duplicate or ineligible votes.
-- [ ] A poll cannot automatically change an orthography profile or community decision state.
-- [ ] A decision can be recorded as no consensus or more testing needed.
+---
 
-## 2. Metric checks
+## 1. Tactile UI & Design System Gates ([`00-design-system.md`](./00-design-system.md))
 
-- [ ] Task accuracy exists only for items with reviewed explicit criteria.
-- [ ] Exact string mismatch is not automatically treated as linguistic error.
-- [ ] Orthographic agreement formula and normalization rule are documented.
-- [ ] Learning-time results show sample size and test conditions.
-- [ ] Community preference is displayed separately from performance metrics.
-- [ ] Community alignment is descriptive and never labeled as correctness.
-- [ ] No overall weighted “best script” score appears in MVP.
+- [ ] **Duolingo Token Conformance:** Colors conform strictly to the palette (`#58cc02` Eager Green, `#1cb0f6` Spark Blue, `#d7ffb8` Storybook Green, `#4b4b4b` Charcoal text on `#ffffff` Paper White).
+- [ ] **Tactile 3D Button Press:** Buttons and cards feature 2px solid borders, 12px rounded corners, and a physical 3D press-depth translation on active click.
+- [ ] **Scribe Mascot Feedback:** The mascot ("Lipi") appears on quest cards and reacts contextually to attempts (happy bounce on success, thoughtful pose on variants).
+- [ ] **Celebration Animations:** Completing a quest triggers confetti particles, XP ticker rollup, and streak flame increments without UI lag.
+- [ ] **Accessible Contrast:** Text combinations meet or exceed WCAG 2.1 AA (minimum 4.5:1 for body copy).
+- [ ] **Mobile Responsiveness:** All quest cards, speech bubbles, and evidence charts scale smoothly on 375px mobile viewports.
 
-## 3. Security checks
+---
 
-- [ ] RLS enabled on every exposed table.
-- [ ] Explicit table grants reviewed for `anon`, `authenticated`, and privileged server roles.
-- [ ] Server-only secret values are absent from client bundle and repository.
-- [ ] Invalid role claims and tampered project IDs are rejected.
-- [ ] Users cannot read private proposals, raw responses or reviewer notes outside their authorization.
-- [ ] Admin-only transitions are validated server-side and audited.
-- [ ] Input validation, output escaping and basic rate limiting exist on public submission paths.
-- [ ] Small-group suppression is enforced before data reaches the client.
+## 2. Core Functional & Governance Gates ([`02-prd.md`](./02-prd.md))
 
-## 4. Privacy and consent
+- [ ] **Role Isolation:** Participants cannot access coordinator or admin tools by tampering with URLs, client state, or network request payloads.
+- [ ] **Proposal Governance:** Proposals move sequentially through `submitted` -> `under_review` -> `approved`. Unapproved proposals cannot collect public responses.
+- [ ] **Audit Trail:** Every governance status change, approval, rejection, or content moderation logs an immutable record with actor, timestamp, and justification reason.
+- [ ] **Orthography Versioning:** Every test response is permanently bound to the active orthography profile rules version in effect during the attempt.
+- [ ] **Blind-First Enforcement:** Aggregate community response distributions are cryptographically/architecturally hidden from the participant until their own response is saved.
+- [ ] **Small-Cohort Privacy Guard:** Any subgroup breakdown with fewer than 5 respondents ($N < 5$) is automatically suppressed to protect anonymity.
+- [ ] **Non-Judgmental Feedback:** Unfamiliar or minority variants are labeled as "Documented variant / Under review", never given a red "wrong" penalty.
+- [ ] **Idempotent Gamification:** Refreshing or resending quest completion requests does not award duplicate XP in the `xp_ledger`.
+- [ ] **Consultation Voting:** Polls strictly enforce one vote per user and cannot unilaterally declare a winning writing system.
+- [ ] **Legitimate Ambiguity:** The platform natively supports recording `no_consensus` or `more_testing_needed` as valid formal outcomes.
 
-- [ ] Research use is explained before a response is collected.
-- [ ] Contributor can choose attribution preference where applicable.
-- [ ] Audio is stored only with permission and defined access/retention.
-- [ ] Exact location and unnecessary personal details are not requested.
-- [ ] Users can understand how their responses contribute to aggregate reporting.
-- [ ] The project clearly separates synthetic demo data from real research data.
-- [ ] Data retention, export and deletion route is defined before production pilot.
+---
 
-## 5. Release gate
+## 3. Technical & Security Gates ([`04-system-architecture.md`](./04-system-architecture.md))
 
-Do not call the MVP demo-ready until:
-- lint/typecheck/build pass;
-- critical tests pass;
-- core authorization tests pass;
-- one end-to-end synthetic project can be demonstrated;
-- the UI explains the distinction between preference, correctness, consistency, learnability and alignment;
-- an outcome of “no decision yet” can be represented;
-- documentation matches the implemented behavior.
+- [ ] **TypeScript Strict Mode:** Zero type errors (`tsc --noEmit` exits with code 0).
+- [ ] **Row Level Security (RLS):** All exposed PostgreSQL tables have active RLS policies with tests covering both permit and deny paths.
+- [ ] **Zero Secret Leakage:** `SUPABASE_SERVICE_ROLE_KEY` is completely absent from browser bundles and client-side code.
+- [ ] **Deep Module Seams:** Domain logic is quarantined inside `lib/modules/` (`QuestEngine`, `MetricsEngine`, `GovernanceWorkflow`, `GamificationLedger`).
+- [ ] **Synthetic Data Watermark:** Demo datasets are explicitly flagged with `is_synthetic_demo = true` and visibly marked in the UI.
+- [ ] **Codebase Memory Indexing:** Codebase indexed in `codebase-memory-mcp` for structural intelligence.
+
+---
+
+## 4. Release Sign-Off Gate
+
+The Lipi Sabha MVP is authorized for demonstration only when:
+1. All automated lint, typecheck, and unit test suites pass.
+2. A seeded synthetic project (Modi Script vs Devanagari in Marathi Orthography) executes the complete journey from proposal review to interactive quest, Community Mirror reveal, and consultation record.
+3. The UI delights users with playful Duolingo-grade tactile responsiveness while maintaining absolute linguistic humility and community sovereignty.

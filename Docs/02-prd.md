@@ -1,165 +1,173 @@
 # 02 — Product Requirements Document (PRD)
 
-**Product:** Lipi Sabha  
+**Product:** Lipi Sabha (लिपि सभा)  
 **Release:** MVP  
-**Status:** Proposed baseline for implementation
+**Status:** Approved baseline for implementation  
+**Aesthetic & UX Benchmark:** Duolingo-grade playful, tactile storybook experience ([`00-design-system.md`](./00-design-system.md)) paired with sovereign community governance.
+
+---
 
 ## 1. Scope
 
-The MVP is a responsive web application with authentication, role-aware workflows, project review, orthography setup, word-focused tests, limited phrase-level contextual tests, simple gamification, transparent results, Community Mirror, and a consultation/decision record.
+The MVP is a responsive web application featuring role-aware community governance, orthography and script configuration, high-engagement Duolingo-style bite-sized learning quests, transparent evidence dashboards, a blind-first Community Mirror, and auditable consultation and decision records.
 
-The core unit is a **linguistic stimulus**. Initially this will mostly be a word; short phrases may be used to check whether a convention remains usable in context. The system does not correct sentence grammar.
+The core linguistic unit is a **linguistic stimulus**. In the MVP, stimuli consist primarily of single words and short phrases (to validate orthographic conventions in real contextual flow). The system does not attempt automatic grammar correction or machine translation.
 
-## 2. Roles and permissions
+---
 
-| Capability | Participant | Proposer / coordinator | Linguist reviewer | Governance reviewer / admin |
-|---|---:|---:|---:|---:|
+## 2. Roles and Permissions Matrix
+
+| Capability | Participant | Proposer / Coordinator | Linguist Reviewer | Governance Reviewer / Admin |
+|---|:---:|:---:|:---:|:---:|
 | Browse public approved projects | Yes | Yes | Yes | Yes |
-| Submit a project proposal | Yes, subject to anti-spam limits | Yes | Yes | Yes |
+| Submit a project proposal | Yes (with anti-spam limits) | Yes | Yes | Yes |
 | Edit own unsubmitted proposal | Yes | Yes | Yes | Yes |
-| Approve/reject project | No | No | No, unless separately appointed | Yes |
-| Configure candidate profiles on approved project | No | Yes, if assigned | Yes, if assigned | Yes |
-| Approve linguistic items/scoring criteria | No | No, unless qualified and assigned | Yes | Can require review |
-| Complete quests/tests | Yes | Yes | Yes | Yes |
-| View own individual response history | Yes | Yes | Yes | Yes, only when needed for moderation/audit and policy permits |
-| View aggregate results | Yes, when released | Yes | Yes | Yes |
-| Create consultation poll | No | Yes, if project rules allow | Can advise | Can moderate/authorize according to project rules |
-| Cast eligible consultation vote | Yes | Yes | Yes | Yes, if eligible under published rules |
-| Record formal outcome | No | Can submit proposed record | Can attest to linguistic review | Authorized community/governance role only |
+| Approve / reject project proposal | No | No | No (unless assigned) | Yes |
+| Configure candidate profiles on approved project | No | Yes (if assigned) | Yes (if assigned) | Yes |
+| Review / approve linguistic items & scoring rules | No | No (unless qualified) | Yes | Can require review |
+| Complete daily & project quests | Yes | Yes | Yes | Yes |
+| View own response history & learning progress | Yes | Yes | Yes | Yes (audit policy permits) |
+| View aggregate results & Community Mirror | Yes (when released) | Yes | Yes | Yes |
+| Create consultation poll | No | Yes (if rules allow) | Can advise | Can moderate / authorize |
+| Cast eligible consultation vote | Yes | Yes | Yes | Yes (if eligible) |
+| Record formal community outcome | No | Can submit proposed record | Can attest review | Authorized role only |
 
-Permissions may be narrowed by each project’s published rules. Platform administrator status must never automatically imply linguistic authority.
+*Permissions may be narrowed by each project's published rules. Platform administrator status must never automatically imply linguistic authority.*
 
-## 3. Functional requirements
+---
 
-### FR-01 — Authentication and profile
-- Users can sign in and maintain a minimal profile.
-- Users may optionally declare a language variety/region only at a broad, privacy-conscious level.
-- Do not collect exact home address or precise location.
-- Role grants are controlled server-side and cannot be self-assigned through editable profile fields.
+## 3. Functional Requirements
 
-**Acceptance:** a participant cannot modify their own role to become an admin or reviewer.
+### FR-01 — Authentication and Profile
+- Users can authenticate via Supabase Auth (email magic link, password, or OAuth).
+- Users maintain a minimal profile: `display_name`, avatar, preferred UI language.
+- Users may optionally self-describe their language variety or broad region only at a privacy-conscious macro level (no exact GPS or street addresses).
+- Role grants are managed server-side with PostgreSQL Row Level Security (RLS) and cannot be modified via client-side requests.
+- **Acceptance Gate:** A participant cannot elevate their own permissions or bypass server-side role validation.
 
-### FR-02 — Project proposal
-The proposal form includes:
-- project/language name and known alternative names;
-- broad region/communities involved (optional and not precise location);
-- language variety/dialect names, with “not yet documented” available;
-- problem statement and project goal;
-- candidate scripts/orthographies, if known;
-- source/provenance for existing forms and proposed variants;
-- community engagement/consent plan;
-- proposer contact or project contact setting;
-- initial scope: words, short phrases, or both.
+### FR-02 — Project Proposal Workflow
+Proposals capture structured information:
+- Language name, ISO/glottolog codes if known, and community-recognized alternative names.
+- Broad geographical regions and community stakeholders.
+- Language varieties / dialects involved (with an explicit "Not documented yet" option).
+- Problem statement, historical context, and project goals.
+- Candidate scripts / orthographic conventions proposed for comparison.
+- Provenance and consent plan for language data.
+- Proposer contact details and organizational affiliation (if any).
+- Initial scope: words, phrases, or both.
+- **Acceptance Gate:** Submission transitions the project to `submitted`/`under_review`. Unapproved proposals are completely hidden from public listings and cannot collect responses.
 
-**Acceptance:** submission creates a proposal in `submitted`/`under_review` state, not an automatically public active project.
+### FR-03 — Governance Review & Audit
+- Governance reviewers evaluate proposals against legitimacy, community consent, safety, and feasibility rubrics.
+- Actions: `approve`, `request_changes`, `reject`.
+- Every transition logs the actor, timestamp, prior state, new state, and review reason to an immutable audit table.
+- Proposers can revise and resubmit proposals with requested changes.
+- **Acceptance Gate:** Only projects with `approved` status can be activated for quest authoring and community participation.
 
-### FR-03 — Governance review
-- Reviewer can approve, request changes, or reject.
-- Every action records actor, timestamp, status change, and reason.
-- Proposer can revise and resubmit a changes-requested proposal.
-- Public project pages show review state and do not describe approval as proof that a particular writing system is correct.
+### FR-04 — Candidate Orthography Profiles
+- Projects can configure two or more candidate orthography profiles (e.g., Option A: Classical Modi vs Option B: Modernized Devanagari; or competing vowel marking conventions).
+- Each profile represents **script + orthographic rules**, not just a superficial script name.
+- Captures plain-language summaries, rules documentation, representative glyph samples, reviewer attestation, and documented limitations.
+- Supports blinded labels (e.g., "Orthography 1" vs "Orthography 2") during empirical testing to prevent brand/label bias.
+- **Acceptance Gate:** Every test item is explicitly version-linked to the active candidate profile rules in effect during the quest.
 
-**Acceptance:** an unapproved proposal is not listed as an active public research project and cannot collect official research responses.
+### FR-05 — Stimulus & Variant Dataset
+- Stimuli of type `word` or `phrase`.
+- Attributes: target reference form, language variety, optional pronunciation note, optional consented audio asset (compressed Opus/MP3), source description, consent basis, and review status.
+- Attaches variants to candidate profiles with explicit status: `reported`, `reviewed`, `accepted_for_task`, `disputed`, `retired`.
+- Multiple acceptable forms are supported; an unfamiliar variant is never marked incorrect simply because it is rare.
+- **Acceptance Gate:** Scored tasks require reviewed stimuli with explicit acceptance criteria. Unreviewed items are labeled "Exploratory / Unreviewed".
 
-### FR-04 — Candidate orthography profiles
-- A project may configure two or more candidate profiles.
-- Each profile represents a script plus spelling/orthographic conventions, not just a script label.
-- Capture a plain-language description, representative examples, reviewer status, source, and known limitations.
-- Keep each candidate neutral (Option A/B labels are acceptable during blinded testing).
+### FR-06 — Guided Quest Engine (Duolingo-Inspired Interactive Learning)
+Quests are bite-sized (default 3–5 tasks, ~2–3 minutes), designed for maximum engagement, clarity, and fun:
+- **Task Type 1 — Script Match Pill:** Tap to match a phonetic sound/syllable (e.g., "ka") with its candidate script glyph.
+- **Task Type 2 — Script Tile Reorder (Phrase Builder):** Arrange chunky rounded word tiles into the correct orthographic sequence.
+- **Task Type 3 — Audio Discrimination:** Listen to native pronunciation and select which candidate spelling accurately reflects vowel length or nasalization.
+- **Task Type 4 — Side-by-Side Orthography Comparison (Blind-First):** Compare Option A and Option B in a contextual sentence; submit preference or readability rating before viewing community results.
+- **Task Type 5 — Canvas Glyph Tracing (Interactive Stroke):** Practice stroke order for key characters on an HTML5 canvas with snap-to-guide feedback.
+- **Acceptance Gate:** Participant completes a quest with real-time tactile animations, bouncy button states, and immediate explanatory feedback.
 
-**Acceptance:** reviewers can tell what convention a participant was testing and what version of the rules applied.
+### FR-07 — Blind-First Reveal & Community Mirror
+- A participant must submit their own response before the Community Mirror aggregate distribution is unlocked.
+- After submission, display a clean percentage distribution breakdown between candidate conventions.
+- Displays sample size, active data collection dates, and review status.
+- If subgroup sample size is below the threshold (default: < 5 participants), the subgroup breakdown is suppressed to protect anonymity.
+- Copy strictly reinforces alignment rather than correctness (e.g., *"34% of participants selected Option A"* vs *"Option A is correct"*).
+- **Acceptance Gate:** Network inspection cannot reveal aggregate answer distributions prior to client submission.
 
-### FR-05 — Stimulus/variant dataset
-- Create stimuli of type `word` or `phrase` for MVP.
-- Capture target/reference form, variety where known, optional pronunciation note or consented audio reference, data source, consent/usage basis, status, and review notes.
-- Attach one or more forms/variants to candidate orthography profiles.
-- Support multiple acceptable forms when the reviewed criteria allow them.
-- A variant must not be automatically marked incorrect simply because it is less common.
+### FR-08 — Transparent Evidence Dashboard
+Displays distinct, non-conflated measures:
+- **Task Accuracy:** Scored performance on items with verified linguistic criteria.
+- **Orthographic Agreement:** Measure of consensus among comparable submissions under explicit normalization rules.
+- **Learnability & Speed:** Completion time curves and pre/post lesson retention.
+- **Community Preference:** Results from formal consultation polls.
+- **Qualitative Observations & Limitations:** Documented community feedback and dialect nuances.
+- **Acceptance Gate:** No single weighted "winner score" or "best script ranking" is ever displayed in MVP.
 
-**Acceptance:** every active test item has a provenance record and a review status. Unreviewed items cannot be used in scored accuracy tasks.
+### FR-09 — Lightweight Gamification & Mascot Motivation
+- **XP Engine:** 
+  - +10 XP for completing a quest.
+  - +2 XP for submitting an optional reflection note.
+  - +5 XP for contributing a verified spelling variant with provenance.
+  - XP ledger is append-only and strictly idempotent (no double-counting on page refresh).
+  - XP is never awarded for voting for a majority option or a specific script.
+- **Scribe Streaks (Lipi Sadhana):** Daily habit counter with an optional "Ink Saver" (streak freeze) to encourage steady learning without punitive stress.
+- **Badges:** First Quest, Careful Scribe, Script Explorer, Community Contributor.
+- **Scribe Ranks:** Playful progression titles (e.g., Novice Reader -> Script Apprentice -> Scribe -> Epigraphist -> Lipi Ratna).
+- **Celebration Modals:** Confetti explosion, bouncy mascot victory dance, and level-up audio-visual feedback upon completing a quest.
+- **Acceptance Gate:** Public leaderboards ranking native speakers are completely absent.
 
-### FR-06 — Guided quest and testing
-- Participant chooses an approved active project.
-- Quest has a small set of clearly described tasks; default pilot target is 3–5 tasks per quest.
-- MVP question types: (a) choose/recognize a reading or writing convention, (b) compare variants, (c) optional free-text spelling response for manual review.
-- Each question is tied to a reviewed item and an explicit evaluation method.
-- Save attempt start/completion and answers, with appropriate consent and privacy settings.
+### FR-10 — Discussion & Consultation Polls
+- Moderated discussion threads attached to project milestones and stimuli.
+- Structured consultation polls with published voter eligibility, start/end dates, and voting methodology.
+- Enforces strictly one vote per user per poll.
+- Results are explicitly marked as "Community Consultation / Advisory" unless the community's formal charter establishes a binding governance process.
+- **Acceptance Gate:** Poll results cannot automatically overwrite database profile states or declare an official script.
 
-**Acceptance:** participant can finish a quest and view a completion state without needing every free-text response to be automatically scored.
+### FR-11 — Auditable Decision Log
+- Formal outcomes: `decision_recorded`, `more_testing_needed`, `no_consensus`, `no_decision_yet`.
+- Captures decision method, participating bodies, summary of evidence evaluated, dissenting opinions, and scheduled review dates.
+- **Acceptance Gate:** A project can cleanly close an iteration with `no_consensus` or `more_testing_needed` as a first-class valid outcome.
 
-### FR-07 — Blind-first reveal / Community Mirror
-- A participant's response is recorded before aggregate responses are revealed.
-- After submission, show aggregate community response distribution when the release threshold is met.
-- Where safe and sufficiently sampled, show aggregate results by self-described language variety; otherwise suppress the subgroup.
-- Clearly label community alignment as similarity to participant responses, not correctness.
-- Display sample size, data period, review status, and limitations.
+### FR-12 — Moderation & Abuse Prevention
+- Community flagging for offensive content, spam, or linguistic trolling.
+- Admin dashboard to review, hide, or restore flagged items with an auditable reason.
+- Rate limiting on quest submissions, proposals, and comments.
+- **Acceptance Gate:** All administrative moderation actions generate immutable audit log records.
 
-**Acceptance:** a user cannot see the answer distribution for a blind-first question before answering; small groups are not exposed through filters.
+### FR-13 — Tactile UI & Mascot Feedback Engine
+- Complies fully with the Duolingo Design Tokens specified in [`00-design-system.md`](./00-design-system.md).
+- Interactive tactile buttons with physical 2px-4px 3D depth press effects.
+- Dynamic mascot speech bubbles delivering encouraging hints and linguistic context.
+- Velocity-matched transitions powered by the `cut-the-curve` motion doctrine.
+- **Acceptance Gate:** UI scores 100% on tactile responsiveness with zero flat generic defaults.
 
-### FR-08 — Evidence dashboard
-Display separate measures:
-- task accuracy for explicitly scored tasks with reviewed criteria;
-- spelling/orthographic agreement for comparable responses;
-- median completion time and pre/post learning change, when test design supports it;
-- community preference from consultation polls;
-- qualitative feedback and known limitations.
+---
 
-Do not combine these into a single weighted “best script” score in the MVP.
+## 4. Non-Functional Requirements
 
-**Acceptance:** every metric has a tooltip/help text or methodology panel and cannot be misread as a universal ranking.
+- **Performance & Bandwidth:** First Contentful Paint < 1.2s on 4G networks; bundle size optimized via Next.js dynamic imports; SVG assets for glyphs and mascots.
+- **Accessibility:** Full WCAG 2.1 AA compliance, keyboard navigation for all quest cards, high contrast ratios (`#4b4b4b` text on `#ffffff` canvas).
+- **Internationalization & Script Rendering:** Flawless HarfBuzz / OpenType complex text shaping for Indic scripts (Devanagari, Sharada, Brahmi, Modi) with ligature preservation.
+- **Codebase Architecture:** Follows Matt Pocock's `codebase-design` principles—deep modules with high depth-to-interface ratios (`QuestEngine`, `MetricsEngine`, `GovernanceWorkflow`, `GamificationLedger`).
+- **Security:** Supabase PostgreSQL Row Level Security (RLS) on all user-accessible tables; zero secrets in client bundles; server-side Zod validation on every mutation.
 
-### FR-09 — Lightweight gamification
-- Award XP for completing a quest and making a valid, non-duplicative contribution.
-- Add a small set of badges (e.g., First Quest, Careful Observer, Community Helper).
-- Show personal progress and optional streak.
-- XP is not awarded for choosing a popular option, voting for a particular script, agreeing with a majority, or reporting a language variety.
-- No public leaderboard ranking native speakers in MVP.
+---
 
-**Acceptance:** gamification rewards participation quality and learning effort, never political/linguistic preference.
+## 5. Explicit Non-Goals for MVP
 
-### FR-10 — Discussion and consultation
-- Project discussion can capture comments/observations linked to an item or result.
-- A project can open a consultation poll with the eligible voter group, poll question/options, start/end, and published method.
-- Store one eligible vote per account per poll unless a formally approved design states otherwise.
-- Poll output is labeled preference/consultation unless the project’s community-defined governance policy specifies a formal decision process.
+1. Grammar correction, automatic essay grading, or machine translation.
+2. AI-generated prescription of "correct" writing systems.
+3. Ranking native speakers or dialects by "purity" or "authority".
+4. Custom ML model training or automatic speech recognition (ASR) in MVP.
+5. Real-time chat feeds or generic social networking features.
 
-**Acceptance:** poll result cannot silently change the approved orthography status or select a winner.
+---
 
-### FR-11 — Decision log
-- Record outcome categories: `decision_recorded`, `more_testing_needed`, `no_consensus`, `no_decision_yet`.
-- Store the decision method, participating/eligible group description, date, summary of evidence considered, dissent/limitations, and next review date if applicable.
-- The system never automatically turns the highest vote count or metric into the formal decision.
+## 6. MVP Release Gate
 
-**Acceptance:** a project can close a cycle without declaring a winning option.
-
-### FR-12 — Moderation and audit trail
-- Flag/report project content, variants, or comments.
-- Admins can hide unsafe/spam content while preserving an audit trail.
-- Keep review actions and project status transitions auditable.
-
-**Acceptance:** privileged actions record actor, timestamp, action, target, and reason.
-
-## 4. Non-functional requirements
-
-- Responsive UI, keyboard accessible, readable at mobile sizes.
-- Fast enough for low-bandwidth environments; avoid heavy animation and large media by default.
-- TypeScript strict mode.
-- Database migrations committed to source control.
-- Authorization enforced server-side and with database Row Level Security where client access exists.
-- No secrets in frontend bundles or repository.
-- Automated checks for critical data permissions and workflow transitions.
-- Clear distinction between demo/synthetic data and real community-sourced data.
-- Audit-relevant timestamps stored consistently (UTC in database; localized for display).
-
-## 5. Explicit non-goals
-
-- Grammar correction or general sentence correction.
-- Automatically generating or prescribing a new script.
-- AI-generated “correct spelling” answers without an approved reference.
-- Custom ML model training, speech recognition, or automatic transcription in MVP.
-- Public leaderboards based on native-language knowledge.
-- General-purpose chat, friends, social feed, or native mobile apps.
-
-## 6. MVP acceptance gate
-
-The MVP is demo-ready only when one seeded **synthetic/demo project** can complete the full flow from proposal review to test submission, evidence view, consultation, and decision record; real-data workflows remain disabled or clearly consent-gated until a real community and data permission are secured.
+The MVP is production-ready only when:
+1. An end-to-end synthetic demo project (e.g., comparing Classical Modi vs Devanagari orthographies) passes all 13 Functional Requirements.
+2. The UI renders the Duolingo-grade tactile design system with active mascot feedback and sound/motion flourishes.
+3. RLS security tests confirm that unauthenticated users cannot read private proposals or bypass blind-first restrictions.
+4. The documentation suite is synchronized with zero contradictions.

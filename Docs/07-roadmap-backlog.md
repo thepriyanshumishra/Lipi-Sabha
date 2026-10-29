@@ -1,111 +1,98 @@
 # 07 — Agile Roadmap and Product Backlog
 
-Deliver by vertical slices, not by building every screen in isolation. Each phase should result in a coherent, testable workflow. Phase names do not prescribe calendar duration; adjust based on team capacity and hackathon deadline.
+**Delivery Strategy:** Vertical slices delivering functional, end-to-end user journeys rather than horizontal technical layers.  
+**Design Standard:** Duolingo-grade playful tactile design system ([`00-design-system.md`](./00-design-system.md)).  
+**Architecture:** Deep module seams ([`04-system-architecture.md`](./04-system-architecture.md)).
 
-## Phase 0 — Setup and specification
+---
 
-**Goal:** Make implementation repeatable before feature coding.
+## Development Roadmap (Vertical Slices)
 
-- Create repository and app skeleton.
-- Add TypeScript strict mode, linting, formatting, `.env.example` and README.
-- Set up Supabase local/hosted project plan and migration workflow.
-- Copy these docs into `/docs` and identify the source of truth.
-- Seed only clearly labeled synthetic demo data.
+### Phase 0 — Setup, Architecture & Design Tokens
+**Goal:** Establish reproducible developer environment and design foundation.
+- Initialize Next.js 15 (App Router) + TypeScript strict mode repository.
+- Configure Tailwind CSS v4 with Duolingo design tokens (Paper White, Eager Green, Spark Blue, 12px radii, 2px borders).
+- Set up Supabase local migration tooling and client/server helpers.
+- Mount `codebase-memory-mcp` for structural repository indexing.
+- Verify that [`Docs/`](./) serves as the canonical source of truth.
+* **Exit Gate:** Clean local build, zero TypeScript warnings, design tokens accessible globally.
 
-**Exit gate:** app boots locally; no secrets committed; CI or documented local checks pass.
+### Phase 1 — App Shell, Auth & Tactile UI Primitives
+**Goal:** Deliver authenticated participant shell and tactile sticker components.
+- Implement base tactile primitives: `<TactileButton />`, `<TactileCard />`, `<ProgressBar />`, `<LipiMascotBubble />`.
+- Supabase Auth integration (magic link / password) with automatic profile creation trigger.
+- Server-side role checks and baseline RLS policies for `profiles` and `platform_roles`.
+- Public landing page with playful mascot introduction and public project browser.
+* **Exit Gate:** Users can sign in, see their Scribe Rank ("Novice Reader"), and experience tactile 3D button press physics.
 
-## Phase 1 — App shell, auth, roles and authorization
+### Phase 2 — Project Proposal & Governance Review
+**Goal:** Complete end-to-end community proposal submission and review workflow.
+- Multi-step proposal form with auto-save and macro-region selectors.
+- Governance review queue for admins (`approve`, `request_changes`, `reject`).
+- Immutable `audit_events` logging for all status transitions.
+- State machine enforcement: Unapproved proposals cannot collect responses.
+* **Exit Gate:** Proposers can draft and submit projects; admins can review and activate them with an auditable reason.
 
-- Landing page and public approved-project list.
-- Sign-in and minimal profile.
-- Server-side role checks.
-- Baseline Supabase RLS and policy tests.
-- Admin-only review area skeleton.
+### Phase 3 — Candidate Orthographies & Linguistic Stimuli
+**Goal:** Enable coordinators to configure competing writing systems and test items.
+- Orthography profile builder (script name, conventions, examples, corpus provenance).
+- Stimuli dataset manager for words and short phrases.
+- Variant manager linking spellings to candidate profiles with reviewer attestation stamps.
+- Support for multiple accepted variants without binary "wrong" labels.
+* **Exit Gate:** Approved projects contain at least two candidate orthography profiles and a reviewed dataset.
 
-**Exit gate:** a participant cannot reach admin actions by editing the URL, request body, or browser state.
+### Phase 4 — Duolingo-Grade Quest Runner & Gamification Engine
+**Goal:** Deliver the bite-sized interactive quest experience.
+- Interactive Quest Runner with top animated progress bar and mascot feedback.
+- Task Type 1: Script Match Pill (phoneme -> glyph).
+- Task Type 2: Script Tile Reorder (phrase builder).
+- Task Type 3: Audio Discrimination (sound -> spelling).
+- Task Type 4: Side-by-Side Orthography Comparison (blind-first).
+- Task Type 5: Canvas Glyph Tracing.
+- Idempotent `xp_ledger` awarding `+10 XP` per completed quest.
+- Celebration Screen: Confetti burst, XP rollup ticker, Scribe Streak increment.
+* **Exit Gate:** A participant can complete a 3-minute quest with tactile card interactions and celebration animations.
 
-## Phase 2 — Project proposal and governance review
+### Phase 5 — Community Mirror & Transparent Evidence Dashboard
+**Goal:** Reveal aggregate community patterns safely after submission.
+- Blind-first reveal trigger: Community Mirror unlocks only after response submission.
+- Real-time comparison percentage bars between Candidate Orthography A and B.
+- Small-cohort suppression ($N < 5$) to prevent subgroup de-anonymization.
+- Evidence Dashboard displaying separate metrics: Task Accuracy, Orthographic Agreement, Learnability Curves, and Consultation Preference.
+* **Exit Gate:** Aggregates cannot be inspected prior to submission; no composite "winner" score is displayed.
 
-- Proposal form, draft, submit, review queue, approve/request changes/reject.
-- Review reasons and audit events.
-- Project state transitions enforced server-side.
+### Phase 6 — Community Consultation, Decision Record & Demo Polish
+**Goal:** Provide sovereign closure to community research iterations.
+- Moderated discussion threads with trolling flag controls.
+- Consultation polls with one-vote-per-user enforcement.
+- Formal Decision Record logger (`decision_recorded`, `more_testing_needed`, `no_consensus`, `no_decision_yet`).
+- Complete synthetic demo project (Modi vs Devanagari in Marathi orthography) clearly marked with demo badge.
+* **Exit Gate:** End-to-end demo path functions flawlessly from proposal to decision record with zero console errors.
 
-**Exit gate:** a project cannot run official tests until approved/activated.
+---
 
-## Phase 3 — Candidate orthographies and dataset
+## Prioritized Product Backlog
 
-- Create candidate orthography profiles.
-- Add word stimuli and optional short phrases.
-- Store variants, source/provenance and review status.
-- Review and publish item workflow.
+### P0 — Non-Negotiable Core (MVP)
+1. Duolingo tactile token system & Scribe Mascot ("Lipi") feedback.
+2. Next.js 15 + Supabase Auth + RLS security boundary.
+3. Project proposal and governance review workflow with audit logging.
+4. Candidate orthography configuration (script + conventions).
+5. 5-Task interactive quest runner with audio, tile reordering, and canvas tracing.
+6. Blind-first Community Mirror with cohort suppression ($N < 5$).
+7. Idempotent XP ledger, Scribe Ranks, and daily streaks with Ink Savers.
+8. Consultation poll and auditable decision record.
+9. Seeded synthetic demo project.
 
-**Exit gate:** active tests can use only reviewed items and refer to an explicit profile version.
+### P1 — Post-MVP Enhancements
+1. Consented native speaker audio recording and upload tool.
+2. Advanced HarfBuzz webassembly complex glyph rendering inspector.
+3. Contributor attribution export in TEI / XML linguistic formats.
+4. Dark paper mode / sepia manuscript reading mode.
+5. Offline PWA sync for remote linguistic fieldwork.
 
-## Phase 4 — Learning quest, response capture and simple gamification
-
-- Quest builder / seeded quest.
-- Participant test screen with 3–5 tasks.
-- Store attempts/responses and timing.
-- Award idempotent XP and a few badges.
-- Support multiple-accepted-forms, manual review, and not-scored states.
-
-**Exit gate:** one participant can complete a full quest and receive an honest feedback state.
-
-## Phase 5 — Community Mirror and evidence dashboard
-
-- Reveal aggregates only after response submission.
-- Calculate response distribution, reviewed-task accuracy where valid, agreement, time, and learning change where supported.
-- Show methodology, sample size, review status, and low-sample suppression.
-
-**Exit gate:** no single “best script” score is displayed; accuracy and preference remain separate.
-
-## Phase 6 — Community consultation, decision record and demo polish
-
-- Discussion/comments with moderation controls.
-- Consultation poll with published eligibility/method.
-- Decision log including no-consensus and more-testing-needed outcomes.
-- Accessible empty/error/loading states, mobile review, security regression tests.
-- Demo script using synthetic data clearly marked as synthetic.
-
-**Exit gate:** full end-to-end demo works and governance rules are visible to participants.
-
-## Product backlog priorities
-
-### P0 — Required for MVP
-- Authentication, role-based authorization.
-- Project proposal and approval workflow.
-- Candidate orthography profile configuration.
-- Word-based test items and optional phrase-level validation.
-- Quest attempt/response persistence.
-- Small XP/badges loop.
-- Blind-first Community Mirror.
-- Transparent separate evidence measures.
-- Consultation and decision record.
-- RLS, audit trail, automated tests, synthetic demo dataset.
-
-### P1 — Valuable after the core works
-- Consented audio stimuli.
-- Contributor attribution preferences and exports.
-- More task types and authoring UX.
-- Better accessibility/low-bandwidth options.
-- Item version comparison and project report export.
-- Moderation queue improvements.
-
-### P2 — Do not build before validating the MVP
-- AI transliteration suggestions.
-- Audio recording or speech recognition.
-- Custom ML/model training.
-- Advanced recommendation or personalization engine.
-- Native mobile apps, chat, public leaderboard, multi-stage reward economy.
-
-## Definition of Done (every vertical slice)
-
-- Acceptance criteria written and met.
-- Loading, empty, error, and success states covered.
-- Server-side authorization implemented and tested.
-- Input validation and safe error handling included.
-- DB migrations and seed changes committed where applicable.
-- Unit/integration/e2e tests updated for risk level.
-- No secrets or unsupported claims added.
-- Docs updated if behavior, schema, roles, or decisions changed.
-- Demo path works using synthetic data.
+### P2 — Out of Scope / Prohibited for Initial Release
+1. AI grammar correction or automatic transliteration guessing.
+2. Custom ML speech-to-text models.
+3. Public competitive leaderboards between native speakers.
+4. General-purpose social network chat.

@@ -1,103 +1,94 @@
-# 06 — Gamification, Community Mirror, and Trust
+# 06 — Gamification, Community Mirror, and Trust Architecture
 
-## 1. Product loop
+**Product:** Lipi Sabha (लिपि सभा)  
+**Gamification Philosophy:** Duolingo-grade intrinsic motivation & joyful learning loops without manufactured political consensus or majority bias.  
+**Visual & Mascot System:** [`00-design-system.md`](./00-design-system.md)  
+**Core Interaction Loop:**  
+`Discover Script → Answer Blind → Reveal Community Mirror → Reflect & Learn → Contribute Variant`
 
-**Learn → Answer blind → Reveal context → Reflect → Contribute**
+---
 
-Gamification should make useful participation easier to repeat; it must not manipulate community outcomes.
+## 1. The Playful Motivation Engine
 
-## 2. MVP gamification
+Educational psychology demonstrates that learners thrive when high-stakes barriers are replaced with playful tactile feedback, clear daily progression, and empathetic mascot encouragement. However, because Lipi Sabha facilitates **community language research**, gamification must reward **curiosity, effort, and linguistic integrity**, never ideological conformity or dialect favoritism.
 
-### Quests
-- Daily Quest: default 3–5 short tasks.
-- Project Quest: a focused set of tasks for a specific approved writing-system study.
-- Community Mission: a project goal such as reviewing a small batch of sample forms, documenting sources, or completing a study session.
+```mermaid
+flowchart LR
+    A[Daily Quest Challenge] --> B[Interactive Tactile Task]
+    B --> C[Instant Feedback & Mascot Reaction]
+    C --> D[Blind-First Response Stored]
+    D --> E[Community Mirror Unlocked]
+    E --> F[XP Rollup & Streak Celebration]
+```
 
-### XP (starter rules; tune after pilot)
-- Complete a quest: 10 XP.
-- Complete an optional reflection/explanation: 2 XP, capped per quest.
-- Submit a contribution that passes the project's provenance/review criteria: 5 XP.
-- Complete a reviewed learning module: 5 XP.
+---
 
-XP is for effort and constructive contribution, not for which script the user selects, how often they vote, or whether they agree with the majority. Apply idempotency to prevent duplicate XP from retries. Keep an audit ledger.
+## 2. Gamification Mechanics
 
-### Badges
-- **First Quest** — first completed quest.
-- **Careful Observer** — completed a set number of comparisons and reviewed the explanations.
-- **Community Helper** — supplied a contribution that passed review.
-- **Evidence Explorer** — viewed the methodology/explanation for a result.
+### A. Experience Points (XP) Economy
+XP is strictly tied to verifiable learning engagement, never to poll outcomes or voting for a majority script:
+* **Complete a Quest (3–5 tasks):** `+10 XP`
+* **Daily Scribe Bonus (first quest of the day):** `+5 XP`
+* **Optional Reflection / Context Note:** `+2 XP` (capped at 1 per quest)
+* **Verified Variant Contribution with Citation/Provenance:** `+15 XP` (awarded only after reviewer review)
+* **Idempotency Guarantee:** All XP awards are written to an append-only `xp_ledger` table with unique constraint `(user_id, event_type, reference_id)`. Page refreshes or network retries can never double-credit XP.
 
-Badges must not claim someone is a better native speaker or more authoritative than another participant.
+### B. Scribe Ranks (लिपिकार पदवी — Progression Ladder)
+As participants practice scripts and compare orthographies, their lifetime XP advances them through prestigious, culturally respectful scribe ranks:
 
-### Streaks
-- Optional in the MVP and easy to disable.
-- Do not penalize missed days or create loss-aversion pressure around community participation.
+| Rank | Title | Lifetime XP Threshold | Badge Unlock | Mascot Interaction |
+|:---:|---|:---:|---|---|
+| **1** | **Akshara Jigyasu** (Letter Curious) | 0 XP | Starter Quill | Mascot waves hello with reed pen |
+| **2** | **Pathaka** (Novice Reader) | 50 XP | First Scroll | Mascot bows and hands over a scroll |
+| **3** | **Lipi Shishya** (Script Apprentice) | 200 XP | Bronze Inkpot | Mascot wears student spectacles |
+| **4** | **Lipi Kovid** (Skilled Scribe) | 500 XP | Silver Stylus | Mascot draws decorative script flourishes |
+| **5** | **Puratattva Mitra** (Epigraphist) | 1,200 XP | Golden Manuscript | Mascot reads from a palm-leaf codex |
+| **6** | **Lipi Ratna** (Guardian of Scripts) | 3,000 XP | Crown of Letters | Full celebratory golden confetti burst |
 
-### Leaderboards
-- No public leaderboard for language knowledge in MVP.
-- If group progress is displayed, it should represent collaborative mission completion, not which option members voted for.
+### C. Scribe Sadhana (Daily Streaks & Non-Punitive Mechanics)
+* **The Streak Flame:** Displayed in the top nav with Coral Fire accent (`#ff4b4b`). Every day the user completes at least one 3-minute quest, the streak advances.
+* **Ink Saver (Streak Freeze):** Each user starts with 1 free Ink Saver. If a day is missed, an Ink Saver is automatically consumed rather than extinguishing the streak.
+* **Anti-Shame Design:** Unlike aggressive commercial apps, Lipi Sabha never sends guilt-inducing push notifications. If a streak resets, the mascot warmly says: *"Welcome back, Scribe! Every day you look at a script keeps its memory alive."*
 
-## 3. Community Mirror
+### D. The Scribe Mascot: "Lipi"
+A charming, hand-crafted mascot: a scholarly little owlet/bird holding an ancient reed stylus (`kalam`).
+* **Idle State:** Perched calmly on top of the quest card, blinking playfully.
+* **Typing / Tracing State:** Peeks attentively at the user's canvas.
+* **Success State:** Springs upward with a happy hop and flapping wings.
+* **Instructive / Multiple Forms State:** Scratches head thoughtfully, holding up an explanatory manuscript banner.
 
-### Purpose
-After a user submits an answer, show how responses in the current sample are distributed. The goal is to help users discover variation, not judge them against the majority.
+### E. Celebration Audio-Visual Loop
+Upon completing the final task of a quest:
+1. **Screen Pause (200ms):** Focus shifts to the center canvas.
+2. **Confetti Burst:** A shower of 60 flat-shaded particles (Eager Green, Spark Blue, Sun Yellow, Coral Fire).
+3. **Counter Rollup:** XP tally ticks up from 0 to +10 with rhythmic audio ticks.
+4. **Card Reveal:** Tactile summary card glides up using velocity-matched ease (`cut-the-curve`).
 
-### Interaction contract
-1. Explain the task and consent/use before answering.
-2. Record the participant’s response.
-3. Reveal the aggregate only after submission.
-4. Separate peer distribution from reviewed task feedback.
-5. Show sample size and whether the item/convention has expert review.
-6. If the sample is too small, show a neutral “not enough data to display a breakdown” state.
+---
 
-### Example labels
-- “You selected Option B. In this sample, 31% selected Option B.”
-- “Answers vary across the participants who responded.”
-- “This task is not scored because more than one form is accepted.”
-- “This is a preference poll, not a language-correctness test.”
+## 3. Community Mirror: The Trust Gasket
 
-Avoid: “You know your language 31%”, “you are wrong because most people chose A”, or “the community is wrong”.
+The **Community Mirror** is Lipi Sabha's defining innovation: it solves the conformity bias problem in linguistic fieldwork.
 
-### Dialect/variety-aware view
-- Variety/region is optional self-description, not inferred from IP or precise location.
-- Never imply the platform’s list of varieties is complete.
-- Default minimum cohort for subgroup display: 5, subject to a stricter threshold when context requires it.
-- Avoid filter combinations that allow someone to infer one person’s response.
-- Show “variety not provided” as a legitimate option.
+### The Blind-First Interaction Law
+1. When a user encounters a candidate orthography comparison (e.g. Word A in Classical Modi vs Word A in Devanagari), **no aggregate percentage is visible**.
+2. The user submits their personal reading or preference blind.
+3. Once the server confirms receipt of the response, the card flips smoothly to reveal the Community Mirror.
 
-## 4. Metrics must remain separate
+### Data Transparency & Protective Rules
+* **Sample Size Transparency:** Always displays total cohort count: *"Based on 142 responses from community participants"*.
+* **Small-Cohort Privacy Guard:** If a dialect or regional subgroup has fewer than $N=5$ participants, the breakdown by subgroup is automatically masked (`is_suppressed = true`), displaying: *"Cohort too small for subgroup breakdown (< 5 participants)"*.
+* **Non-Judgmental Copy:**
+  * ✅ *"You chose Form A. 62% of participants in this sample also selected Form A."*
+  * ✅ *"Responses in this quest show wide variation across regional dialects."*
+  * ❌ Never: *"You are wrong"* or *"Form A is the winner"*.
 
-### Task accuracy
-For a task with reviewed, explicit criteria only. For free-text spelling, automatic scoring needs reviewed accepted forms/normalization. Otherwise mark as `needs_human_review` or `not_scored`.
+---
 
-### Orthographic agreement
-The degree to which responses agree under a specified, transparent grouping/normalization rule. Agreement is not proof that the convention is best or that dissenters are wrong.
+## 4. Ethical Safeguards Against Gamification Manipulation
 
-### Learnability
-For a controlled task, compare pre/post performance and completion-time distributions. Record prior familiarity where appropriate. Small pilot numbers are exploratory, not definitive proof.
-
-### Community preference
-Report poll results, eligibility, sample size, and method. A preference poll does not itself prove consensus.
-
-### Community alignment
-How similar the participant’s response is to other responses in a defined sample. It is descriptive, not a correctness score.
-
-No composite winner score in the MVP.
-
-## 5. Anti-gaming and fairness controls
-
-- Do not give XP for votes or for choosing a majority option.
-- Rate-limit repeated submissions and enforce one eligible poll vote per user.
-- Do not reveal aggregate answers before blind-first responses are submitted.
-- Mark demo/synthetic data persistently.
-- Flag suspicious duplicate contribution patterns for review rather than silently deleting valid variants.
-- Support multiple legitimate responses and unresolved variants.
-- Keep majority/minority distributions visible when safe; avoid collapsing diversity into a single score.
-- Do not rank dialects or speakers.
-
-## 6. Research integrity
-
-- Record source, permission/consent basis, reviewer, version, and task criteria.
-- Clearly separate community reports, expert-reviewed claims, and automated calculations.
-- Publish methodology alongside result displays.
-- If the study design cannot establish a single correct answer, do not fabricate one for quiz convenience.
+1. **Zero XP for Voting:** Voting in a consultation poll awards **0 XP**. This prevents users from spamming polls to farm points.
+2. **Zero XP for Majority Agreement:** Users receive the exact same XP whether their answer matches the majority or represents a unique minority dialect.
+3. **No Public Competitions Between Native Speakers:** Lipi Sabha intentionally rejects public rank leaderboards that pit community members against each other.
+4. **Synthetic Data Watermark:** All test/demo environments display a persistent banner: *"Illustrative synthetic demo project — not community-validated linguistic data"*.
+5. **Auditable Community Sovereignty:** The platform provides empirical clarity, but the human community retains sovereign governance over all orthographic adoptions.
