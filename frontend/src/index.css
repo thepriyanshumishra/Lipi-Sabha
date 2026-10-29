@@ -1,0 +1,367 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+/* ========================================================
+   LIPI SABHA — Sacred Manuscript & Modern Gita Book Design System
+   Warm Antique Parchment, 1.5px Crisp Borders, Gold & Indigo Accents
+   ======================================================== */
+
+@theme {
+  /* Colors - Gita Book Illuminated Manuscript Palette */
+  --color-cream: #FBF8F1;
+  --color-ink: #1C1917;
+  --color-purple: #B45309;       /* Sacred Saffron / Antique Ochre */
+  --color-purple-hover: #92400E;
+  --color-purple-light: #FEF3C7;
+  --color-coral: #C2410C;        /* Sacred Vermilion / Sindoor */
+  --color-coral-light: #FFEDD5;
+  --color-mint: #ECFDF5;         /* Lotus Leaf Green */
+  --color-mint-dark: #15803D;
+  --color-yellow: #FEF3C7;
+  --color-yellow-dark: #B45309;
+  --color-sky: #F0F9FF;
+  --color-sky-dark: #0369A1;
+  --color-lilac: #FEF3C7;
+  --color-neutral: #F5EFE4;      /* Pressed Antique Paper */
+  --color-border: #DCCFB9;       /* Defined 1.5px Antique Brass/Sandstone */
+  --color-muted: #6B6154;        /* Soft Charcoal Ink */
+  --color-white: #FFFDF9;        /* Warm Manuscript Sheet */
+  --color-danger: #DC2626;
+  --color-danger-light: #FEE2E2;
+
+  /* Typography - Classic Book & Script */
+  --font-display: "Playfair Display", "Cinzel", "Nunito", Georgia, serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-script: "Noto Sans Devanagari", "Noto Sans", system-ui, sans-serif;
+
+  /* Spacing Scale */
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+  --spacing-30: 7.5rem;
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Defined Book Shadows */
+  --shadow-soft: 0 2px 8px -1px rgba(28, 25, 23, 0.05), 0 1px 3px 0 rgba(28, 25, 23, 0.03);
+  --shadow-card: 0 4px 16px -2px rgba(28, 25, 23, 0.07), 0 2px 6px -1px rgba(28, 25, 23, 0.04);
+  --shadow-elevated: 0 12px 28px -4px rgba(28, 25, 23, 0.12), 0 4px 10px -2px rgba(28, 25, 23, 0.06);
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.4s ease-out;
+  --animate-slide-up: slide-up 0.4s ease-out;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 3s ease-in-out infinite;
+}
+
+/* ========================================================
+   DARK THEME: Midnight Temple & Gold Illumination
+   ======================================================== */
+.dark {
+  --color-cream: #14110E;
+  --color-ink: #F5EFE6;
+  --color-purple: #F59E0B;
+  --color-purple-hover: #D97706;
+  --color-purple-light: #2A2117;
+  --color-coral: #FB923C;
+  --color-coral-light: #3D1C0F;
+  --color-mint: #064E3B;
+  --color-mint-dark: #34D399;
+  --color-yellow: #3E2B12;
+  --color-yellow-dark: #FBBF24;
+  --color-sky: #082F49;
+  --color-sky-dark: #38BDF8;
+  --color-lilac: #2D2216;
+  --color-neutral: #1C1814;
+  --color-border: #3A3226;       /* Warm temple gold/bronze border */
+  --color-muted: #A89D8F;
+  --color-white: #1C1814;
+  --color-danger: #F87171;
+  --color-danger-light: #450A0A;
+}
+
+/* Keyframes */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* ========================================
+   Global Clean Styles (Warm Gita Manuscript Canvas)
+   ======================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background-color: var(--color-cream);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.dark body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-purple);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ========================================================
+   GLOBAL INTERACTION & NO UNWANTED TEXT SELECTION
+   ======================================================== */
+*, *::before, *::after {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+input, textarea, [contenteditable="true"], .allow-select {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+  cursor: text !important;
+}
+
+::selection {
+  background: transparent !important;
+  color: inherit !important;
+}
+::-moz-selection {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+input::selection, textarea::selection {
+  background: rgba(180, 83, 9, 0.25) !important;
+  color: inherit !important;
+}
+
+html, body {
+  cursor: default;
+}
+
+a, button, input[type="submit"], input[type="button"], [role="button"], summary {
+  cursor: pointer;
+}
+
+/* Subtle bookish golden accent bar for hero typography */
+.hero-story-underline {
+  position: relative;
+  display: inline-block;
+}
+.hero-story-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #B45309 0%, #D97706 50%, #C2410C 100%);
+  border-radius: 9999px;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+input, textarea {
+  caret-color: var(--color-purple);
+}
+
+/* ========================================================
+   DEFINED 1.5px CARD ARCHITECTURE (Exact Half-Thickness Sweet Spot)
+   Clearly framed, visible borders, warm bookish paper depth
+   ======================================================== */
+.card-catchy {
+  background-color: var(--color-white);
+  border-radius: 1.25rem;
+  border: 1.5px solid var(--color-border);
+  box-shadow: 0 4px 18px -2px rgba(28, 25, 23, 0.05), 0 2px 6px -1px rgba(28, 25, 23, 0.03);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-catchy:hover {
+  transform: translateY(-2px);
+  border-color: #B45309;
+  box-shadow: 0 10px 24px -3px rgba(180, 83, 9, 0.12), 0 3px 8px -1px rgba(28, 25, 23, 0.05);
+}
+
+/* Tactile Saffron & Manuscript Buttons (1.5px border, 3D bottom) */
+.btn-chunky-purple {
+  background-color: var(--color-purple);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  border-radius: 0.875rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 3.5px solid #78350F;
+  box-shadow: 0 4px 14px -2px rgba(180, 83, 9, 0.35);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.btn-chunky-purple:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px -2px rgba(180, 83, 9, 0.45);
+  background-color: var(--color-purple-hover);
+}
+.btn-chunky-purple:active {
+  transform: translateY(1.5px);
+  border-bottom-width: 1.5px;
+  box-shadow: 0 1px 4px rgba(180, 83, 9, 0.2);
+}
+
+.btn-chunky-white {
+  background-color: var(--color-white);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+  border-radius: 0.875rem;
+  border: 1.5px solid var(--color-border);
+  border-bottom: 3.5px solid #C4B59D;
+  box-shadow: 0 2px 8px -2px rgba(28, 25, 23, 0.05);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.btn-chunky-white:hover {
+  transform: translateY(-1px);
+  background-color: #FAF6EE;
+  border-color: #B45309;
+  box-shadow: 0 4px 12px -2px rgba(28, 25, 23, 0.08);
+}
+.btn-chunky-white:active {
+  transform: translateY(1.5px);
+  border-bottom-width: 1.5px;
+}
+
+.btn-chunky-mint {
+  background-color: #ECFDF5;
+  color: #15803D;
+  font-family: var(--font-display);
+  font-weight: 700;
+  border-radius: 0.875rem;
+  border: 1.5px solid #A7F3D0;
+  border-bottom: 3.5px solid #059669;
+  box-shadow: 0 2px 8px -2px rgba(21, 128, 61, 0.15);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.btn-chunky-mint:hover {
+  transform: translateY(-1px);
+  background-color: #D1FAE5;
+}
+.btn-chunky-mint:active {
+  transform: translateY(1.5px);
+  border-bottom-width: 1.5px;
+}
+
+/* 1.5px Manuscript Badges */
+.badge-catchy-purple {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 0.625rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  background-color: #FEF3C7;
+  color: #92400E;
+  border: 1.5px solid #FCD34D;
+}
+
+.badge-catchy-mint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 0.625rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  background-color: #ECFDF5;
+  color: #15803D;
+  border: 1.5px solid #A7F3D0;
+}
+
+.badge-catchy-coral {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 0.625rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  background-color: #FFEDD5;
+  color: #C2410C;
+  border: 1.5px solid #FDBA74;
+}
+
+/* Dark mode overrides */
+.dark .card-catchy {
+  background-color: #1C1814;
+  border: 1.5px solid #3A3226;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+}
+.dark .card-catchy:hover {
+  border-color: #F59E0B;
+}
+.dark .btn-chunky-white {
+  background-color: #1C1814;
+  color: #F5EFE6;
+  border: 1.5px solid #3A3226;
+  border-bottom: 3.5px solid #12100E;
+}
+.dark .btn-chunky-purple {
+  background-color: #D97706;
+  border: 1.5px solid #FBBF24;
+  border-bottom: 3.5px solid #92400E;
+}
+.dark .badge-catchy-purple {
+  background-color: #2D2216;
+  color: #FCD34D;
+  border: 1.5px solid #92400E;
+}
+.dark header {
+  background-color: rgba(20, 17, 14, 0.92);
+  border-color: #3A3226;
+}
