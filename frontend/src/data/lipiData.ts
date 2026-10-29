@@ -1772,12 +1772,15 @@ export interface ScriptProject {
   lipiId: string;
   lipiName: string;
   imageUrl?: string;
+  audioUrl?: string;
   description?: string;
   author: string;
   submittedAt: string;
   status: 'unverified' | 'verified' | 'flagged' | 'consultation' | 'ratified';
   branches?: ScriptProjectBranch[];
   options?: string[];
+  upvotes?: number;
+  downvotes?: number;
   reviewerVerdict?: {
     recommendedBranchId?: string;
     acceptedOption?: string;
@@ -1799,6 +1802,9 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     author: 'Aria (User)',
     submittedAt: 'Today, 10:15 AM',
     status: 'verified',
+    upvotes: 16,
+    downvotes: 1,
+    options: ['R-I-N-A', 'R-E-E-N-A', 'रीना'],
     branches: [
       {
         id: 'branch-rina',
@@ -1836,9 +1842,31 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     ],
     reviewerVerdict: {
       recommendedBranchId: 'branch-deva-reena',
+      acceptedOption: 'रीना',
       reviewerName: 'Meera (Lipi Specialist)',
       rationale: 'Lossless phonetic truth: Ra + Dirgha Ee Matra (ी) + Na + Aa Matra (ा). Devanagari captures the long vowel /iː/ natively, while ASCII "R-I-N-A" is acceptable for SMS.',
       ratifiedAt: 'Yesterday, 3:30 PM'
+    }
+  },
+  {
+    id: 'proj-flagged-sample',
+    title: 'कम्प्यूटर या कंप्यूटर (Nasal before Pa-varga)?',
+    spokenWord: 'कंप्यूटर / Computer',
+    dialectContext: 'Modern Hindi Orthography Standard',
+    lipiId: 'devanagari',
+    lipiName: 'देवनागरी (Devanagari)',
+    description: 'User submitted whether half-ma ligature should be written as full broken conjunct or standard bindu.',
+    author: 'Ravi (Student)',
+    submittedAt: 'Yesterday, 2:15 PM',
+    status: 'flagged',
+    upvotes: 4,
+    downvotes: 11,
+    options: ['कम्प्यूटर', 'कंप्यूटर'],
+    reviewerVerdict: {
+      acceptedOption: 'कंप्यूटर',
+      reviewerName: 'Meera (Devanagari Specialist)',
+      rationale: 'Flagged Non-Standard: Under Directorate of Hindi standards, homorganic nasal stops before pa-varga are codified as bindu (कंप्यूटर) for unified digital search.',
+      ratifiedAt: 'Yesterday, 5:00 PM'
     }
   },
   {

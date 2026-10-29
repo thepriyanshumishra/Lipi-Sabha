@@ -21,6 +21,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useLipi } from '@/contexts/LipiContext';
 import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/audio';
+import { ImageLightboxModal } from '@/components/ImageLightboxModal';
 import type { LipiKnowledgeNode, ScriptProject } from '@/data/lipiData';
 
 export function ReviewPage() {
@@ -44,7 +45,9 @@ export function ReviewPage() {
 
   // Reviewer Chat / Commentary per post
   const [commentMap, setCommentMap] = useState<Record<string, string>>({});
+  const [selectedOptionMap, setSelectedOptionMap] = useState<Record<string, string>>({});
   const [decisionFeedback, setDecisionFeedback] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
 
   // Edit Node Modal State
   const [editingNode, setEditingNode] = useState<LipiKnowledgeNode | null>(null);
@@ -70,11 +73,12 @@ export function ReviewPage() {
 
   // Action: Verify & Accept
   const handleVerify = (proj: ScriptProject) => {
+    const acceptedOption = selectedOptionMap[proj.id] || (proj.options && proj.options[0]);
     const comment =
       commentMap[proj.id]?.trim() ||
       `Verified by ${user?.display_name || 'Meera (Reviewer)'}. Conforms with documented ${proj.lipiName} orthographic canon.`;
 
-    verifyProject(proj.id, comment, user?.display_name || 'Meera (Reviewer)');
+    verifyProject(proj.id, comment, user?.display_name || 'Meera (Reviewer)', acceptedOption);
     playSuccessChime();
     setDecisionFeedback(`✓ Verified and published to public User Space: "${proj.title}"`);
     setTimeout(() => setDecisionFeedback(null), 3500);
@@ -82,11 +86,12 @@ export function ReviewPage() {
 
   // Action: Flag as Wrong
   const handleFlag = (proj: ScriptProject) => {
+    const acceptedOption = selectedOptionMap[proj.id];
     const reason =
       commentMap[proj.id]?.trim() ||
       'Flagged: Does not meet orthographic standards or needs revision.';
 
-    flagProject(proj.id, reason, user?.display_name || 'Meera (Reviewer)');
+    flagProject(proj.id, reason, user?.display_name || 'Meera (Reviewer)', acceptedOption);
     playAcousticChime(320, 0.25);
     setDecisionFeedback(`Flagged post: "${proj.title}"`);
     setTimeout(() => setDecisionFeedback(null), 3500);
@@ -348,48 +353,82 @@ export function ReviewPage() {
                           )}
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            playPronunciation(proj.spokenWord, 'hi-IN');
-                          }}
-                          className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-700 border border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer self-start sm:self-auto"
-                        >
-                          <Volume2 size={14} className="text-[#B45309]" />
-                          <span>Hear Pronunciation</span>
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {proj.audioUrl ? (
+                            <audio src={proj.audioUrl} controls className="h-7 max-w-[180px]" />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                playPronunciation(proj.spokenWord, 'hi-IN');
+                              }}
+                              className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-700 border border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer"
+                            >
+                              <Volume2 size={14} className="text-[#B45309]" />
+                              <span>Hear Pronunciation</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Attached Photo (if any) */}
+                      {/* Attached Photo (Click to open full lightbox) */}
                       {proj.imageUrl && (
-                        <div className="p-3 rounded-2xl bg-neutral/50 dark:bg-slate-800 border border-border flex items-center gap-3">
+                        <div
+                          onClick={() => setLightboxImage({ url: proj.imageUrl!, title: proj.spokenWord })}
+                          className="p-3 rounded-2xl bg-neutral/50 dark:bg-slate-800 border border-border flex items-center gap-3 cursor-pointer group hover:border-[#78350F] transition-all"
+                          title="Click to view full picture"
+                        >
                           <img
                             src={proj.imageUrl}
                             alt="Specimen"
-                            className="w-16 h-16 object-cover rounded-xl border border-border shadow-soft"
+                            className="w-16 h-16 object-cover rounded-xl border border-border shadow-soft group-hover:scale-105 transition-transform"
                           />
-                          <div className="text-xs font-serif text-ink">
-                            <span className="font-bold block text-[#78350F]">Attached Picture / Inscription</span>
-                            <span className="text-muted text-[11px]">Submitted by user for orthographic decipherment.</span>
+                          <div className="text-xs font-serif text-ink flex-1">
+                            <span className="font-bold block text-[#78350F]">
+                              Attached Picture / Inscription (Click to open full 🔍)
+                            </span>
+                            <span className="text-muted text-[11px]">
+                              Submitted by user for orthographic decipherment.
+                            </span>
                           </div>
                         </div>
                       )}
 
-                      {/* Optional Spelling Options / Branches if user added any */}
+                      {/* User-Suggested Spelling Options (Click to Select Endorsed Choice) */}
                       {proj.options && proj.options.length > 0 && (
-                        <div className="space-y-1">
-                          <span className="text-[10px] font-mono font-bold uppercase text-muted block">
-                            User-Suggested Spelling Options:
-                          </span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {proj.options.map((opt, idx) => (
-                              <span
-                                key={idx}
-                                className="px-2.5 py-1 rounded-lg bg-neutral dark:bg-slate-800 border border-border text-xs font-serif font-bold text-ink"
-                              >
-                                {opt}
+                        <div className="space-y-2 p-3.5 rounded-2xl bg-amber-50/40 dark:bg-slate-800/60 border border-[#78350F]/20">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-mono font-bold uppercase text-[#78350F] dark:text-amber-400 block">
+                              Click to Endorse Standard Spelling Option:
+                            </span>
+                            {selectedOptionMap[proj.id] && (
+                              <span className="text-[10px] font-mono font-black text-mint-dark">
+                                ✓ Endorsed: {selectedOptionMap[proj.id]}
                               </span>
-                            ))}
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            {proj.options.map((opt, idx) => {
+                              const isSelected = selectedOptionMap[proj.id] === opt;
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedOptionMap((prev) => ({ ...prev, [proj.id]: opt }))
+                                  }
+                                  className={`px-3.5 py-1.5 rounded-xl border text-xs font-serif font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                                    isSelected
+                                      ? 'bg-mint-dark text-white border-mint-dark shadow-soft scale-105'
+                                      : 'bg-white dark:bg-slate-700 border-border text-ink hover:border-[#78350F]'
+                                  }`}
+                                >
+                                  <span>{opt}</span>
+                                  {isSelected && <Check size={13} />}
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
@@ -706,6 +745,14 @@ export function ReviewPage() {
           </motion.div>
         </div>
       )}
+
+      {/* Image Lightbox Modal */}
+      <ImageLightboxModal
+        isOpen={Boolean(lightboxImage)}
+        imageUrl={lightboxImage?.url || null}
+        title={lightboxImage?.title}
+        onClose={() => setLightboxImage(null)}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   Volume2,
   Upload,
   Camera,
+  Mic,
   Plus,
   Trash2,
   Send,
@@ -32,12 +33,15 @@ export function CreateProjectModal({ isOpen, onClose, onCreated }: CreateProject
   const { activeLipi, allLipis, createProject } = useLipi();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   // Minimal User Inputs
   const [wordOrQuestion, setWordOrQuestion] = useState('');
   const [targetLipiId, setTargetLipiId] = useState(activeLipi.id);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string>('');
+  const [audioFileName, setAudioFileName] = useState<string>('');
 
   // Optional spelling options (0 mandatory, user can add 0 or more if they wish)
   const [options, setOptions] = useState<string[]>([]);
@@ -56,6 +60,18 @@ export function CreateProjectModal({ isOpen, onClose, onCreated }: CreateProject
       const result = reader.result as string;
       setImageUrl(result);
       setImagePreview(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAudioFileName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAudioUrl(reader.result as string);
+      playSuccessChime();
     };
     reader.readAsDataURL(file);
   };
@@ -106,6 +122,7 @@ export function CreateProjectModal({ isOpen, onClose, onCreated }: CreateProject
       lipiId: targetLipi.id,
       lipiName: `${targetLipi.nameNative} (${targetLipi.nameEnglish})`,
       imageUrl: imageUrl.trim() || undefined,
+      audioUrl: audioUrl.trim() || undefined,
       description: content ? `User inquiry: "${content}". Awaiting specialist verification.` : 'Photo of inscription submitted for orthographic decipherment.',
       author: user?.display_name || 'Aria (User)',
       options: options.length > 0 ? options : undefined,
@@ -266,6 +283,55 @@ export function CreateProjectModal({ isOpen, onClose, onCreated }: CreateProject
                           {preset.name}
                         </button>
                       ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 2b. Audio File Upload (Optional) */}
+                <div className="space-y-2 p-3 rounded-2xl bg-neutral/50 dark:bg-slate-800/50 border border-border">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-display font-bold text-ink uppercase flex items-center gap-1.5">
+                      <Mic size={14} className="text-[#B45309]" />
+                      <span>ऑडियो रिकॉर्डिंग / वॉइस क्लिप (Optional Audio File):</span>
+                    </span>
+                    {audioUrl && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAudioUrl('');
+                          setAudioFileName('');
+                        }}
+                        className="text-[10px] font-mono text-danger hover:underline cursor-pointer"
+                      >
+                        हटाएं (Remove)
+                      </button>
+                    )}
+                  </div>
+
+                  {audioUrl ? (
+                    <div className="flex items-center gap-3">
+                      <audio src={audioUrl} controls className="h-8 max-w-[220px]" />
+                      <span className="text-[11px] font-mono text-mint-dark font-bold truncate">
+                        ✓ {audioFileName || 'Audio attached'}
+                      </span>
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        ref={audioInputRef}
+                        type="file"
+                        accept="audio/*"
+                        onChange={handleAudioUpload}
+                        className="hidden"
+                        id="minimal-audio-upload"
+                      />
+                      <label
+                        htmlFor="minimal-audio-upload"
+                        className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-border hover:border-[#78350F] text-xs font-display font-bold text-ink inline-flex items-center gap-1.5 cursor-pointer shadow-soft"
+                      >
+                        <Upload size={13} />
+                        <span>Upload Audio File</span>
+                      </label>
                     </div>
                   )}
                 </div>

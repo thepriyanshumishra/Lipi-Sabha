@@ -48,8 +48,11 @@ interface LipiContextType {
   flagProject: (
     projectId: string,
     reason: string,
-    reviewerName: string
+    reviewerName: string,
+    acceptedOption?: string
   ) => void;
+  voteOnProject: (projectId: string, direction: 'up' | 'down') => void;
+  userVotesMap: Record<string, 'up' | 'down'>;
   voteOnBranch: (projectId: string, branchId: string) => void;
   ratifyProject: (
     projectId: string,
@@ -132,6 +135,13 @@ export function LipiProvider({ children }: { children: ReactNode }) {
   const [nodesMap, setNodesMap] = useState<Record<string, LipiKnowledgeNode[]>>(getInitialNodesMap);
   const [submissions, setSubmissions] = useState<LipiTestSubmission[]>(getInitialSubmissions);
   const [projects, setProjects] = useState<ScriptProject[]>(getInitialProjects);
+  const [userVotesMap, setUserVotesMap] = useState<Record<string, 'up' | 'down'>>(() => {
+    try {
+      const saved = localStorage.getItem('lipi_sabha_user_card_votes');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {};
+  });
 
   const activeLipi = getLipiById(activeLipiId);
 
@@ -304,7 +314,8 @@ export function LipiProvider({ children }: { children: ReactNode }) {
   const flagProject = (
     projectId: string,
     reason: string,
-    reviewerName: string
+    reviewerName: string,
+    acceptedOption?: string
   ) => {
     const updated = projects.map((proj) => {
       if (proj.id === projectId) {
@@ -314,6 +325,7 @@ export function LipiProvider({ children }: { children: ReactNode }) {
           reviewerVerdict: {
             reviewerName,
             rationale: reason,
+            acceptedOption,
             ratifiedAt: 'Just now'
           }
         };
@@ -321,6 +333,57 @@ export function LipiProvider({ children }: { children: ReactNode }) {
       return proj;
     });
     saveProjects(updated);
+  };
+
+  const voteOnProject = (projectId: string, direction: 'up' | 'down') => {
+    const currentVote = userVotesMap[projectId];
+    let newVote: 'up' | 'down' | null = direction;
+
+    let upDelta = 0;
+    let downDelta = 0;
+
+    if (currentVote === direction) {
+      newVote = null;
+      if (direction === 'up') upDelta = -1;
+      else downDelta = -1;
+    } else if (currentVote) {
+      if (direction === 'up') {
+        upDelta = 1;
+        downDelta = -1;
+      } else {
+        upDelta = -1;
+        downDelta = 1;
+      }
+    } else {
+      if (direction === 'up') upDelta = 1;
+      else downDelta = 1;
+    }
+
+    const updatedProjects = projects.map((p) => {
+      if (p.id === projectId) {
+        const curUp = p.upvotes ?? 0;
+        const curDown = p.downvotes ?? 0;
+        return {
+          ...p,
+          upvotes: Math.max(0, curUp + upDelta),
+          downvotes: Math.max(0, curDown + downDelta)
+        };
+      }
+      return p;
+    });
+
+    const updatedUserVotes = { ...userVotesMap };
+    if (newVote) {
+      updatedUserVotes[projectId] = newVote;
+    } else {
+      delete updatedUserVotes[projectId];
+    }
+
+    setUserVotesMap(updatedUserVotes);
+    try {
+      localStorage.setItem('lipi_sabha_user_card_votes', JSON.stringify(updatedUserVotes));
+    } catch {}
+    saveProjects(updatedProjects);
   };
 
   const voteOnBranch = (projectId: string, branchId: string) => {
@@ -390,6 +453,8 @@ export function LipiProvider({ children }: { children: ReactNode }) {
         createProject,
         verifyProject,
         flagProject,
+        voteOnProject,
+        userVotesMap,
         voteOnBranch,
         ratifyProject
       }}

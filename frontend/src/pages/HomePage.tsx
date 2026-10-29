@@ -16,6 +16,8 @@ import {
   Compass,
   Layers,
   ThumbsUp,
+  ThumbsDown,
+  Flag,
   Image as ImageIcon,
   ShieldCheck,
   PlusCircle,
@@ -24,14 +26,27 @@ import {
 import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/audio';
 import { useLipi } from '@/contexts/LipiContext';
 import { CreateProjectModal } from '@/components/CreateProjectModal';
+import { ImageLightboxModal } from '@/components/ImageLightboxModal';
 
 export function HomePage() {
-  const { activeLipi, allLipis, setLipiId, activeLipiNodes, projects, voteOnBranch } = useLipi();
+  const {
+    activeLipi,
+    allLipis,
+    setLipiId,
+    activeLipiNodes,
+    projects,
+    voteOnBranch,
+    voteOnProject,
+    userVotesMap
+  } = useLipi();
   const knowledgeNodes = activeLipiNodes;
 
-  // Public User Space ONLY shows verified projects (unverified posts are in Reviewer Queue)
+  // Public User Space ONLY shows verified and flagged decisions (unverified posts remain in Reviewer Queue)
   const verifiedProjects = projects.filter(
     (p) => p.status === 'verified' || p.status === 'ratified'
+  );
+  const publicDecisionProjects = projects.filter(
+    (p) => p.status === 'verified' || p.status === 'ratified' || p.status === 'flagged'
   );
 
   // View mode: 'communityDilemmas' (MVP core: Reena dilemma & user project trees) vs 'heritage' (4-level foundational trail)
@@ -41,6 +56,7 @@ export function HomePage() {
   );
   const [votedBranches, setVotedBranches] = useState<Record<string, boolean>>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string } | null>(null);
 
   // Heritage Tree State
   const [selectedNodeId, setSelectedNodeId] = useState<string>(activeLipiNodes[0]?.id || '');
@@ -381,92 +397,211 @@ export function HomePage() {
             )}
 
             {/* ========================================================
-                VERIFIED COMMUNITY DECISIONS & SPECIALIST RESOLUTIONS
-                User doubts verified by reviewers appear here with
-                the reviewer's comment and reviewer's name!
+                VERIFIED & FLAGGED COMMUNITY DECISIONS (RESOLVED RESOLUTIONS)
+                Shows both Verified (green) and Flagged (red) posts with:
+                - Reviewer Verdict & Name
+                - Clickable Zoomable Photo Lightbox
+                - Accepted Spelling Option
+                - 1-Vote-per-user Upvoting / Downvoting (▲ / ▼)
                 ======================================================== */}
             <div className="space-y-4 pt-4 border-t-[1.5px] border-border">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="space-y-0.5">
                   <span className="text-[11px] font-mono font-bold uppercase text-mint-dark flex items-center gap-1.5">
                     <ShieldCheck size={14} />
-                    <span>Sabha Verified Decisions ({verifiedProjects.length})</span>
+                    <span>Sabha Certified Orthography Canon ({publicDecisionProjects.length})</span>
                   </span>
                   <h3 className="font-display text-xl sm:text-2xl font-black text-ink">
-                    Verified Community Doubts & Specialist Resolutions
+                    Verified Decisions & Specialist Rectifications
                   </h3>
                 </div>
                 <span className="text-xs font-serif text-muted">
-                  Inspected & approved by authorized script specialists
+                  Audited by authorized script specialists with community voting
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {verifiedProjects.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border-[1.5px] border-mint-dark/30 shadow-card space-y-3"
-                    style={{ borderBottomWidth: '3.5px', borderBottomColor: '#059669' }}
-                  >
-                    {/* Header: Verified seal + timestamp */}
-                    <div className="flex items-center justify-between border-b border-border pb-2.5">
-                      <span className="text-[10px] font-mono font-black uppercase px-2.5 py-0.5 rounded-full bg-mint/40 text-mint-dark">
-                        ✓ Verified by {item.reviewerVerdict?.reviewerName || 'Lipi Specialist'}
-                      </span>
-                      <span className="text-[10px] font-mono text-muted">
-                        {item.reviewerVerdict?.ratifiedAt || item.submittedAt}
-                      </span>
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {publicDecisionProjects.map((item) => {
+                  const isFlagged = item.status === 'flagged';
+                  const userVote = userVotesMap[item.id];
 
-                    {/* User Doubt / Question */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] font-mono text-muted uppercase block">
-                          User Question / Word:
+                  return (
+                    <div
+                      key={item.id}
+                      className={`p-5 sm:p-6 rounded-3xl border-[1.5px] shadow-card space-y-3.5 transition-all ${
+                        isFlagged
+                          ? 'bg-rose-50/20 dark:bg-rose-950/20 border-rose-300 dark:border-rose-900/50'
+                          : 'bg-white dark:bg-slate-900 border-mint-dark/30'
+                      }`}
+                      style={{
+                        borderBottomWidth: '4px',
+                        borderBottomColor: isFlagged ? '#E11D48' : '#059669'
+                      }}
+                    >
+                      {/* Header: Verified seal or Red Flag */}
+                      <div className="flex items-center justify-between border-b border-border pb-2.5">
+                        <span
+                          className={`text-[10px] font-mono font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                            isFlagged
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                              : 'bg-mint/40 text-mint-dark dark:bg-emerald-950 dark:text-emerald-300'
+                          }`}
+                        >
+                          {isFlagged ? (
+                            <>
+                              <Flag size={11} className="text-rose-600 fill-rose-600" />
+                              <span>🚩 Flagged / Rectified by {item.reviewerVerdict?.reviewerName || 'Lipi Specialist'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <ShieldCheck size={12} className="text-mint-dark" />
+                              <span>✓ Verified by {item.reviewerVerdict?.reviewerName || 'Lipi Specialist'}</span>
+                            </>
+                          )}
                         </span>
-                        <h4 className="font-serif font-black text-xl text-ink">
-                          {item.spokenWord}
-                        </h4>
+                        <span className="text-[10px] font-mono text-muted">
+                          {item.reviewerVerdict?.ratifiedAt || item.submittedAt}
+                        </span>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => playPronunciation(item.spokenWord, 'hi-IN')}
-                        className="p-2 rounded-xl bg-amber-50 dark:bg-slate-800 text-[#78350F] hover:bg-[#78350F] hover:text-white transition-colors cursor-pointer"
-                        title="Hear pronunciation"
-                      >
-                        <Volume2 size={15} />
-                      </button>
-                    </div>
+                      {/* User Doubt / Spoken Word with Audio */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] font-mono text-muted uppercase block">
+                            User Question / Spoken Word:
+                          </span>
+                          <h4 className="font-serif font-black text-xl sm:text-2xl text-ink">
+                            {item.spokenWord}
+                          </h4>
+                          {item.title !== item.spokenWord && (
+                            <p className="text-xs font-serif text-muted">{item.title}</p>
+                          )}
+                        </div>
 
-                    {/* Attached Photo (if any) */}
-                    {item.imageUrl && (
-                      <img
-                        src={item.imageUrl}
-                        alt="Specimen"
-                        className="w-full h-32 object-cover rounded-xl border border-border shadow-soft"
-                      />
-                    )}
-
-                    {/* Reviewer Commentary */}
-                    {item.reviewerVerdict?.rationale && (
-                      <div className="p-3.5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/60 border border-[#78350F]/20 text-xs font-serif text-ink space-y-1">
-                        <span className="font-bold text-[#78350F] text-[11px] block">
-                          Specialist Resolution:
-                        </span>
-                        <p className="text-muted leading-relaxed italic">
-                          &ldquo;{item.reviewerVerdict.rationale}&rdquo;
-                        </p>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {item.audioUrl ? (
+                            <audio src={item.audioUrl} controls className="h-7 max-w-[170px]" />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => playPronunciation(item.spokenWord, 'hi-IN')}
+                              className="p-2 rounded-xl bg-amber-50 dark:bg-slate-800 text-[#78350F] hover:bg-[#78350F] hover:text-white transition-colors cursor-pointer shadow-soft"
+                              title="Hear pronunciation"
+                            >
+                              <Volume2 size={15} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    )}
 
-                    {/* Footer Meta */}
-                    <div className="text-[10px] font-mono text-muted flex items-center justify-between pt-1 border-t border-border/60">
-                      <span>Asked by: {item.author}</span>
-                      <span>Scope: {item.lipiName}</span>
+                      {/* Attached Photo (Click to open full lightbox) */}
+                      {item.imageUrl && (
+                        <div className="relative group">
+                          <img
+                            src={item.imageUrl}
+                            alt="Specimen"
+                            onClick={() => setLightboxImage({ url: item.imageUrl!, title: item.spokenWord })}
+                            className="w-full h-36 sm:h-44 object-cover rounded-xl border border-border shadow-soft cursor-pointer group-hover:opacity-90 group-hover:scale-[1.01] transition-all"
+                            title="Click to open & zoom picture"
+                          />
+                          <div
+                            onClick={() => setLightboxImage({ url: item.imageUrl!, title: item.spokenWord })}
+                            className="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-black/70 text-white text-[10px] font-mono cursor-pointer backdrop-blur-sm opacity-90 group-hover:opacity-100 flex items-center gap-1"
+                          >
+                            <span>🔍 Click to expand</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Accepted Spelling Option Pill (if reviewer endorsed one) */}
+                      {item.reviewerVerdict?.acceptedOption && (
+                        <div className="p-2.5 rounded-xl bg-amber-50/60 dark:bg-slate-800/60 border border-[#78350F]/20 space-y-1">
+                          <span className="text-[10px] font-mono font-bold uppercase text-[#78350F] dark:text-amber-400 block">
+                            Endorsed Standard Spelling:
+                          </span>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="px-2.5 py-1 rounded-lg bg-mint-dark text-white font-serif font-black text-xs shadow-soft flex items-center gap-1">
+                              <span>✓</span>
+                              <span>{item.reviewerVerdict.acceptedOption}</span>
+                            </span>
+                            {item.options &&
+                              item.options
+                                .filter((o) => o !== item.reviewerVerdict?.acceptedOption)
+                                .map((opt, oIdx) => (
+                                  <span
+                                    key={oIdx}
+                                    className="px-2 py-0.5 rounded-lg bg-neutral dark:bg-slate-700 text-muted font-serif text-xs opacity-70 line-through"
+                                  >
+                                    {opt}
+                                  </span>
+                                ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Reviewer Commentary */}
+                      {item.reviewerVerdict?.rationale && (
+                        <div
+                          className={`p-3.5 rounded-2xl text-xs font-serif space-y-1 border ${
+                            isFlagged
+                              ? 'bg-rose-50/50 dark:bg-rose-950/30 border-rose-200 text-ink'
+                              : 'bg-amber-50/50 dark:bg-slate-800/60 border-[#78350F]/20 text-ink'
+                          }`}
+                        >
+                          <span
+                            className={`font-bold text-[11px] block ${
+                              isFlagged ? 'text-rose-700 dark:text-rose-400' : 'text-[#78350F] dark:text-amber-400'
+                            }`}
+                          >
+                            {isFlagged ? 'Specialist Rectification:' : 'Specialist Guidance:'}
+                          </span>
+                          <p className="leading-relaxed italic">
+                            &ldquo;{item.reviewerVerdict.rationale}&rdquo;
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Footer Meta & 1-Vote-per-User Upvote/Downvote Bar */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/70 text-xs">
+                        <div className="text-[10px] font-mono text-muted space-y-0.5">
+                          <span>Contributor: <strong className="text-ink">{item.author}</strong></span>
+                          <span className="block">Scope: {item.lipiName}</span>
+                        </div>
+
+                        {/* Voting Column: Upvote & Downvote */}
+                        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-neutral/80 dark:bg-slate-800 border border-border">
+                          <button
+                            type="button"
+                            onClick={() => voteOnProject(item.id, 'up')}
+                            className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                              userVote === 'up'
+                                ? 'bg-mint-dark text-white shadow-soft scale-105'
+                                : 'text-muted hover:text-ink'
+                            }`}
+                            title={userVote === 'up' ? 'Click to remove upvote' : 'Upvote resolution'}
+                          >
+                            <ThumbsUp size={12} className={userVote === 'up' ? 'fill-white' : ''} />
+                            <span>{item.upvotes || 0}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => voteOnProject(item.id, 'down')}
+                            className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                              userVote === 'down'
+                                ? 'bg-danger text-white shadow-soft scale-105'
+                                : 'text-muted hover:text-ink'
+                            }`}
+                            title={userVote === 'down' ? 'Click to remove downvote' : 'Downvote resolution'}
+                          >
+                            <ThumbsDown size={12} className={userVote === 'down' ? 'fill-white' : ''} />
+                            <span>{item.downvotes || 0}</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -842,6 +977,14 @@ export function HomePage() {
           setSelectedProjectId(newId);
           setTreeMode('communityDilemmas');
         }}
+      />
+
+      {/* Image Lightbox Modal */}
+      <ImageLightboxModal
+        isOpen={Boolean(lightboxImage)}
+        imageUrl={lightboxImage?.url || null}
+        title={lightboxImage?.title}
+        onClose={() => setLightboxImage(null)}
       />
     </div>
   );
