@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -13,10 +13,12 @@ import {
   ChevronDown,
   Sun,
   Moon,
-  Sparkles
+  Sparkles,
+  Check
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLipi } from '@/contexts/LipiContext';
 
 // 1. User Experience: Two Dedicated Pages (Learn Tree & Script Studio)
 const userNavLinks = [
@@ -33,8 +35,13 @@ const reviewerNavLinks = [
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [lipiDropdownOpen, setLipiDropdownOpen] = useState(false);
+  const lipiMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
   const { user, isAuthenticated, logout, activeWorkspace, setActiveWorkspace, isReviewer } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { activeLipi, setLipiId, allLipis } = useLipi();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -49,30 +56,45 @@ export function Navbar() {
     }
   };
 
+  // Close menus when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (lipiMenuRef.current && !lipiMenuRef.current.contains(event.target as Node)) {
+        setLipiDropdownOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50 bg-cream/90 dark:bg-neutral/90 backdrop-blur-md border-b border-border">
+    <header className="sticky top-0 z-50 bg-cream/95 dark:bg-neutral/95 backdrop-blur-md border-b-[1.5px] border-border select-none">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
-        <div className="flex items-center justify-between h-18">
-          {/* Logo / Brand with Gita Manuscript Feel */}
-          <Link to="/" className="flex items-center gap-2.5 group" aria-label="Lipi Sabha home">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-display font-black text-xl border border-border shadow-soft group-hover:scale-105 transition-transform ${
+        <div className="flex items-center justify-between h-18 gap-2 sm:gap-4">
+          
+          {/* Logo / Brand with Dynamic Lipi Glyph */}
+          <Link to="/" className="flex items-center gap-2.5 group shrink-0" aria-label="Lipi Sabha home">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-display font-black text-xl border-[1.5px] border-[#78350F]/20 dark:border-amber-900/40 shadow-soft group-hover:scale-105 transition-transform ${
               isReviewer && activeWorkspace === 'reviewer'
                 ? 'bg-mint-dark text-white'
-                : 'bg-purple text-white'
+                : 'bg-[#B45309] text-white shadow-amber-900/20'
             }`}>
-              {isReviewer && activeWorkspace === 'reviewer' ? '⚖️' : 'ल'}
+              {isReviewer && activeWorkspace === 'reviewer' ? '⚖️' : activeLipi.symbol}
             </div>
             <div className="flex flex-col">
               <span className="font-display text-2xl font-black text-ink tracking-tight leading-none">
                 Lipi Sabha
               </span>
-              <span className="text-[10px] font-serif italic text-purple mt-0.5 font-bold">
+              <span className="text-[10px] font-serif italic text-purple mt-0.5 font-bold truncate max-w-[170px] sm:max-w-none">
                 {isReviewer && activeWorkspace === 'reviewer' ? (
                   <span className="text-mint-dark font-extrabold flex items-center gap-1">
                     [ ⚖ Reviewer Studio ]
                   </span>
                 ) : (
-                  'Sacred & Living Orthographies'
+                  `${activeLipi.nameNative} • ${activeLipi.nameEnglish}`
                 )}
               </span>
             </div>
@@ -82,7 +104,7 @@ export function Navbar() {
           <div className="hidden lg:flex items-center gap-3">
             {/* Unobtrusive Workspace Switcher for Authorized Reviewers */}
             {isReviewer && (
-              <div className="flex items-center p-1 rounded-2xl bg-neutral/60 border border-border shadow-soft">
+              <div className="flex items-center p-1 rounded-2xl bg-neutral/60 border-[1.5px] border-border shadow-soft">
                 <button
                   type="button"
                   onClick={() => handleSwitchWorkspace('user')}
@@ -113,7 +135,7 @@ export function Navbar() {
             )}
 
             {/* The 2 Core Navigation Links */}
-            <div className="flex items-center gap-1.5 bg-neutral/80 p-1.5 rounded-2xl border border-border shadow-soft">
+            <div className="flex items-center gap-1.5 bg-neutral/80 p-1.5 rounded-2xl border-[1.5px] border-border shadow-soft">
               {currentNavLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive =
@@ -138,13 +160,13 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Desktop Right: Contextual Auth / Profile + Theme Toggle */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop Right: Contextual Auth / Profile + Theme Toggle + Lipi Selector Dropdown */}
+          <div className="hidden md:flex items-center gap-2.5">
             {/* Desktop Theme Switcher */}
             <button
               type="button"
               onClick={toggleTheme}
-              className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-border/80 hover:border-purple/50 flex items-center justify-center text-ink shadow-soft transition-all cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border-[1.5px] border-border/80 hover:border-purple/50 flex items-center justify-center text-ink shadow-soft transition-all cursor-pointer"
               aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
               title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
             >
@@ -161,7 +183,7 @@ export function Navbar() {
                 {activeWorkspace === 'user' ? (
                   <Link
                     to="/learn"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-mint border border-mint-dark/20 shadow-soft text-xs font-mono font-bold text-mint-dark hover:scale-102 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-mint border-[1.5px] border-mint-dark/20 shadow-soft text-xs font-mono font-bold text-mint-dark hover:scale-102 transition-all"
                     title="Your Progress Garden"
                   >
                     <span className="text-base">🌱</span>
@@ -169,7 +191,7 @@ export function Navbar() {
                   </Link>
                 ) : (
                   <div
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-mint/50 border border-mint-dark/20 shadow-soft text-xs font-mono font-bold text-mint-dark"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-mint/50 border-[1.5px] border-mint-dark/20 shadow-soft text-xs font-mono font-bold text-mint-dark"
                     title="Audited Review XP"
                   >
                     <ShieldCheck size={14} />
@@ -178,17 +200,20 @@ export function Navbar() {
                 )}
 
                 {/* Profile Dropdown */}
-                <div className="relative">
+                <div className="relative" ref={userMenuRef}>
                   <button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-border/80 hover:border-purple shadow-soft transition-all cursor-pointer"
+                    onClick={() => {
+                      setUserMenuOpen(!userMenuOpen);
+                      setLipiDropdownOpen(false);
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border-[1.5px] border-border/80 hover:border-purple shadow-soft transition-all cursor-pointer"
                     aria-expanded={userMenuOpen}
                     aria-haspopup="true"
                   >
                     <div className="w-6 h-6 rounded-lg bg-purple text-white font-mono font-black flex items-center justify-center text-xs">
                       {user?.display_name?.charAt(0) || 'U'}
                     </div>
-                    <span className="text-xs font-display font-black text-ink max-w-[120px] truncate">
+                    <span className="text-xs font-display font-black text-ink max-w-[100px] truncate">
                       {user?.display_name}
                     </span>
                     <ChevronDown size={14} className="text-muted" />
@@ -200,7 +225,7 @@ export function Navbar() {
                         initial={{ opacity: 0, y: -4, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -4, scale: 0.95 }}
-                        className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border-2 border-border shadow-elevated py-2 z-50"
+                        className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-border shadow-elevated py-2 z-50"
                         role="menu"
                       >
                         <div className="px-4 py-2 border-b border-border">
@@ -238,30 +263,21 @@ export function Navbar() {
                           </div>
                         )}
 
-                        <Link
-                          to="/dashboard"
-                          className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-ink hover:bg-neutral transition-colors"
-                          role="menuitem"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <UserIcon size={14} /> My Learning Journal
-                        </Link>
-                        <Link
-                          to="/contributions"
-                          className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-ink hover:bg-neutral transition-colors"
-                          role="menuitem"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <BookOpen size={14} /> My Submissions
-                        </Link>
-
-                        <div className="border-t border-border mt-1 pt-1">
+                        <div className="px-2 py-1">
+                          <Link
+                            to="/dashboard"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-ink hover:bg-neutral transition-colors"
+                          >
+                            <UserIcon size={14} className="text-muted" />
+                            <span>My Learning Journal</span>
+                          </Link>
                           <button
                             onClick={() => { logout(); setUserMenuOpen(false); navigate('/'); }}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-danger hover:bg-danger-light transition-colors w-full text-left cursor-pointer"
-                            role="menuitem"
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-danger hover:bg-danger-light w-full text-left transition-colors cursor-pointer"
                           >
-                            <LogOut size={14} /> Sign Out
+                            <LogOut size={14} />
+                            <span>Sign Out</span>
                           </button>
                         </div>
                       </motion.div>
@@ -273,30 +289,166 @@ export function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   to="/auth/sign-in"
-                  className="px-4 py-2 rounded-xl text-xs font-display font-extrabold text-muted hover:text-ink transition-colors"
+                  className="px-3 py-1.5 rounded-xl border-[1.5px] border-border hover:border-purple text-xs font-display font-bold text-ink hover:text-purple transition-all"
                 >
                   Sign In
                 </Link>
-                <Link
-                  to="/learn"
-                  className="btn-chunky-purple px-5 py-2 text-xs inline-flex items-center gap-1.5"
-                >
-                  <Sparkles size={14} />
-                  Start Exploring
-                </Link>
               </div>
             )}
+
+            {/* ========================================================
+                LIPI SELECTOR DROPDOWN (Circled in Red by User)
+                Switches the entire active writing system across both
+                ज्ञान वृक्ष (Learn Tree) and प्रयोग शाला (Test & Verify)
+                ======================================================== */}
+            <div className="relative" ref={lipiMenuRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setLipiDropdownOpen(!lipiDropdownOpen);
+                  setUserMenuOpen(false);
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FFFDF8] dark:bg-slate-800 border-[1.5px] border-[#78350F]/25 dark:border-amber-900/40 hover:border-[#78350F]/60 shadow-soft transition-all cursor-pointer group"
+                aria-label="Select Writing System (Lipi)"
+                aria-expanded={lipiDropdownOpen}
+                aria-haspopup="true"
+                title="Select active script (Lipi)"
+              >
+                {/* Script Glyph Emblem */}
+                <div className="w-6 h-6 rounded-lg bg-[#78350F]/10 dark:bg-amber-950/60 border border-[#78350F]/20 flex items-center justify-center font-serif font-black text-xs text-[#78350F] dark:text-amber-300 group-hover:scale-105 transition-transform">
+                  {activeLipi.symbol}
+                </div>
+
+                <div className="flex flex-col text-left">
+                  <span className="text-[8px] uppercase tracking-wider font-mono font-bold text-[#78350F]/70 dark:text-amber-400/80">
+                    Lipi
+                  </span>
+                  <span className="text-xs font-display font-black text-ink leading-none">
+                    {activeLipi.nameNative}
+                  </span>
+                </div>
+
+                <ChevronDown
+                  size={13}
+                  className={`text-[#78350F]/70 dark:text-amber-400/80 transition-transform duration-200 ${
+                    lipiDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {lipiDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-80 bg-[#FFFDF8] dark:bg-slate-900 rounded-2xl border-[1.5px] border-[#78350F]/30 dark:border-amber-900/50 shadow-elevated py-2.5 z-50 overflow-hidden"
+                    role="menu"
+                  >
+                    {/* Header info */}
+                    <div className="px-4 py-2 border-b border-[#78350F]/10 dark:border-amber-900/30">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#78350F] dark:text-amber-400">
+                          📜 Sacred & Living Lipis
+                        </span>
+                        <span className="text-[10px] font-mono bg-[#78350F]/10 dark:bg-amber-950 text-[#78350F] dark:text-amber-300 px-2 py-0.5 rounded-full font-bold">
+                          {allLipis.length} Scripts
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-serif text-muted mt-1 leading-snug">
+                        Selecting a Lipi adapts both <span className="font-bold text-ink">ज्ञान वृक्ष</span> and <span className="font-bold text-ink">प्रयोग शाला</span> instantly.
+                      </p>
+                    </div>
+
+                    {/* Lipis List */}
+                    <div className="max-h-80 overflow-y-auto px-2 py-1.5 space-y-1">
+                      {allLipis.map((lipi) => {
+                        const isSelected = lipi.id === activeLipi.id;
+                        return (
+                          <button
+                            key={lipi.id}
+                            type="button"
+                            onClick={() => {
+                              setLipiId(lipi.id);
+                              setLipiDropdownOpen(false);
+                            }}
+                            className={`w-full text-left p-2.5 rounded-xl transition-all flex items-center justify-between gap-3 cursor-pointer group ${
+                              isSelected
+                                ? 'bg-amber-50 dark:bg-amber-950/40 border border-[#78350F]/40 shadow-soft'
+                                : 'hover:bg-neutral/80 dark:hover:bg-slate-800/80 border border-transparent'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              {/* Symbol box */}
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center font-serif font-black text-base shrink-0 transition-all ${
+                                  isSelected
+                                    ? 'bg-[#78350F] text-white shadow-sm'
+                                    : 'bg-[#78350F]/10 dark:bg-amber-950 text-[#78350F] dark:text-amber-300 group-hover:scale-105'
+                                }`}
+                              >
+                                {lipi.symbol}
+                              </div>
+
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-display font-extrabold text-xs text-ink truncate">
+                                    {lipi.nameNative}
+                                  </span>
+                                  <span className="text-[10px] font-sans text-muted truncate">
+                                    ({lipi.nameEnglish})
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[10px] font-mono text-muted">
+                                  <span>{lipi.era}</span>
+                                  <span>•</span>
+                                  <span className="truncate">{lipi.region.split(',')[0]}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Active Checkmark */}
+                            {isSelected && (
+                              <div className="shrink-0 w-5 h-5 rounded-full bg-[#78350F] text-white flex items-center justify-center">
+                                <Check size={12} strokeWidth={3} />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-xl text-ink bg-neutral border border-border"
-            aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
-            aria-expanded={mobileOpen}
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          {/* Mobile Right Controls: Lipi Badge + Hamburger */}
+          <div className="flex items-center gap-2 md:hidden">
+            {/* Quick Lipi Button on mobile */}
+            <button
+              type="button"
+              onClick={() => {
+                const nextIdx = (allLipis.findIndex((l) => l.id === activeLipi.id) + 1) % allLipis.length;
+                setLipiId(allLipis[nextIdx].id);
+              }}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#FFFDF8] dark:bg-slate-800 border-[1.5px] border-[#78350F]/30 text-xs font-serif font-bold text-[#78350F] dark:text-amber-300 shadow-soft"
+              title="Tap to cycle active Lipi"
+            >
+              <span>{activeLipi.symbol}</span>
+              <span className="text-[10px] font-mono font-semibold">{activeLipi.nameNative}</span>
+            </button>
+
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-2 rounded-xl border-[1.5px] border-border text-ink hover:bg-neutral transition-colors cursor-pointer"
+              aria-label={mobileOpen ? 'Close mobile menu' : 'Open mobile menu'}
+            >
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation Drawer */}
@@ -306,11 +458,41 @@ export function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t-2 border-border overflow-hidden py-4 space-y-3"
+              className="md:hidden border-t-[1.5px] border-border py-4 space-y-3"
             >
-              {/* Workspace Switcher in Mobile Drawer */}
+              {/* Mobile Lipi Selector Block */}
+              <div className="p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border-[1.5px] border-[#78350F]/20 space-y-2">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#78350F] dark:text-amber-400 block">
+                  Select Active Lipi (Writing System)
+                </span>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {allLipis.map((lipi) => {
+                    const isSelected = lipi.id === activeLipi.id;
+                    return (
+                      <button
+                        key={lipi.id}
+                        type="button"
+                        onClick={() => {
+                          setLipiId(lipi.id);
+                          setMobileOpen(false);
+                        }}
+                        className={`flex items-center gap-2 p-2 rounded-xl text-left transition-all ${
+                          isSelected
+                            ? 'bg-[#78350F] text-white shadow-soft font-bold'
+                            : 'bg-white dark:bg-slate-800 border border-border text-ink'
+                        }`}
+                      >
+                        <span className="text-sm font-serif font-black">{lipi.symbol}</span>
+                        <span className="text-xs truncate">{lipi.nameNative}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Workspace Switcher inside mobile */}
               {isReviewer && (
-                <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-white border border-border">
+                <div className="grid grid-cols-2 gap-2 p-1 bg-neutral/80 rounded-2xl border-[1.5px] border-border">
                   <button
                     onClick={() => { handleSwitchWorkspace('user'); setMobileOpen(false); }}
                     className={`py-2 text-xs font-display font-extrabold rounded-xl transition-all ${
@@ -357,7 +539,7 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl border-2 border-border bg-white text-xs font-display font-black text-ink shadow-soft cursor-pointer"
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl border-[1.5px] border-border bg-white dark:bg-slate-800 text-xs font-display font-black text-ink shadow-soft cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     {theme === 'dark' ? (
@@ -373,7 +555,7 @@ export function Navbar() {
                 </button>
               </div>
 
-              <div className="border-t border-border pt-3 mt-3">
+              <div className="border-t-[1.5px] border-border pt-3 mt-3">
                 {isAuthenticated ? (
                   <div className="space-y-1">
                     <Link
@@ -395,16 +577,9 @@ export function Navbar() {
                     <Link
                       to="/auth/sign-in"
                       onClick={() => setMobileOpen(false)}
-                      className="w-full text-center py-2.5 rounded-xl border-2 border-border font-display font-bold text-xs text-ink"
+                      className="w-full text-center py-2.5 rounded-xl border-[1.5px] border-border font-display font-bold text-xs text-ink"
                     >
                       Sign In
-                    </Link>
-                    <Link
-                      to="/learn"
-                      onClick={() => setMobileOpen(false)}
-                      className="btn-chunky-purple w-full text-center py-3 text-xs"
-                    >
-                      Start Exploring Freely
                     </Link>
                   </div>
                 )}

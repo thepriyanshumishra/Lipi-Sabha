@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -12,193 +12,34 @@ import {
   Lightbulb,
   Sparkles,
   X,
-  Layers,
-  Radio
+  Radio,
+  Compass,
+  Layers
 } from 'lucide-react';
 import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/audio';
-
-interface KnowledgeNode {
-  id: string;
-  level: number;
-  title: string;
-  subtitle: string;
-  glyph: string;
-  scriptName: string;
-  themeColor: string;
-  badgeLabel: string;
-  lang: string;
-  spokenForm: string;
-  // Step 1: Learn & Trace
-  learnTitle: string;
-  learnExplanation: string;
-  culturalNote: string;
-  sampleWords: { char: string; ipa: string; gloss: string }[];
-  // Step 2: Interactive Quiz
-  quizQuestion: string;
-  quizOptions: { text: string; subtext: string; isCorrect: boolean }[];
-  quizExplanation: string;
-  // Step 3: Deep Wisdom
-  deepTitle: string;
-  deepLore: string;
-  dialectInsight: string;
-  dialectSample: { label: string; text: string; lang: string };
-  communityRule: string;
-}
-
-const knowledgeNodes: KnowledgeNode[] = [
-  {
-    id: 'node-root',
-    level: 1,
-    title: 'Root & Lineage: Devanagari & Brahmi',
-    subtitle: 'How ancient sound-first writing systems organize human speech.',
-    glyph: 'ल',
-    scriptName: 'Devanagari (South Asian Tradition)',
-    themeColor: '#B45309',
-    badgeLabel: 'Lineage Foundation',
-    lang: 'hi-IN',
-    spokenForm: 'ल',
-    learnTitle: 'The 3D Anatomy of "ल" (Lipi / Script)',
-    learnExplanation:
-      'In the Devanagari tradition, every character represents a consonant with an inherent vowel /a/. The continuous horizontal hanging bar (shirorekha) physically links syllables into unified words, echoing unbroken breath flow.',
-    culturalNote:
-      'Devanagari is an abugida descended from ancient Brahmi (c. 3rd century BCE). It prioritizes phonetic truth: letters are arranged strictly by place of vocal articulation (throat, palate, teeth, lips).',
-    sampleWords: [
-      { char: 'ल', ipa: '/lɐ/', gloss: 'Base letter La with inherent vowel' },
-      { char: 'लि', ipa: '/lɪ/', gloss: 'Short vowel -i matra attached left' },
-      { char: 'ली', ipa: '/liː/', gloss: 'Long vowel -ī matra attached right' },
-      { char: 'ल्प', ipa: '/lpɐ/', gloss: 'Half-letter conjunct ligature' }
-    ],
-    quizQuestion: 'In Devanagari, what happens to the vowel sound when you write the bare consonant "ल" without extra marks?',
-    quizOptions: [
-      { text: 'It has an inherent short "a" vowel sound (/lɐ/)', subtext: 'Standard abugida characteristic', isCorrect: true },
-      { text: 'It is a pure silent consonant with zero vowel', subtext: 'Requires halant mark (्)', isCorrect: false },
-      { text: 'It represents a long "ā" vowel sound', subtext: 'Requires aa matra (ा)', isCorrect: false }
-    ],
-    quizExplanation:
-      'Correct! As an abugida, every base consonant carries an inherent vowel. To cancel it, a halant (्) is attached.',
-    deepTitle: 'Sovereign Community Rationale',
-    deepLore:
-      'When digitizing classical scripts, early computers struggled with conjunct stacking. Rather than discarding classical ligatures, language communities demanded smart font rendering engines that preserve orthographic dignity.',
-    dialectInsight: 'Regional pronunciation varies from dental /l/ to retroflex flap /ɭ/ across Marathi, Hindi, and Rajasthani dialects.',
-    dialectSample: { label: 'Listen to Regional Flap Variant', text: 'ळ', lang: 'mr-IN' },
-    communityRule: 'Orthography Rule #1: Inherent vowels must be preserved in base orthography models.'
-  },
-  {
-    id: 'node-vowels',
-    level: 2,
-    title: 'Vowel Alchemy: Macrons vs Digraphs',
-    subtitle: 'The great debate: compact diacritic lines (ā) vs double letters (aa).',
-    glyph: 'ā',
-    scriptName: 'Latin Extended Diacritic Orthography',
-    themeColor: '#C2410C',
-    badgeLabel: 'Acoustic Precision',
-    lang: 'en-US',
-    spokenForm: 'tāla',
-    learnTitle: 'Signaling Vowel Length Across Alphabets',
-    learnExplanation:
-      'Languages distinguish short vowels from long vowels. How should a community write this distinction? Option A uses a macron diacritic above the letter (ā). Option B doubles the vowel letter (aa). Each choice entails distinct engineering and reading trade-offs.',
-    culturalNote:
-      'Macrons offer visual brevity and preserve bookish elegance (common in sacred Sanskrit transcriptions and Māori). Digraphs (aa) allow typing on standard English keyboards with zero special software.',
-    sampleWords: [
-      { char: 'talā', ipa: '/tɐlaː/', gloss: 'Short initial, long final' },
-      { char: 'tāla', ipa: '/taːlɐ/', gloss: 'Long initial, short final' },
-      { char: 'tālā', ipa: '/taːlaː/', gloss: 'Both vowels long' }
-    ],
-    quizQuestion: 'Which word has a SHORT initial vowel and a LONG final vowel?',
-    quizOptions: [
-      { text: 'talā', subtext: 'Initial vowel bare (short), second vowel marked (long)', isCorrect: true },
-      { text: 'tāla', subtext: 'Initial vowel marked (long), second bare (short)', isCorrect: false },
-      { text: 'tālā', subtext: 'Both vowels marked as long', isCorrect: false }
-    ],
-    quizExplanation:
-      'Spot on! In "talā", "a" has no marker (short), whereas "ā" carries the horizontal macron (long vowel).',
-    deepTitle: 'Digital Access vs Orthographic Elegance',
-    deepLore:
-      'A community in northern Norway debated whether to adopt macrons. Older speakers favored macrons for their compact aesthetic; younger mobile users initially preferred double vowels because standard phone keyboards lacked quick macron keys.',
-    dialectInsight: 'In dialects where vowel duration conveys grammatical tense, precision in length marking prevents ambiguity.',
-    dialectSample: { label: 'Listen to Vowel Contrast (talā vs tāla)', text: 'tala, taala', lang: 'en-US' },
-    communityRule: 'Orthography Rule #2: Long vowel representation must be consistently verified without automated bias.'
-  },
-  {
-    id: 'node-conjuncts',
-    level: 3,
-    title: 'The Conjunct Forge: Ligatures vs Linear Keys',
-    subtitle: 'Balancing complex sacred ligatures against smartphone keypad ergonomics.',
-    glyph: 'क्ष',
-    scriptName: 'Classical Conjunct Orthography (Ksha)',
-    themeColor: '#15803D',
-    badgeLabel: 'Scribal Mastery',
-    lang: 'hi-IN',
-    spokenForm: 'क्ष',
-    learnTitle: 'When Two Consonants Merge into One Form',
-    learnExplanation:
-      'When two consonants sound consecutively without an intervening vowel (like "k" + "ṣ"), traditional scribes forged a single ligature (क्ष). In digital input, this requires complex font shapers.',
-    culturalNote:
-      'Classical Gita manuscripts feature intricate stacked conjuncts that economize page space and reflect sacred calligraphy. Modern mobile keyboards sometimes offer a linear fallback (क्+ष) to assist quick typing.',
-    sampleWords: [
-      { char: 'क्ष', ipa: '/kʂɐ/', gloss: 'Ligature conjunct of Ka + Ssa' },
-      { char: 'ज्ञ', ipa: '/dʑɲɐ/', gloss: 'Ligature conjunct of Ja + Nya' },
-      { char: 'त्र', ipa: '/tɾɐ/', gloss: 'Ligature conjunct of Ta + Ra' }
-    ],
-    quizQuestion: 'Why did traditional scribes merge consonants into compact ligatures?',
-    quizOptions: [
-      { text: 'To economize expensive parchment and reflect unbroken pronunciation', subtext: 'Scribal tradition and phonological unity', isCorrect: true },
-      { text: 'Because they had not yet invented single letters', subtext: 'Single letters existed beforehand', isCorrect: false },
-      { text: 'To confuse readers from outside the village', subtext: 'Inaccurate historical belief', isCorrect: false }
-    ],
-    quizExplanation:
-      'Exactly! In handwritten manuscripts, palm leaf and paper were scarce and precious. Ligatures mirrored unbroken speech stream while saving surface area.',
-    deepTitle: 'Mobile Accessibility Compromise',
-    deepLore:
-      'In the River Valley community, elders and youth compromised: traditional print editions retain full ligatures, while a simplified one-letter-per-key standard was adopted for official SMS messaging.',
-    dialectInsight: 'Conjunct clustering often relaxes in informal spoken dialects into epenthetic vowels (e.g., "pra-" becoming "para-").',
-    dialectSample: { label: 'Listen to Conjunct Pronunciation', text: 'क्षमा', lang: 'hi-IN' },
-    communityRule: 'Orthography Rule #3: Conjunct rules must provide clear mapping between input keystrokes and rendered glyphs.'
-  },
-  {
-    id: 'node-sabha',
-    level: 4,
-    title: 'Sovereign Sabha: Community Decision-Making',
-    subtitle: 'The golden principle: Communities are decision-makers, not mere datasets.',
-    glyph: '⚖️',
-    scriptName: 'Community Consensus Governance',
-    themeColor: '#4338CA',
-    badgeLabel: 'Democratic Forum',
-    lang: 'hi-IN',
-    spokenForm: 'सभा',
-    learnTitle: 'Who Decides How a Language is Written?',
-    learnExplanation:
-      'Historically, external linguists or centralized bureaucracies imposed writing systems on regional languages. Lipi Sabha restores sovereignty: orthography choices are debated openly in the community forum.',
-    culturalNote:
-      'A writing system is not just an arbitrary technical cipher; it represents religious identity, historical continuity, and emotional connection to ancestral speech.',
-    sampleWords: [
-      { char: 'मत', ipa: '/mɐt̪/', gloss: 'Deliberation, vote, informed perspective' },
-      { char: 'सभा', ipa: '/sɐbʱaː/', gloss: 'Democratic council of speakers' },
-      { char: 'निर्णय', ipa: '/nɪɾɳɐjɐ/', gloss: 'Consensus decision permanently recorded' }
-    ],
-    quizQuestion: 'In Lipi Sabha, who determines the official spelling and orthography standards?',
-    quizOptions: [
-      { text: 'The native speaker community through transparent consensus deliberation', subtext: 'The foundational principle of Lipi Sabha', isCorrect: true },
-      { text: 'An automated machine learning algorithm that picks the shortest word', subtext: 'Algorithms do not understand human heritage', isCorrect: false },
-      { text: 'A single external government administrator', subtext: 'Top-down imposition', isCorrect: false }
-    ],
-    quizExplanation:
-      'Spot on! The community is the sovereign decision-maker. Technology serves documentation; speakers choose the standard.',
-    deepTitle: 'Recorded Consensus Records',
-    deepLore:
-      'Every proposal voted on in the Sabha is entered into an immutable community ledger that includes minority opinions, ensuring dissenting perspectives are never erased.',
-    dialectInsight: 'Consensus does not enforce dialect extinction; variants are tagged with metadata rather than labeled "incorrect".',
-    dialectSample: { label: 'Listen to "Sabha" Chanted in Council', text: 'सत्यमेव जयते सभा', lang: 'hi-IN' },
-    communityRule: 'Orthography Rule #4: No spelling convention shall be enforced without recorded speaker consultation.'
-  }
-];
+import { useLipi } from '@/contexts/LipiContext';
 
 export function HomePage() {
-  const [selectedNodeId, setSelectedNodeId] = useState<string>('node-root');
+  const { activeLipi, allLipis, setLipiId } = useLipi();
+  const knowledgeNodes = activeLipi.knowledgeNodes;
+
+  const [selectedNodeId, setSelectedNodeId] = useState<string>(knowledgeNodes[0]?.id || '');
   const [activeStep, setActiveStep] = useState<'learn' | 'quiz' | 'deep'>('learn');
   const [quizSelection, setQuizSelection] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [earnedXP, setEarnedXP] = useState(450);
+  const [activeGardenLetterIdx, setActiveGardenLetterIdx] = useState<number>(0);
+
+  // When activeLipi changes, reset to the first node of the new Lipi
+  useEffect(() => {
+    if (activeLipi.knowledgeNodes.length > 0) {
+      setSelectedNodeId(activeLipi.knowledgeNodes[0].id);
+      setActiveStep('learn');
+      setQuizSelection(null);
+      setQuizSubmitted(false);
+      setActiveGardenLetterIdx(0);
+    }
+  }, [activeLipi.id]);
 
   const activeNode = knowledgeNodes.find((n) => n.id === selectedNodeId) || knowledgeNodes[0];
 
@@ -207,7 +48,7 @@ export function HomePage() {
     setActiveStep('learn');
     setQuizSelection(null);
     setQuizSubmitted(false);
-    playAcousticChime(440 + activeNode.level * 40, 0.4);
+    playAcousticChime(440 + (activeNode?.level || 1) * 45, 0.4);
   };
 
   const handleQuizAnswer = (index: number) => {
@@ -221,29 +62,44 @@ export function HomePage() {
     }
   };
 
+  const activeGardenLetter = activeLipi.gardenLetters[activeGardenLetterIdx] || activeLipi.gardenLetters[0];
+
   return (
-    <div className="bg-cream text-ink min-h-screen">
+    <div className="bg-cream text-ink min-h-screen select-none">
       {/* ========================================================
           HERO: ILLUMINATED GITA BOOK / SACRED MANUSCRIPT OPENING
-          Clean, elegant, with the badge line removed as requested
+          Dynamically tuned to the selected Lipi
           ======================================================== */}
-      <section className="relative pt-14 pb-16 lg:pt-20 lg:pb-24 border-b border-border">
+      <section className="relative pt-12 pb-14 lg:pt-16 lg:pb-20 border-b-[1.5px] border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-6">
+          
+          {/* Active Lipi Badge with Era & Region */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border-[1.5px] border-[#78350F]/25 dark:border-amber-900/40 text-xs font-serif shadow-soft">
+            <span className="w-5 h-5 rounded-md bg-[#78350F] text-white flex items-center justify-center font-bold text-xs">
+              {activeLipi.symbol}
+            </span>
+            <span className="font-bold text-[#78350F] dark:text-amber-300">
+              {activeLipi.nameNative} ({activeLipi.nameEnglish})
+            </span>
+            <span className="text-muted">•</span>
+            <span className="text-muted font-mono">{activeLipi.era}</span>
+          </div>
+
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-ink tracking-tight leading-[1.18]">
             Every letter has a{' '}
             <span className="hero-story-underline text-purple">
               story.
             </span>
             <br />
-            Every community has a voice.
+            Explore <span className="text-[#B45309] dark:text-amber-400">{activeLipi.nameNative}</span> Lipi.
           </h1>
 
           <p className="text-muted text-base sm:text-lg font-serif max-w-2xl mx-auto leading-relaxed">
-            Writing systems are living tapestries of culture, acoustic precision, and sovereign choice. Explore the 3D Tree of Knowledge below or jump to the Script Testing Lab.
+            {activeLipi.overview}
           </p>
 
           {/* Quick Dual Jump Scrolls */}
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
             <a
               href="#tree-of-knowledge"
               className="btn-chunky-purple px-7 py-3.5 text-sm inline-flex items-center gap-2"
@@ -257,15 +113,151 @@ export function HomePage() {
               to="/lab"
               className="btn-chunky-white px-7 py-3.5 text-sm inline-flex items-center gap-2"
             >
-              <FlaskConical size={17} className="text-purple" />
-              <span>प्रयोग शाला (Test & Verify Script) →</span>
+              <FlaskConical size={17} className="text-[#B45309]" />
+              <span>प्रयोग शाला (Test {activeLipi.nameEnglish} Script) →</span>
             </Link>
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-xs font-sans text-muted pt-2">
-            <span className="w-2 h-2 rounded-full bg-mint-dark animate-pulse" />
-            <span>Audited Community Ledger • 100% Free & Open-Access</span>
+          {/* Lipi Quick-Switcher Pills below Hero */}
+          <div className="pt-4 flex items-center justify-center gap-2 flex-wrap text-xs">
+            <span className="font-mono text-muted uppercase text-[10px] tracking-wider font-bold">
+              Switch Lipi:
+            </span>
+            {allLipis.map((lipi) => (
+              <button
+                key={lipi.id}
+                type="button"
+                onClick={() => setLipiId(lipi.id)}
+                className={`px-3 py-1 rounded-xl font-display text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                  lipi.id === activeLipi.id
+                    ? 'bg-[#78350F] text-white shadow-soft font-bold'
+                    : 'bg-white dark:bg-slate-800 border-[1.5px] border-border text-ink hover:border-[#78350F]/50'
+                }`}
+              >
+                <span className="font-serif font-black">{lipi.symbol}</span>
+                <span>{lipi.nameNative}</span>
+              </button>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          THE 3D LETTER GARDEN (Tactile Blooms of Active Lipi)
+          Click to hear authentic pronunciation and anatomical insight
+          ======================================================== */}
+      <section className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b-[1.5px] border-border">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-[1.5px] border-border pb-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🌸</span>
+                <h3 className="font-display text-lg sm:text-xl font-black text-ink">
+                  The Living Letter Garden of {activeLipi.nameNative}
+                </h3>
+              </div>
+              <p className="text-xs font-serif text-muted">
+                Click any signature character to hear its acoustic resonance and inspect its scribal role.
+              </p>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint/50 border border-mint-dark/30 text-xs font-mono font-bold text-mint-dark shrink-0">
+              <Volume2 size={13} />
+              <span>Audio Synthesis Ready</span>
+            </div>
+          </div>
+
+          {/* Letter Petals Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {activeLipi.gardenLetters.map((letter, idx) => {
+              const isActive = activeGardenLetterIdx === idx;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setActiveGardenLetterIdx(idx);
+                    playAcousticChime(500 + idx * 80, 0.3);
+                    playPronunciation(letter.audioText, letter.lang);
+                  }}
+                  className={`p-4 rounded-2xl transition-all cursor-pointer text-center relative overflow-hidden group ${
+                    isActive
+                      ? 'bg-amber-50/90 dark:bg-amber-950/40 border-2 border-[#78350F] shadow-elevated -translate-y-1'
+                      : 'bg-[#FFFDF9] dark:bg-slate-800/80 border-[1.5px] border-border hover:border-[#78350F]/50 hover:-translate-y-0.5 shadow-soft'
+                  }`}
+                  style={{
+                    borderBottomWidth: isActive ? '4px' : '3px',
+                    borderBottomColor: isActive ? '#78350F' : '#DCCFB9'
+                  }}
+                >
+                  <div className="flex items-center justify-between text-[10px] text-muted mb-2">
+                    <span className="font-mono font-bold uppercase">Petal {idx + 1}</span>
+                    <span className="text-purple group-hover:scale-110 transition-transform">
+                      <Volume2 size={13} />
+                    </span>
+                  </div>
+
+                  {/* 3D Glyphs */}
+                  <div className="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center font-serif font-black text-3xl my-2 shadow-soft transition-transform group-hover:scale-105"
+                    style={{
+                      background: isActive
+                        ? 'linear-gradient(135deg, #D97706 0%, #B45309 60%, #78350F 100%)'
+                        : 'linear-gradient(180deg, #FFFFFF 0%, #F5EFE4 100%)',
+                      color: isActive ? '#FFFFFF' : '#1C1917',
+                      border: isActive ? '2px solid #FDE68A' : '1.5px solid #DCCFB9',
+                      boxShadow: isActive ? '0 6px 0px #451A03' : '0 3px 0px #C4B59D'
+                    }}
+                  >
+                    {letter.char}
+                  </div>
+
+                  <span className="font-display font-extrabold text-xs text-ink block truncate mt-1">
+                    {letter.name}
+                  </span>
+                  <span className="font-mono text-[11px] text-[#B45309] dark:text-amber-400 block font-bold">
+                    {letter.ipa}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active Bloom Description Banner */}
+          {activeGardenLetter && (
+            <motion.div
+              key={activeGardenLetter.char}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border-[1.5px] border-[#78350F]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-10 rounded-xl bg-[#78350F] text-white flex items-center justify-center font-serif font-black text-xl shrink-0 shadow-soft">
+                  {activeGardenLetter.char}
+                </span>
+                <div>
+                  <h4 className="font-display font-bold text-sm text-ink flex items-center gap-2">
+                    <span>{activeGardenLetter.name}</span>
+                    <span className="font-mono text-xs text-purple font-semibold">({activeGardenLetter.ipa})</span>
+                  </h4>
+                  <p className="text-xs font-serif text-muted mt-0.5 leading-relaxed">
+                    {activeGardenLetter.meaning}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  playAcousticChime(600, 0.3);
+                  playPronunciation(activeGardenLetter.audioText, activeGardenLetter.lang);
+                }}
+                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border-[1.5px] border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer shrink-0 self-start sm:self-auto"
+              >
+                <Volume2 size={14} className="text-[#B45309]" />
+                <span>Hear Resonance ({activeGardenLetter.char})</span>
+              </button>
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -274,35 +266,35 @@ export function HomePage() {
           Sculpted 3D medallions, organic golden branching path,
           and interactive 3-stage deep wisdom bloom
           ======================================================== */}
-      <section id="tree-of-knowledge" className="py-16 lg:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <section id="tree-of-knowledge" className="py-14 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <div className="inline-block px-3 py-1 rounded-full bg-purple-light border border-purple/30 text-xs font-serif font-bold text-purple uppercase">
             ज्ञान वृक्ष • The 3D Knowledge Tree
           </div>
           <h2 className="font-display text-3xl sm:text-4xl font-black text-ink">
-            Ascend the Sacred Orthographic Tree
+            Ascend the Living Tree of {activeLipi.nameNative}
           </h2>
           <p className="text-muted text-sm font-serif">
-            Step upon the sculpted 3D medallions along the golden vine. Each node unlocks a tactile lesson, an interactive quiz, and living community wisdom.
+            Step upon the sculpted 3D medallions along the golden vine. Each node unpacks an authentic orthographic lesson, an interactive quiz, and living community wisdom for {activeLipi.nameEnglish}.
           </p>
         </div>
 
         {/* The 3D Tree & Detail Canvas */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: 3D Sculpted Tree Path */}
-          <div className="lg:col-span-5 bg-white rounded-3xl border border-border p-6 shadow-card space-y-6">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <span className="text-xs font-display font-extrabold uppercase tracking-wider text-purple flex items-center gap-1.5">
+          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 shadow-card space-y-6">
+            <div className="flex items-center justify-between border-b-[1.5px] border-border pb-3">
+              <span className="text-xs font-display font-extrabold uppercase tracking-wider text-[#B45309] dark:text-amber-400 flex items-center gap-1.5">
                 <span>🌿</span>
                 <span>The 3D Discovery Trail</span>
               </span>
               <span className="text-xs font-mono font-bold text-muted">
-                Branch {activeNode.level} of 4
+                Branch {activeNode?.level || 1} of {knowledgeNodes.length}
               </span>
             </div>
 
             {/* 3D Stepping Stone Nodes */}
-            <div className="space-y-5 relative py-2">
+            <div className="space-y-4 relative py-2">
               {/* Organic 3D Golden Vine Line with Soft Drop Shadow */}
               <div
                 className="absolute left-[34px] top-6 bottom-6 w-1 rounded-full -z-0"
@@ -318,10 +310,10 @@ export function HomePage() {
                   <button
                     key={node.id}
                     onClick={() => handleSelectNode(node.id)}
-                    className={`relative z-10 w-full text-left p-4 rounded-2xl transition-all flex items-center gap-4 cursor-pointer group ${
+                    className={`relative z-10 w-full text-left p-3.5 rounded-2xl transition-all flex items-center gap-4 cursor-pointer group ${
                       isSelected
-                        ? 'bg-gradient-to-r from-amber-50/90 to-white border-2 border-purple shadow-elevated -translate-y-1'
-                        : 'bg-white border-[1.5px] border-border hover:border-purple/60 hover:-translate-y-0.5 shadow-soft'
+                        ? 'bg-gradient-to-r from-amber-50/90 to-white dark:from-amber-950/40 dark:to-slate-800 border-2 border-[#78350F] shadow-elevated -translate-y-1'
+                        : 'bg-white dark:bg-slate-800 border-[1.5px] border-border hover:border-[#78350F]/60 hover:-translate-y-0.5 shadow-soft'
                     }`}
                     style={{
                       borderBottomWidth: isSelected ? '4.5px' : '3.5px',
@@ -330,7 +322,7 @@ export function HomePage() {
                   >
                     {/* 3D Tactile Circular Medallion / Stepping Stone */}
                     <div
-                      className={`relative w-14 h-14 rounded-2xl flex items-center justify-center font-display font-black text-2xl shrink-0 transition-all select-none ${
+                      className={`relative w-13 h-13 rounded-2xl flex items-center justify-center font-display font-black text-2xl shrink-0 transition-all select-none ${
                         isSelected
                           ? 'scale-105 text-white'
                           : 'text-ink bg-neutral border border-border group-hover:scale-102'
@@ -355,18 +347,18 @@ export function HomePage() {
                     </div>
 
                     {/* Node Metadata & Title */}
-                    <div className="space-y-1 min-w-0 flex-1">
+                    <div className="space-y-0.5 min-w-0 flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono font-bold uppercase text-purple tracking-wider">
+                        <span className="text-[10px] font-mono font-bold uppercase text-[#B45309] dark:text-amber-400 tracking-wider">
                           Level {node.level} • {node.badgeLabel}
                         </span>
                         {isSelected && (
-                          <span className="text-[9px] font-mono font-black bg-purple text-white px-2 py-0.5 rounded-full shadow-sm">
+                          <span className="text-[9px] font-mono font-black bg-[#78350F] text-white px-2 py-0.5 rounded-full shadow-sm">
                             BLOOMING
                           </span>
                         )}
                       </div>
-                      <h3 className="font-display font-bold text-sm text-ink truncate group-hover:text-purple transition-colors">
+                      <h3 className="font-display font-bold text-sm text-ink truncate group-hover:text-[#B45309] transition-colors">
                         {node.title.split(':')[0]}
                       </h3>
                       <p className="text-xs text-muted font-sans line-clamp-1">
@@ -380,9 +372,9 @@ export function HomePage() {
           </div>
 
           {/* Right Column: 3D Interactive Detail Bloom Container */}
-          <div className="lg:col-span-7 bg-white rounded-3xl border border-border p-6 sm:p-8 shadow-card space-y-6">
+          <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-6">
             {/* 3D Header Emblem with Holographic Glow */}
-            <div className="flex items-center justify-between border-b border-border pb-5">
+            <div className="flex items-center justify-between border-b-[1.5px] border-border pb-5">
               <div className="flex items-center gap-4">
                 {/* 3D Focal Glyph Orb */}
                 <div
@@ -399,7 +391,7 @@ export function HomePage() {
 
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-purple uppercase">
+                    <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400 uppercase">
                       {activeNode.scriptName}
                     </span>
                     <button
@@ -407,7 +399,7 @@ export function HomePage() {
                         playAcousticChime(580, 0.3);
                         playPronunciation(activeNode.spokenForm, activeNode.lang);
                       }}
-                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-purple-light border border-purple/30 text-[11px] font-sans font-bold text-purple hover:bg-purple hover:text-white transition-all shadow-soft cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-[#78350F]/30 text-[11px] font-sans font-bold text-[#78350F] dark:text-amber-300 hover:bg-[#78350F] hover:text-white transition-all shadow-soft cursor-pointer"
                       title="Click to hear authentic audio pronunciation"
                     >
                       <Volume2 size={13} />
@@ -433,7 +425,7 @@ export function HomePage() {
                 className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer ${
                   activeStep === 'learn'
                     ? 'btn-chunky-purple'
-                    : 'bg-neutral text-muted border border-border hover:text-ink'
+                    : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
                 }`}
               >
                 📖 1. Learn & Trace
@@ -444,7 +436,7 @@ export function HomePage() {
                 className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer ${
                   activeStep === 'quiz'
                     ? 'btn-chunky-purple'
-                    : 'bg-neutral text-muted border border-border hover:text-ink'
+                    : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
                 }`}
               >
                 🎯 2. Interactive Quiz {quizSubmitted && '✓'}
@@ -455,10 +447,10 @@ export function HomePage() {
                 className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer ${
                   activeStep === 'deep'
                     ? 'btn-chunky-purple'
-                    : 'bg-neutral text-muted border border-border hover:text-ink'
+                    : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
                 }`}
               >
-                📜 3. Deep Wisdom
+                📜 3. Deep Wisdom & Sabha Rules
               </button>
             </div>
 
@@ -479,8 +471,8 @@ export function HomePage() {
                 </div>
 
                 {/* Cultural Heritage Card */}
-                <div className="p-4 rounded-2xl bg-neutral/60 border border-border space-y-1">
-                  <span className="text-[11px] font-display font-extrabold uppercase text-purple flex items-center gap-1">
+                <div className="p-4 rounded-2xl bg-neutral/60 dark:bg-slate-800/60 border border-border space-y-1">
+                  <span className="text-[11px] font-display font-extrabold uppercase text-[#B45309] dark:text-amber-400 flex items-center gap-1">
                     <Lightbulb size={13} />
                     <span>Historical Scribal Lineage</span>
                   </span>
@@ -495,7 +487,7 @@ export function HomePage() {
                     <span className="text-xs font-display font-bold text-muted uppercase tracking-wider block">
                       Interactive Glyph Anatomy (Click to hear sound):
                     </span>
-                    <span className="text-[11px] font-serif text-purple flex items-center gap-1">
+                    <span className="text-[11px] font-serif text-[#B45309] dark:text-amber-400 flex items-center gap-1">
                       <Volume2 size={12} />
                       <span>Audio Enabled</span>
                     </span>
@@ -509,18 +501,18 @@ export function HomePage() {
                           playAcousticChime(520 + idx * 75, 0.25);
                           playPronunciation(sample.char, activeNode.lang);
                         }}
-                        className="p-3 rounded-2xl bg-white border border-border hover:border-purple transition-all text-center space-y-1 shadow-soft cursor-pointer hover:-translate-y-1 group active:translate-y-0.5"
+                        className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-border hover:border-[#78350F] transition-all text-center space-y-1 shadow-soft cursor-pointer hover:-translate-y-1 group active:translate-y-0.5"
                         style={{ borderBottomWidth: '3px', borderBottomColor: '#DCCFB9' }}
                         title="Click to hear authentic sound"
                       >
-                        <div className="flex items-center justify-center gap-1 text-[10px] text-muted group-hover:text-purple">
+                        <div className="flex items-center justify-center gap-1 text-[10px] text-muted group-hover:text-[#B45309]">
                           <Volume2 size={11} />
                           <span>Listen</span>
                         </div>
-                        <span className="font-display text-2xl font-black text-ink block group-hover:text-purple">
+                        <span className="font-display text-2xl font-black text-ink block group-hover:text-[#B45309]">
                           {sample.char}
                         </span>
-                        <span className="font-mono text-[10px] text-purple block font-semibold">
+                        <span className="font-mono text-[10px] text-[#B45309] dark:text-amber-400 block font-semibold">
                           {sample.ipa}
                         </span>
                         <span className="text-[9px] font-sans text-muted block leading-tight">
@@ -551,7 +543,7 @@ export function HomePage() {
                 className="space-y-6 pt-2"
               >
                 <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-purple uppercase">
+                  <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400 uppercase">
                     Level {activeNode.level} Knowledge Check
                   </span>
                   <h4 className="font-display text-xl sm:text-2xl font-black text-ink">
@@ -572,7 +564,7 @@ export function HomePage() {
                             ? opt.isCorrect
                               ? 'bg-mint/60 border-mint-dark text-ink shadow-soft'
                               : 'bg-danger-light border-danger text-ink'
-                            : 'bg-white border-border hover:border-purple/50'
+                            : 'bg-white dark:bg-slate-800 border-border hover:border-[#78350F]/50'
                         }`}
                         style={{
                           borderBottomWidth: '3.5px',
@@ -646,7 +638,7 @@ export function HomePage() {
                 className="space-y-6 pt-2"
               >
                 <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-purple uppercase">
+                  <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400 uppercase">
                     Wisdom & Living Tradition
                   </span>
                   <h4 className="font-display text-2xl font-black text-ink">
@@ -658,9 +650,9 @@ export function HomePage() {
                 </div>
 
                 {/* Dialect Respect & Interactive Acoustic Audition */}
-                <div className="p-4 rounded-2xl bg-purple-light/40 border border-purple/30 space-y-2.5">
+                <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/30 border border-[#78350F]/20 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-display font-extrabold uppercase text-purple flex items-center gap-1.5">
+                    <span className="text-[11px] font-display font-extrabold uppercase text-[#B45309] dark:text-amber-400 flex items-center gap-1.5">
                       <Volume2 size={14} />
                       <span>Dialect Respect & Spoken Variety</span>
                     </span>
@@ -675,9 +667,9 @@ export function HomePage() {
                         playAcousticChime(540, 0.25);
                         playPronunciation(activeNode.spokenForm, activeNode.lang);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-white border border-border text-xs font-display font-bold text-ink hover:border-purple inline-flex items-center gap-1.5 shadow-soft cursor-pointer active:translate-y-0.5"
+                      className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer active:translate-y-0.5"
                     >
-                      <Volume2 size={13} className="text-purple" />
+                      <Volume2 size={13} className="text-[#B45309]" />
                       <span>Hear Standard ({activeNode.glyph})</span>
                     </button>
                     <button
@@ -685,16 +677,16 @@ export function HomePage() {
                         playAcousticChime(480, 0.25);
                         playPronunciation(activeNode.dialectSample.text, activeNode.dialectSample.lang);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-white border border-border text-xs font-display font-bold text-ink hover:border-purple inline-flex items-center gap-1.5 shadow-soft cursor-pointer active:translate-y-0.5"
+                      className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer active:translate-y-0.5"
                     >
-                      <Radio size={13} className="text-purple" />
+                      <Radio size={13} className="text-[#B45309]" />
                       <span>{activeNode.dialectSample.label}</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Formally Codified Sabha Rule */}
-                <div className="p-4 rounded-2xl bg-neutral/80 border border-border space-y-1">
+                <div className="p-4 rounded-2xl bg-neutral/80 dark:bg-slate-800/80 border border-border space-y-1">
                   <span className="text-[10px] font-mono font-black uppercase text-muted">
                     Ratified Sabha Principle
                   </span>
@@ -725,16 +717,16 @@ export function HomePage() {
       {/* ========================================================
           LINK TO PAGE 2 (प्रयोग शाला)
           ======================================================== */}
-      <section className="py-12 bg-neutral/50 border-t border-border">
+      <section className="py-12 bg-neutral/50 border-t-[1.5px] border-border">
         <div className="max-w-4xl mx-auto px-4 text-center space-y-4">
-          <span className="text-xs font-display font-extrabold uppercase tracking-wider text-purple">
+          <span className="text-xs font-display font-extrabold uppercase tracking-wider text-[#B45309] dark:text-amber-400">
             Dedicated Workbench
           </span>
           <h3 className="font-display text-2xl font-black text-ink">
-            Ready to test your orthography rules?
+            Ready to test your {activeLipi.nameEnglish} orthography rules?
           </h3>
           <p className="text-xs sm:text-sm font-serif text-muted max-w-xl mx-auto leading-relaxed">
-            Visit the dedicated Script Testing Studio to type with tactile glyph keys, validate sentences against community rules, and run consistency audits.
+            Visit the dedicated Script Testing Studio to type with tactile glyph keys, validate sentences against community rules, and run consistency audits for {activeLipi.nameNative}.
           </p>
           <div className="pt-2">
             <Link
@@ -750,7 +742,7 @@ export function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-10 bg-white border-t border-border">
+      <footer className="py-10 bg-white dark:bg-slate-900 border-t-[1.5px] border-border">
         <div className="max-w-4xl mx-auto px-4 text-center space-y-2">
           <span className="font-display text-xl font-black text-ink block">
             Lipi Sabha
