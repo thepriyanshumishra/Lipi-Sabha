@@ -21,7 +21,8 @@ import {
   Image as ImageIcon,
   ShieldCheck,
   PlusCircle,
-  HelpCircle
+  HelpCircle,
+  Clock
 } from 'lucide-react';
 import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/audio';
 import { useLipi } from '@/contexts/LipiContext';
@@ -45,13 +46,26 @@ export function HomePage() {
   } = useLipi();
   const knowledgeNodes = activeLipiNodes;
 
-  // Public User Space ONLY shows verified and flagged decisions (unverified posts remain in Reviewer Queue)
+  // Public User Space shows all community verified and flagged decisions in the gallery below
   const verifiedProjects = projects.filter(
     (p) => p.status === 'verified' || p.status === 'ratified'
   );
   const publicDecisionProjects = projects.filter(
     (p) => p.status === 'verified' || p.status === 'ratified' || p.status === 'flagged'
   );
+
+  // User's personal questions (matches their logged-in display name)
+  const currentUserDisplayName = user?.display_name || '';
+  const mySubmittedProjects = projects.filter(
+    (p) =>
+      currentUserDisplayName &&
+      p.author &&
+      (p.author.toLowerCase().includes(currentUserDisplayName.toLowerCase()) ||
+       currentUserDisplayName.toLowerCase().includes(p.author.toLowerCase()))
+  );
+
+  // Filter for top tracker: 'my' (My Questions) vs 'all' (All Dilemmas)
+  const [dilemmaFilter, setDilemmaFilter] = useState<'my' | 'all'>('my');
 
   // View mode: 'communityDilemmas' (MVP core: Reena dilemma & user project trees) vs 'heritage' (4-level foundational trail)
   const [treeMode, setTreeMode] = useState<'communityDilemmas' | 'heritage'>('communityDilemmas');
@@ -82,8 +96,15 @@ export function HomePage() {
   }, [activeLipi.id, activeLipiNodes]);
 
   const activeNode = knowledgeNodes.find((n) => n.id === selectedNodeId) || knowledgeNodes[0];
+  const trackerProjects =
+    dilemmaFilter === 'my' && mySubmittedProjects.length > 0
+      ? mySubmittedProjects
+      : verifiedProjects;
+
   const activeProject =
-    verifiedProjects.find((p) => p.id === selectedProjectId) || verifiedProjects[0];
+    projects.find((p) => p.id === selectedProjectId) ||
+    trackerProjects[0] ||
+    projects[0];
 
   const handleSelectNode = (nodeId: string) => {
     setSelectedNodeId(nodeId);
@@ -188,53 +209,109 @@ export function HomePage() {
         {/* ========================================================
             MODE A: COMMUNITY ORTHOGRAPHY DILEMMA TREE (MVP CORE)
             Solves: "How should Reena be written? R-I-N-A, R-E-E-N-A, or रीना?"
+            Includes personal doubt tracking & instant input-output review
             ======================================================== */}
         {treeMode === 'communityDilemmas' && activeProject && (
-          <div className="space-y-8">
-            {/* Dilemma Selector Tabs if multiple projects exist */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-mono font-bold uppercase text-muted tracking-wider">
-                Select Active Dilemma:
-              </span>
-              {verifiedProjects.map((proj) => (
+          <div className="space-y-6">
+            {/* Dilemma Selector Tabs & Personal / Community Scope Toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-border shadow-soft">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-mono font-bold uppercase text-muted tracking-wider">
+                  Scope:
+                </span>
+
                 <button
-                  key={proj.id}
                   type="button"
-                  onClick={() => setSelectedProjectId(proj.id)}
-                  className={`px-3 py-1.5 rounded-xl font-display text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
-                    proj.id === activeProject.id
+                  onClick={() => setDilemmaFilter('my')}
+                  className={`px-3 py-1 rounded-xl font-display text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                    dilemmaFilter === 'my'
                       ? 'bg-[#78350F] text-white shadow-soft font-bold'
-                      : 'bg-white dark:bg-slate-800 border border-border text-ink hover:border-[#78350F]/50'
+                      : 'bg-cream border border-border text-ink hover:border-[#78350F]/50'
                   }`}
                 >
-                  <span>✓</span>
-                  <span className="truncate max-w-[200px]">{proj.title}</span>
+                  <span>🌱</span>
+                  <span>My Questions ({mySubmittedProjects.length})</span>
                 </button>
-              ))}
+
+                <button
+                  type="button"
+                  onClick={() => setDilemmaFilter('all')}
+                  className={`px-3 py-1 rounded-xl font-display text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                    dilemmaFilter === 'all'
+                      ? 'bg-[#78350F] text-white shadow-soft font-bold'
+                      : 'bg-cream border border-border text-ink hover:border-[#78350F]/50'
+                  }`}
+                >
+                  <span>🌐</span>
+                  <span>All Dilemmas ({verifiedProjects.length})</span>
+                </button>
+              </div>
 
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="ml-auto text-xs font-display font-extrabold text-[#78350F] dark:text-amber-300 hover:text-purple bg-amber-50 dark:bg-amber-950/40 border border-[#78350F]/30 hover:border-[#78350F] px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-soft transition-all"
+                className="text-xs font-display font-extrabold text-[#78350F] dark:text-amber-300 hover:text-purple bg-amber-50 dark:bg-amber-950/40 border border-[#78350F]/30 hover:border-[#78350F] px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-soft transition-all self-start sm:self-auto"
               >
                 <PlusCircle size={14} />
                 <span>+ नया प्रश्न / शब्द पूछें (Ask Doubt)</span>
               </button>
             </div>
 
-            {/* Dilemma Header Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-5">
+            {/* Dilemma Selection Pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {trackerProjects.map((proj) => {
+                const isSelected = proj.id === activeProject.id;
+                const isVerified = proj.status === 'verified' || proj.status === 'ratified';
+                const isFlagged = proj.status === 'flagged';
+
+                return (
+                  <button
+                    key={proj.id}
+                    type="button"
+                    onClick={() => setSelectedProjectId(proj.id)}
+                    className={`px-3.5 py-1.5 rounded-xl font-display text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-[#78350F] text-white shadow-soft font-bold scale-102'
+                        : 'bg-white dark:bg-slate-800 border border-border text-ink hover:border-[#78350F]/50'
+                    }`}
+                  >
+                    <span>{isFlagged ? '🚩' : isVerified ? '✓' : '⏳'}</span>
+                    <span className="truncate max-w-[200px]">{proj.spokenWord || proj.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Dilemma Header Card with Prominent Specialist Resolution */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-[#78350F] dark:bg-amber-950 dark:text-amber-300">
-                      {activeProject.dialectContext}
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {activeProject.reviewerVerdict ? (
+                      <span className={`text-[10px] font-mono font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                        activeProject.status === 'flagged'
+                          ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                          : 'bg-mint/40 text-mint-dark dark:bg-emerald-950 dark:text-emerald-300'
+                      }`}>
+                        {activeProject.status === 'flagged' ? '🚩 Flagged' : '✓ Verified by'} {activeProject.reviewerVerdict.reviewerName}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-[#78350F] dark:bg-amber-950 dark:text-amber-300">
+                        ⏳ Review Pending (जांच जारी है)
+                      </span>
+                    )}
+
+                    <span className="text-[11px] font-mono text-muted">
+                      Asked by <strong className="text-ink">{activeProject.author}</strong> • {activeProject.submittedAt}
                     </span>
-                    <span className="text-[11px] font-mono text-muted">Submitted by {activeProject.author}</span>
                   </div>
+
                   <h3 className="font-display text-2xl sm:text-3xl font-black text-ink">
-                    {activeProject.title}
+                    {activeProject.spokenWord || activeProject.title}
                   </h3>
+                  {activeProject.title !== activeProject.spokenWord && (
+                    <p className="text-xs font-serif text-muted">{activeProject.title}</p>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
@@ -254,15 +331,19 @@ export function HomePage() {
 
               {/* Photo preview if user uploaded an image */}
               {activeProject.imageUrl && (
-                <div className="p-4 rounded-2xl bg-neutral/50 dark:bg-slate-800 border border-border flex items-center gap-4">
+                <div
+                  onClick={() => setLightboxImage({ url: activeProject.imageUrl!, title: activeProject.spokenWord })}
+                  className="p-4 rounded-2xl bg-neutral/50 dark:bg-slate-800 border border-border flex items-center gap-4 cursor-pointer hover:border-[#78350F] transition-all group"
+                  title="Click to view full image in lightbox"
+                >
                   <img
                     src={activeProject.imageUrl}
                     alt="Uploaded Inscription Specimen"
-                    className="w-24 h-24 object-cover rounded-xl border border-border shadow-soft"
+                    className="w-20 h-20 object-cover rounded-xl border border-border shadow-soft group-hover:scale-105 transition-transform"
                   />
                   <div>
-                    <span className="font-mono text-[10px] font-bold text-muted uppercase block">
-                      Uploaded Inscription / Specimen Photo
+                    <span className="font-mono text-[10px] font-bold text-[#78350F] dark:text-amber-400 uppercase block">
+                      Uploaded Inscription / Specimen Photo (Click to Expand 🔍)
                     </span>
                     <p className="font-serif text-xs text-ink mt-0.5">
                       Visual evidence submitted by community member for orthographic comparison.
@@ -271,33 +352,72 @@ export function HomePage() {
                 </div>
               )}
 
+              {/* PROMINENT SPECIALIST RESOLUTION & VERDICT BANNER (Direct Input -> Output) */}
+              {activeProject.reviewerVerdict ? (
+                <div
+                  className={`p-6 rounded-3xl border-[2px] shadow-soft space-y-4 ${
+                    activeProject.status === 'flagged'
+                      ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-300 dark:border-rose-900/50'
+                      : 'bg-emerald-50/60 dark:bg-emerald-950/30 border-mint-dark'
+                  }`}
+                >
+                  <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+                    <span className="font-display font-black text-xs uppercase flex items-center gap-2">
+                      <ShieldCheck
+                        size={17}
+                        className={activeProject.status === 'flagged' ? 'text-rose-600' : 'text-mint-dark'}
+                      />
+                      <span>Specialist Verdict & Reviewer Resolution (रिव्यूअर उत्तर):</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-muted">
+                      {activeProject.reviewerVerdict.ratifiedAt || 'Verified'}
+                    </span>
+                  </div>
+
+                  {/* Endorsed Standard Orthography in Large Font */}
+                  {activeProject.reviewerVerdict.acceptedOption && (
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-mono font-bold uppercase text-muted block">
+                        Approved Standard Spelling (स्वीकृत मानक वर्तनी):
+                      </span>
+                      <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-mint-dark text-white font-serif font-black text-2xl shadow-elevated">
+                        <span>✓</span>
+                        <span>{activeProject.reviewerVerdict.acceptedOption}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reviewer Commentary & Rationale */}
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono font-bold uppercase text-muted block">
+                      Specialist Explanation ({activeProject.reviewerVerdict.reviewerName}):
+                    </span>
+                    <p className="text-sm font-serif text-ink italic leading-relaxed">
+                      &ldquo;{activeProject.reviewerVerdict.rationale}&rdquo;
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Pending Review Notice */
+                <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-900/50 space-y-1 text-ink">
+                  <div className="flex items-center gap-2 font-display font-bold text-xs text-[#78350F] dark:text-amber-300 uppercase">
+                    <Clock size={15} />
+                    <span>⏳ Awaiting Specialist Review (रिव्यूअर जांच जारी है)</span>
+                  </div>
+                  <p className="text-xs font-serif text-muted">
+                    आपका प्रश्न सीधे रिव्यूअर कतार में पहुँच चुका है। जैसे ही अधिकृत विशेषज्ञ इसे प्रमाणित करेंगे, स्वीकृत वर्तनी और व्याख्या यहाँ लाइव दिखाई देगी।
+                  </p>
+                </div>
+              )}
+
               <p className="font-serif text-sm text-muted leading-relaxed">
                 {activeProject.description}
               </p>
 
               {/* Sovereign Principle Quote */}
-              <div className="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-[#78350F]/20 text-xs font-serif text-[#78350F] dark:text-amber-300 italic">
+              <div className="p-3 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-[#78350F]/20 text-[11px] font-serif text-[#78350F] dark:text-amber-300 italic">
                 &ldquo;The community is the decision-maker, not just the dataset. Compare keyboard ease of learning against acoustic fidelity below.&rdquo;
               </div>
-
-              {/* Reviewer Ratification Banner if approved */}
-              {activeProject.status === 'ratified' && activeProject.reviewerVerdict && (
-                <div className="p-5 rounded-2xl bg-mint/20 dark:bg-emerald-950/30 border-[1.5px] border-mint-dark/40 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-display font-extrabold text-mint-dark uppercase flex items-center gap-1.5">
-                      <ShieldCheck size={16} />
-                      <span>Sovereign Sabha Ratified Decision</span>
-                    </span>
-                    <span className="text-[10px] font-mono text-muted">{activeProject.reviewerVerdict.ratifiedAt}</span>
-                  </div>
-                  <p className="text-xs font-serif text-ink leading-relaxed font-semibold">
-                    Decision by {activeProject.reviewerVerdict.reviewerName}:
-                  </p>
-                  <p className="text-xs font-serif text-ink italic leading-relaxed">
-                    {activeProject.reviewerVerdict.rationale}
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* The Competing Decision Tree Branches */}
@@ -999,6 +1119,7 @@ export function HomePage() {
         onCreated={(newId) => {
           setSelectedProjectId(newId);
           setTreeMode('communityDilemmas');
+          setDilemmaFilter('my');
         }}
       />
 

@@ -25,7 +25,7 @@ import { ImageLightboxModal } from '@/components/ImageLightboxModal';
 import type { LipiKnowledgeNode, ScriptProject } from '@/data/lipiData';
 
 export function ReviewPage() {
-  const { user, isReviewer } = useAuth();
+  const { user, isReviewer, awardXP } = useAuth();
   const {
     activeLipi,
     allLipis,
@@ -79,6 +79,7 @@ export function ReviewPage() {
       `Verified by ${user?.display_name || 'Meera (Reviewer)'}. Conforms with documented ${proj.lipiName} orthographic canon.`;
 
     verifyProject(proj.id, comment, user?.display_name || 'Meera (Reviewer)', acceptedOption);
+    awardXP(50, `Verified orthography for "${proj.spokenWord}"`);
     playSuccessChime();
     setDecisionFeedback(`✓ Verified and published to public User Space: "${proj.title}"`);
     setTimeout(() => setDecisionFeedback(null), 3500);
@@ -92,6 +93,7 @@ export function ReviewPage() {
       'Flagged: Does not meet orthographic standards or needs revision.';
 
     flagProject(proj.id, reason, user?.display_name || 'Meera (Reviewer)', acceptedOption);
+    awardXP(25, `Calibrated non-standard entry for "${proj.spokenWord}"`);
     playAcousticChime(320, 0.25);
     setDecisionFeedback(`Flagged post: "${proj.title}"`);
     setTimeout(() => setDecisionFeedback(null), 3500);

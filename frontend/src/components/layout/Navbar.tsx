@@ -20,6 +20,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLipi } from '@/contexts/LipiContext';
 import { UserSwitcherModal } from '@/components/UserSwitcherModal';
+import { LeaderboardModal } from '@/components/LeaderboardModal';
+import { playAcousticChime } from '@/utils/audio';
 
 // 1. User Experience: Two Dedicated Pages (Learn Tree & Script Studio)
 const userNavLinks = [
@@ -37,6 +39,7 @@ export function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [lipiDropdownOpen, setLipiDropdownOpen] = useState(false);
   const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const lipiMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -180,24 +183,33 @@ export function Navbar() {
 
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                {/* User Garden Stage Pill */}
+                {/* Live Real-time XP Pill - Click to Open Leaderboard */}
                 {activeWorkspace === 'user' ? (
-                  <Link
-                    to="/learn"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-mint border-[1.5px] border-mint-dark/20 shadow-soft text-xs font-mono font-bold text-mint-dark hover:scale-102 transition-all"
-                    title="Your Progress Garden"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLeaderboardOpen(true);
+                      playAcousticChime(560, 0.25);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-mint border-[1.5px] border-mint-dark/30 shadow-soft text-xs font-mono font-bold text-mint-dark hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+                    title="Click to view Sovereign Community Leaderboard 🏆"
                   >
-                    <span className="text-base">🌱</span>
+                    <span className="text-base group-hover:rotate-12 transition-transform">🌱</span>
                     <span>{user?.learning_xp || 0} XP</span>
-                  </Link>
+                  </button>
                 ) : (
-                  <div
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-mint/50 border-[1.5px] border-mint-dark/20 shadow-soft text-xs font-mono font-bold text-mint-dark"
-                    title="Audited Review XP"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLeaderboardOpen(true);
+                      playAcousticChime(620, 0.25);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-mint/50 border-[1.5px] border-mint-dark/30 shadow-soft text-xs font-mono font-bold text-mint-dark hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+                    title="Click to view Specialist Reviewer Leaderboard 🏆"
                   >
-                    <ShieldCheck size={14} />
+                    <ShieldCheck size={14} className="group-hover:rotate-12 transition-transform" />
                     <span>{user?.review_xp || 650} XP</span>
-                  </div>
+                  </button>
                 )}
 
                 {/* Profile Dropdown */}
@@ -576,6 +588,12 @@ export function Navbar() {
       <UserSwitcherModal
         isOpen={userSwitcherOpen}
         onClose={() => setUserSwitcherOpen(false)}
+      />
+
+      {/* Sovereign Community & Reviewer Leaderboard Modal */}
+      <LeaderboardModal
+        isOpen={leaderboardOpen}
+        onClose={() => setLeaderboardOpen(false)}
       />
     </header>
   );
