@@ -221,7 +221,7 @@ export function LabPage() {
             </div>
           </div>
 
-          {/* Dilemma / Project Creator Banner (PS 5.4 MVP) */}
+          {/* Dilemma / Doubt Creator Banner (PS 5.4 MVP) */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-[#78350F]/20">
             <div className="space-y-0.5">
               <span className="text-xs font-display font-black text-ink flex items-center gap-1.5">
@@ -229,7 +229,7 @@ export function LabPage() {
                 <span>PS 5.4: Unwritten Spoken Word or Inscription Specimen?</span>
               </span>
               <p className="text-[11px] font-serif text-muted">
-                Create a community decision tree (e.g. &ldquo;Reena&rdquo; → R-I-N-A vs R-E-E-N-A vs रीना) with photo upload & acoustic playback.
+                Post your word, question, or inscription photo for review. Verified questions get published with specialist guidance.
               </p>
             </div>
             <button
@@ -238,7 +238,7 @@ export function LabPage() {
               className="btn-chunky-purple px-4 py-2 text-xs shrink-0 inline-flex items-center gap-2 cursor-pointer shadow-soft"
             >
               <FlaskConical size={14} />
-              <span>+ Create Script Dilemma Project</span>
+              <span>+ नया प्रश्न पूछें (Ask Doubt)</span>
             </button>
           </div>
 

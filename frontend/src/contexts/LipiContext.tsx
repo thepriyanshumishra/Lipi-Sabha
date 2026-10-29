@@ -21,6 +21,7 @@ interface LipiContextType {
   getNodesForLipi: (lipiId: string) => LipiKnowledgeNode[];
   activeLipiNodes: LipiKnowledgeNode[];
   addKnowledgeNode: (lipiId: string, node: LipiKnowledgeNode) => void;
+  updateKnowledgeNode: (lipiId: string, nodeId: string, patch: Partial<LipiKnowledgeNode>) => void;
   deleteKnowledgeNode: (lipiId: string, nodeId: string) => void;
 
   // Submissions & Review Workflow
@@ -38,6 +39,17 @@ interface LipiContextType {
   createProject: (
     data: Omit<ScriptProject, 'id' | 'submittedAt' | 'status'>
   ) => ScriptProject;
+  verifyProject: (
+    projectId: string,
+    comment: string,
+    reviewerName: string,
+    acceptedOption?: string
+  ) => void;
+  flagProject: (
+    projectId: string,
+    reason: string,
+    reviewerName: string
+  ) => void;
   voteOnBranch: (projectId: string, branchId: string) => void;
   ratifyProject: (
     projectId: string,
@@ -180,6 +192,19 @@ export function LipiProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const updateKnowledgeNode = (
+    lipiId: string,
+    nodeId: string,
+    patch: Partial<LipiKnowledgeNode>
+  ) => {
+    const existing = nodesMap[lipiId] || [...getLipiById(lipiId).knowledgeNodes];
+    const updated = existing.map((n) => (n.id === nodeId ? { ...n, ...patch } : n));
+    saveNodesMap({
+      ...nodesMap,
+      [lipiId]: updated
+    });
+  };
+
   const deleteKnowledgeNode = (lipiId: string, nodeId: string) => {
     const existing = nodesMap[lipiId] || [...getLipiById(lipiId).knowledgeNodes];
     const updated = existing.filter((n) => n.id !== nodeId);
@@ -245,17 +270,64 @@ export function LipiProvider({ children }: { children: ReactNode }) {
     const newProj: ScriptProject = {
       ...data,
       id: `proj-${Date.now()}`,
-      status: 'consultation',
+      status: 'unverified', // Unverified by default! Will only show on public page after reviewer verifies!
       submittedAt: 'Just now'
     };
     saveProjects([newProj, ...projects]);
     return newProj;
   };
 
+  const verifyProject = (
+    projectId: string,
+    comment: string,
+    reviewerName: string,
+    acceptedOption?: string
+  ) => {
+    const updated = projects.map((proj) => {
+      if (proj.id === projectId) {
+        return {
+          ...proj,
+          status: 'verified' as const,
+          reviewerVerdict: {
+            reviewerName,
+            rationale: comment,
+            acceptedOption,
+            ratifiedAt: 'Just now'
+          }
+        };
+      }
+      return proj;
+    });
+    saveProjects(updated);
+  };
+
+  const flagProject = (
+    projectId: string,
+    reason: string,
+    reviewerName: string
+  ) => {
+    const updated = projects.map((proj) => {
+      if (proj.id === projectId) {
+        return {
+          ...proj,
+          status: 'flagged' as const,
+          reviewerVerdict: {
+            reviewerName,
+            rationale: reason,
+            ratifiedAt: 'Just now'
+          }
+        };
+      }
+      return proj;
+    });
+    saveProjects(updated);
+  };
+
   const voteOnBranch = (projectId: string, branchId: string) => {
     const updated = projects.map((proj) => {
       if (proj.id === projectId) {
-        const updatedBranches = proj.branches.map((b) => {
+        const branches = proj.branches || [];
+        const updatedBranches = branches.map((b) => {
           if (b.id === branchId) {
             return { ...b, communityVotes: b.communityVotes + 1 };
           }
@@ -278,7 +350,7 @@ export function LipiProvider({ children }: { children: ReactNode }) {
       if (proj.id === projectId) {
         return {
           ...proj,
-          status: 'ratified' as const,
+          status: 'verified' as const,
           reviewerVerdict: {
             recommendedBranchId,
             reviewerName,
@@ -306,6 +378,7 @@ export function LipiProvider({ children }: { children: ReactNode }) {
         getNodesForLipi,
         activeLipiNodes,
         addKnowledgeNode,
+        updateKnowledgeNode,
         deleteKnowledgeNode,
         submissions,
         getSubmissionsForLipi,
@@ -315,6 +388,8 @@ export function LipiProvider({ children }: { children: ReactNode }) {
         projects,
         getProjectsForLipi,
         createProject,
+        verifyProject,
+        flagProject,
         voteOnBranch,
         ratifyProject
       }}

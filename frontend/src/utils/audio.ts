@@ -146,40 +146,57 @@ function transliterateForSpeech(input: string): { speakable: string; lang: strin
   return { speakable: result, lang: hasDevanagari ? 'hi-IN' : 'en-US' };
 }
 
+// Cached voices for instant zero-delay speech
+let cachedVoices: SpeechSynthesisVoice[] = [];
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  cachedVoices = window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => {
+    cachedVoices = window.speechSynthesis.getVoices();
+  };
+}
+
 /**
  * Pronounces a character, word, or phoneme using the browser SpeechSynthesis API.
- * Always plays an acoustic chime in sync and guarantees spoken audio without silence.
+ * Optimized for instant zero-delay response and clear pronunciation.
  */
 export function playPronunciation(text: string, defaultLang = 'hi-IN') {
   if (!text || !text.trim()) {
-    playAcousticChime(440);
+    playAcousticChime(440, 0.15);
     return;
   }
 
-  // Play a gentle acoustic chime so there is immediate feedback
-  playAcousticChime(528, 0.25);
+  // Play a quick subtle harmonic tick immediately so user has 0ms audio feedback
+  playAcousticChime(580, 0.12);
 
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     return;
   }
 
   try {
-    window.speechSynthesis.cancel();
+    const synth = window.speechSynthesis;
+    // Resume in case browser suspended speech engine
+    if (synth.paused) {
+      synth.resume();
+    }
+    // Only cancel if already busy speaking
+    if (synth.speaking) {
+      synth.cancel();
+    }
 
     const { speakable, lang } = transliterateForSpeech(text);
     const targetLang = lang || defaultLang;
 
     const utterance = new SpeechSynthesisUtterance(speakable);
     utterance.lang = targetLang;
-    utterance.rate = 0.85;
+    utterance.rate = 1.05; // natural, responsive pacing
     utterance.pitch = 1.0;
 
-    // Try finding matching language voice
-    const voices = window.speechSynthesis.getVoices();
+    const voices = cachedVoices.length > 0 ? cachedVoices : synth.getVoices();
     if (voices && voices.length > 0) {
+      const targetPrefix = targetLang.slice(0, 2).toLowerCase();
       const match =
-        voices.find((v) => v.lang.toLowerCase().startsWith(targetLang.slice(0, 2).toLowerCase())) ||
-        voices.find((v) => v.lang.toLowerCase().includes('in')) ||
+        voices.find((v) => v.lang.toLowerCase().startsWith(targetPrefix)) ||
+        voices.find((v) => v.lang.toLowerCase().includes('in') || v.lang.toLowerCase().includes('hi')) ||
         voices[0];
       if (match) {
         utterance.voice = match;
@@ -187,13 +204,12 @@ export function playPronunciation(text: string, defaultLang = 'hi-IN') {
     }
 
     utterance.onerror = () => {
-      // Harmonic fallback if speech synthesis throws error
-      playAcousticChime(432, 0.4);
+      playAcousticChime(432, 0.3);
     };
 
-    window.speechSynthesis.speak(utterance);
+    synth.speak(utterance);
   } catch (err) {
-    playAcousticChime(432, 0.4);
+    playAcousticChime(432, 0.3);
   }
 }
 

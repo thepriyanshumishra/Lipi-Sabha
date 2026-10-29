@@ -1768,17 +1768,19 @@ export interface ScriptProject {
   id: string;
   title: string;
   spokenWord: string;
-  dialectContext: string;
+  dialectContext?: string;
   lipiId: string;
   lipiName: string;
   imageUrl?: string;
-  description: string;
+  description?: string;
   author: string;
   submittedAt: string;
-  status: 'consultation' | 'ratified';
-  branches: ScriptProjectBranch[];
+  status: 'unverified' | 'verified' | 'flagged' | 'consultation' | 'ratified';
+  branches?: ScriptProjectBranch[];
+  options?: string[];
   reviewerVerdict?: {
-    recommendedBranchId: string;
+    recommendedBranchId?: string;
+    acceptedOption?: string;
     reviewerName: string;
     rationale: string;
     ratifiedAt: string;
@@ -1796,7 +1798,7 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     description: 'Community members are debating between ASCII mobile typing (R-I-N-A), English digraphs (R-E-E-N-A), and native Devanagari (रीना). Outsiders should not decide for native speakers. Compare learning ease against acoustic fidelity.',
     author: 'Aria (User)',
     submittedAt: 'Today, 10:15 AM',
-    status: 'consultation',
+    status: 'verified',
     branches: [
       {
         id: 'branch-rina',
@@ -1831,6 +1833,49 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
         audioPronunciation: 'रीना',
         rationale: 'Lossless phonetic truth: Ra + Dirgha Ee Matra (ी) + Na + Aa Matra (ा). Exact acoustic match with unbroken breath.'
       }
+    ],
+    reviewerVerdict: {
+      recommendedBranchId: 'branch-deva-reena',
+      reviewerName: 'Meera (Lipi Specialist)',
+      rationale: 'Lossless phonetic truth: Ra + Dirgha Ee Matra (ी) + Na + Aa Matra (ा). Devanagari captures the long vowel /iː/ natively, while ASCII "R-I-N-A" is acceptable for SMS.',
+      ratifiedAt: 'Yesterday, 3:30 PM'
+    }
+  },
+  {
+    id: 'proj-unverified-sample-1',
+    title: 'Doubt: Should "Namaste" use the conjunct स्त or separate letters?',
+    spokenWord: 'नमस्ते / Namaste',
+    dialectContext: 'Spoken Greeting Decipherment',
+    lipiId: 'devanagari',
+    lipiName: 'देवनागरी (Devanagari)',
+    description: 'A speaker can pronounce the greeting naturally but wonders whether mobile keyboards should use half-sa ligature (स्त) or full letters.',
+    author: 'Kunal (Community Contributor)',
+    submittedAt: 'Just now',
+    status: 'unverified',
+    options: ['नमस्ते (with conjunct स्त)', 'नमसते (separate letters)'],
+    branches: [
+      {
+        id: 'b-namaste-1',
+        label: 'Option 1: नमस्ते',
+        representation: 'नमस्ते',
+        scriptType: 'Devanagari Conjunct',
+        phoneticAccuracy: 100,
+        easeOfLearning: 'Medium',
+        communityVotes: 3,
+        audioPronunciation: 'नमस्ते',
+        rationale: 'Traditional Sanskrit and Hindi sandhi rules require the half s (halant) conjunct.'
+      },
+      {
+        id: 'b-namaste-2',
+        label: 'Option 2: नमसते',
+        representation: 'नमसते',
+        scriptType: 'Devanagari Simplified',
+        phoneticAccuracy: 60,
+        easeOfLearning: 'High',
+        communityVotes: 1,
+        audioPronunciation: 'नमसते',
+        rationale: 'Easier to type without halant key, but adds an unwanted schwa /a/ sound.'
+      }
     ]
   },
   {
@@ -1840,10 +1885,11 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     dialectContext: 'Himalayan Temple Epigraph / Birch-Bark Oral Lineage',
     lipiId: 'sharada',
     lipiName: 'शारदा (Sharada Script)',
+    imageUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80',
     description: 'A villager found an eroded stone carving in Himachal Pradesh. The community recites the sacred phrase verbally but debates whether to standardize the inscription in Devanagari or Sharada.',
     author: 'Kavi (Fieldwork Contributor)',
     submittedAt: 'Yesterday, 4:30 PM',
-    status: 'ratified',
+    status: 'verified',
     branches: [
       {
         id: 'branch-inscr-deva',

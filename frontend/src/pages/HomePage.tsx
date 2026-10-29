@@ -29,9 +29,16 @@ export function HomePage() {
   const { activeLipi, allLipis, setLipiId, activeLipiNodes, projects, voteOnBranch } = useLipi();
   const knowledgeNodes = activeLipiNodes;
 
+  // Public User Space ONLY shows verified projects (unverified posts are in Reviewer Queue)
+  const verifiedProjects = projects.filter(
+    (p) => p.status === 'verified' || p.status === 'ratified'
+  );
+
   // View mode: 'communityDilemmas' (MVP core: Reena dilemma & user project trees) vs 'heritage' (4-level foundational trail)
   const [treeMode, setTreeMode] = useState<'communityDilemmas' | 'heritage'>('communityDilemmas');
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id || 'proj-reena-orthography');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(
+    verifiedProjects[0]?.id || 'proj-reena-orthography'
+  );
   const [votedBranches, setVotedBranches] = useState<Record<string, boolean>>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -55,7 +62,8 @@ export function HomePage() {
   }, [activeLipi.id, activeLipiNodes]);
 
   const activeNode = knowledgeNodes.find((n) => n.id === selectedNodeId) || knowledgeNodes[0];
-  const activeProject = projects.find((p) => p.id === selectedProjectId) || projects[0];
+  const activeProject =
+    verifiedProjects.find((p) => p.id === selectedProjectId) || verifiedProjects[0];
 
   const handleSelectNode = (nodeId: string) => {
     setSelectedNodeId(nodeId);
@@ -138,7 +146,7 @@ export function HomePage() {
               }`}
             >
               <Compass size={14} />
-              <span>Community Dilemma Trees ({projects.length})</span>
+              <span>Community Dilemma Trees ({verifiedProjects.length})</span>
             </button>
 
             <button
@@ -167,7 +175,7 @@ export function HomePage() {
               <span className="text-[10px] font-mono font-bold uppercase text-muted tracking-wider">
                 Select Active Dilemma:
               </span>
-              {projects.map((proj) => (
+              {verifiedProjects.map((proj) => (
                 <button
                   key={proj.id}
                   type="button"
@@ -178,7 +186,7 @@ export function HomePage() {
                       : 'bg-white dark:bg-slate-800 border border-border text-ink hover:border-[#78350F]/50'
                   }`}
                 >
-                  <span>{proj.status === 'ratified' ? '✓' : '⚖️'}</span>
+                  <span>✓</span>
                   <span className="truncate max-w-[200px]">{proj.title}</span>
                 </button>
               ))}
@@ -186,10 +194,10 @@ export function HomePage() {
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="ml-auto text-xs font-display font-extrabold text-[#78350F] dark:text-amber-300 hover:text-purple bg-amber-50 dark:bg-amber-950/40 border border-[#78350F]/30 hover:border-[#78350F] px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-soft transition-all"
+                className="ml-auto text-xs font-display font-extrabold text-[#78350F] dark:text-amber-300 hover:text-purple bg-amber-50 dark:bg-amber-950/40 border border-[#78350F]/30 hover:border-[#78350F] px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-soft transition-all"
               >
                 <PlusCircle size={14} />
-                <span>+ नया लिपि प्रोजेक्ट बनाएं (Create Dilemma)</span>
+                <span>+ नया प्रश्न / शब्द पूछें (Ask Doubt)</span>
               </button>
             </div>
 
@@ -272,101 +280,193 @@ export function HomePage() {
             </div>
 
             {/* The Competing Decision Tree Branches */}
-            <div className="space-y-4">
-              <h4 className="font-display text-lg font-black text-ink flex items-center gap-2">
-                <span>🌳</span>
-                <span>Competing Orthography Branches ({activeProject.branches.length} Proposals)</span>
-              </h4>
+            {activeProject.branches && activeProject.branches.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="font-display text-lg font-black text-ink flex items-center gap-2">
+                  <span>🌳</span>
+                  <span>Competing Orthography Branches ({activeProject.branches.length} Proposals)</span>
+                </h4>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {activeProject.branches.map((branch, bIdx) => {
-                  const isWinningVerdict =
-                    activeProject.reviewerVerdict?.recommendedBranchId === branch.id;
-                  const hasVoted = votedBranches[branch.id];
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {activeProject.branches.map((branch, bIdx) => {
+                    const isWinningVerdict =
+                      activeProject.reviewerVerdict?.recommendedBranchId === branch.id;
+                    const hasVoted = votedBranches[branch.id];
 
-                  return (
-                    <div
-                      key={branch.id}
-                      className={`p-6 rounded-3xl border-[1.5px] transition-all space-y-4 relative ${
-                        isWinningVerdict
-                          ? 'bg-mint/10 dark:bg-emerald-950/20 border-mint-dark shadow-elevated'
-                          : 'bg-white dark:bg-slate-900 border-border shadow-card hover:border-[#78350F]/50'
-                      }`}
-                      style={{
-                        borderBottomWidth: '4.5px',
-                        borderBottomColor: isWinningVerdict ? '#059669' : '#DCCFB9'
-                      }}
-                    >
-                      {/* Top Badges */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono font-bold uppercase text-[#78350F] dark:text-amber-400">
-                          {branch.scriptType}
-                        </span>
-                        {isWinningVerdict && (
-                          <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-mint-dark text-white shadow-soft">
-                            ✓ Ratified Choice
+                    return (
+                      <div
+                        key={branch.id}
+                        className={`p-6 rounded-3xl border-[1.5px] transition-all space-y-4 relative ${
+                          isWinningVerdict
+                            ? 'bg-mint/10 dark:bg-emerald-950/20 border-mint-dark shadow-elevated'
+                            : 'bg-white dark:bg-slate-900 border-border shadow-card hover:border-[#78350F]/50'
+                        }`}
+                        style={{
+                          borderBottomWidth: '4.5px',
+                          borderBottomColor: isWinningVerdict ? '#059669' : '#DCCFB9'
+                        }}
+                      >
+                        {/* Top Badges */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase text-[#78350F] dark:text-amber-400">
+                            {branch.scriptType}
                           </span>
-                        )}
-                      </div>
-
-                      {/* Representation Box with Audio Playback */}
-                      <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/30 border border-[#78350F]/20 text-center space-y-1">
-                        <span className="font-serif font-black text-3xl sm:text-4xl text-ink tracking-wide block">
-                          {branch.representation}
-                        </span>
-                        <span className="text-xs font-display font-bold text-muted block">
-                          {branch.label}
-                        </span>
-                      </div>
-
-                      {/* Metrics: Ease of Learning vs Phonetic Precision */}
-                      <div className="grid grid-cols-2 gap-2 text-center text-xs">
-                        <div className="p-2.5 rounded-xl bg-neutral/50 dark:bg-slate-800 border border-border space-y-0.5">
-                          <span className="text-[9px] font-mono text-muted uppercase block">Keypad Ease</span>
-                          <span className="font-display font-black text-ink">{branch.easeOfLearning}</span>
+                          {isWinningVerdict && (
+                            <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-mint-dark text-white shadow-soft">
+                              ✓ Ratified Choice
+                            </span>
+                          )}
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-neutral/50 dark:bg-slate-800 border border-border space-y-0.5">
-                          <span className="text-[9px] font-mono text-muted uppercase block">Acoustic Match</span>
-                          <span className="font-display font-black text-mint-dark">{branch.phoneticAccuracy}%</span>
+                        {/* Representation Box with Audio Playback */}
+                        <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/30 border border-[#78350F]/20 text-center space-y-1">
+                          <span className="font-serif font-black text-3xl sm:text-4xl text-ink tracking-wide block">
+                            {branch.representation}
+                          </span>
+                          <span className="text-xs font-display font-bold text-muted block">
+                            {branch.label}
+                          </span>
+                        </div>
+
+                        {/* Metrics: Ease of Learning vs Phonetic Precision */}
+                        <div className="grid grid-cols-2 gap-2 text-center text-xs">
+                          <div className="p-2.5 rounded-xl bg-neutral/50 dark:bg-slate-800 border border-border space-y-0.5">
+                            <span className="text-[9px] font-mono text-muted uppercase block">Keypad Ease</span>
+                            <span className="font-display font-black text-ink">{branch.easeOfLearning}</span>
+                          </div>
+
+                          <div className="p-2.5 rounded-xl bg-neutral/50 dark:bg-slate-800 border border-border space-y-0.5">
+                            <span className="text-[9px] font-mono text-muted uppercase block">Acoustic Match</span>
+                            <span className="font-display font-black text-mint-dark">{branch.phoneticAccuracy}%</span>
+                          </div>
+                        </div>
+
+                        {/* Linguistic Rationale */}
+                        <p className="text-xs font-serif text-muted leading-relaxed">
+                          {branch.rationale}
+                        </p>
+
+                        {/* Actions: Listen & Vote */}
+                        <div className="pt-2 border-t border-border flex items-center justify-between gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              playAcousticChime(560 + bIdx * 60, 0.25);
+                              playPronunciation(branch.audioPronunciation, 'hi-IN');
+                            }}
+                            className="p-2 rounded-xl border border-border text-xs font-display font-bold text-[#78350F] hover:bg-[#78350F] hover:text-white transition-all cursor-pointer shadow-soft"
+                            title="Listen to pronunciation of this branch"
+                          >
+                            <Volume2 size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleVote(branch.id)}
+                            className={`flex-1 py-2 px-3 rounded-xl text-xs font-display font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                              hasVoted
+                                ? 'bg-mint-dark text-white shadow-soft'
+                                : 'bg-white dark:bg-slate-800 border border-border text-ink hover:border-[#78350F]'
+                            }`}
+                          >
+                            <ThumbsUp size={13} />
+                            <span>{hasVoted ? 'Voted' : 'Vote'} ({branch.communityVotes})</span>
+                          </button>
                         </div>
                       </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-                      {/* Linguistic Rationale */}
-                      <p className="text-xs font-serif text-muted leading-relaxed">
-                        {branch.rationale}
-                      </p>
+            {/* ========================================================
+                VERIFIED COMMUNITY DECISIONS & SPECIALIST RESOLUTIONS
+                User doubts verified by reviewers appear here with
+                the reviewer's comment and reviewer's name!
+                ======================================================== */}
+            <div className="space-y-4 pt-4 border-t-[1.5px] border-border">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-mono font-bold uppercase text-mint-dark flex items-center gap-1.5">
+                    <ShieldCheck size={14} />
+                    <span>Sabha Verified Decisions ({verifiedProjects.length})</span>
+                  </span>
+                  <h3 className="font-display text-xl sm:text-2xl font-black text-ink">
+                    Verified Community Doubts & Specialist Resolutions
+                  </h3>
+                </div>
+                <span className="text-xs font-serif text-muted">
+                  Inspected & approved by authorized script specialists
+                </span>
+              </div>
 
-                      {/* Actions: Listen & Vote */}
-                      <div className="pt-2 border-t border-border flex items-center justify-between gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            playAcousticChime(560 + bIdx * 60, 0.25);
-                            playPronunciation(branch.audioPronunciation, 'hi-IN');
-                          }}
-                          className="p-2 rounded-xl border border-border text-xs font-display font-bold text-[#78350F] hover:bg-[#78350F] hover:text-white transition-all cursor-pointer shadow-soft"
-                          title="Listen to pronunciation of this branch"
-                        >
-                          <Volume2 size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleVote(branch.id)}
-                          className={`flex-1 py-2 px-3 rounded-xl text-xs font-display font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                            hasVoted
-                              ? 'bg-mint-dark text-white shadow-soft'
-                              : 'bg-white dark:bg-slate-800 border border-border text-ink hover:border-[#78350F]'
-                          }`}
-                        >
-                          <ThumbsUp size={13} />
-                          <span>{hasVoted ? 'Voted' : 'Vote'} ({branch.communityVotes})</span>
-                        </button>
-                      </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {verifiedProjects.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border-[1.5px] border-mint-dark/30 shadow-card space-y-3"
+                    style={{ borderBottomWidth: '3.5px', borderBottomColor: '#059669' }}
+                  >
+                    {/* Header: Verified seal + timestamp */}
+                    <div className="flex items-center justify-between border-b border-border pb-2.5">
+                      <span className="text-[10px] font-mono font-black uppercase px-2.5 py-0.5 rounded-full bg-mint/40 text-mint-dark">
+                        ✓ Verified by {item.reviewerVerdict?.reviewerName || 'Lipi Specialist'}
+                      </span>
+                      <span className="text-[10px] font-mono text-muted">
+                        {item.reviewerVerdict?.ratifiedAt || item.submittedAt}
+                      </span>
                     </div>
-                  );
-                })}
+
+                    {/* User Doubt / Question */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-mono text-muted uppercase block">
+                          User Question / Word:
+                        </span>
+                        <h4 className="font-serif font-black text-xl text-ink">
+                          {item.spokenWord}
+                        </h4>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => playPronunciation(item.spokenWord, 'hi-IN')}
+                        className="p-2 rounded-xl bg-amber-50 dark:bg-slate-800 text-[#78350F] hover:bg-[#78350F] hover:text-white transition-colors cursor-pointer"
+                        title="Hear pronunciation"
+                      >
+                        <Volume2 size={15} />
+                      </button>
+                    </div>
+
+                    {/* Attached Photo (if any) */}
+                    {item.imageUrl && (
+                      <img
+                        src={item.imageUrl}
+                        alt="Specimen"
+                        className="w-full h-32 object-cover rounded-xl border border-border shadow-soft"
+                      />
+                    )}
+
+                    {/* Reviewer Commentary */}
+                    {item.reviewerVerdict?.rationale && (
+                      <div className="p-3.5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/60 border border-[#78350F]/20 text-xs font-serif text-ink space-y-1">
+                        <span className="font-bold text-[#78350F] text-[11px] block">
+                          Specialist Resolution:
+                        </span>
+                        <p className="text-muted leading-relaxed italic">
+                          &ldquo;{item.reviewerVerdict.rationale}&rdquo;
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Footer Meta */}
+                    <div className="text-[10px] font-mono text-muted flex items-center justify-between pt-1 border-t border-border/60">
+                      <span>Asked by: {item.author}</span>
+                      <span>Scope: {item.lipiName}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

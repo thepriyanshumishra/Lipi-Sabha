@@ -26,10 +26,9 @@ const userNavLinks = [
   { to: '/lab', label: 'प्रयोग शाला (Test & Verify)', icon: FlaskConical },
 ];
 
-// 2. Reviewer Experience: Dedicated Evidence & Evaluation Workflow
+// 2. Reviewer Experience: Dedicated Evidence & Evaluation Workflow (No Prayog Shala)
 const reviewerNavLinks = [
-  { to: '/review', label: 'Review Queue', icon: ShieldCheck },
-  { to: '/sabha', label: 'Sabha Decisions', icon: Users },
+  { to: '/review', label: 'Review Queue & Tree Editor', icon: ShieldCheck },
 ];
 
 export function Navbar() {
