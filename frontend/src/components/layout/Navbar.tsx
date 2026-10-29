@@ -40,6 +40,7 @@ export function Navbar() {
   const [lipiDropdownOpen, setLipiDropdownOpen] = useState(false);
   const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const [leaderboardTab, setLeaderboardTab] = useState<'learners' | 'reviewers'>('learners');
   const lipiMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -188,6 +189,7 @@ export function Navbar() {
                   <button
                     type="button"
                     onClick={() => {
+                      setLeaderboardTab('learners');
                       setLeaderboardOpen(true);
                       playAcousticChime(560, 0.25);
                     }}
@@ -201,6 +203,7 @@ export function Navbar() {
                   <button
                     type="button"
                     onClick={() => {
+                      setLeaderboardTab('reviewers');
                       setLeaderboardOpen(true);
                       playAcousticChime(620, 0.25);
                     }}
@@ -594,6 +597,7 @@ export function Navbar() {
       <LeaderboardModal
         isOpen={leaderboardOpen}
         onClose={() => setLeaderboardOpen(false)}
+        defaultTab={leaderboardTab}
       />
     </header>
   );
