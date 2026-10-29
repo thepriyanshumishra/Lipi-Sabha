@@ -33,8 +33,9 @@ export function ImagePlaceholder({
   const effectiveRatio = aspectRatio !== undefined ? aspectRatio : isBackground ? 'none' : (asset?.aspectRatio || '16/9');
   const effectiveVariant = variant || (asset?.section === 'fieldwork' || asset?.section === 'projects' ? 'parchment' : 'dark');
 
-  // Attempt to load real image if available in /images/ directory
-  const imageSrc = asset ? `/images/${asset.fileName}` : undefined;
+  // Only attempt to load real image if it has been marked as available in the manifest
+  const isAvailable = Boolean(asset?.isAvailable);
+  const imageSrc = asset && isAvailable ? `/images/${asset.fileName}` : undefined;
 
   const isParchment = effectiveVariant === 'parchment';
   const isHero = effectiveVariant === 'hero';

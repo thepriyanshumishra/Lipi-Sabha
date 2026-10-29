@@ -18,6 +18,7 @@ export interface AssetMetadata {
   isBackground: boolean;
   objectFit?: 'cover' | 'contain' | 'fill';
   historicalContext?: string;
+  isAvailable?: boolean;
 }
 
 export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
@@ -108,6 +109,7 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     isBackground: false,
     objectFit: 'cover',
     historicalContext: 'Maharashtra, c. 1760 CE',
+    isAvailable: true,
   },
   'hero-community-member-strip': {
     id: 'hero-community-member-strip',
