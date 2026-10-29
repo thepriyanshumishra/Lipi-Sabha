@@ -48,7 +48,7 @@ export function QuestRunner({ questTitle, tasks, onComplete, onExit }: QuestRunn
   const currentTask = tasks[currentIndex];
   const isLastTask = currentIndex === tasks.length - 1;
 
-  // Simple Web Audio API Synthesizer for pleasant tactile sound clicks and bells
+  // Web Audio acoustic clicks & chimes
   const playSound = (type: 'tap' | 'correct' | 'fanfare') => {
     try {
       const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
@@ -58,18 +58,19 @@ export function QuestRunner({ questTitle, tasks, onComplete, onExit }: QuestRunn
       gain.connect(ctx.destination);
 
       if (type === 'tap') {
-        osc.frequency.setValueAtTime(440, ctx.currentTime);
-        gain.gain.setValueAtTime(0.05, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        osc.frequency.setValueAtTime(480, ctx.currentTime);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
         osc.start();
-        osc.stop(ctx.currentTime + 0.08);
+        osc.stop(ctx.currentTime + 0.07);
       } else if (type === 'correct') {
-        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.09); // E5
+        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.18); // G5
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
         osc.start();
-        osc.stop(ctx.currentTime + 0.3);
+        osc.stop(ctx.currentTime + 0.35);
       }
     } catch {
       // AudioContext not allowed before user interaction
@@ -117,23 +118,23 @@ export function QuestRunner({ questTitle, tasks, onComplete, onExit }: QuestRunn
         <button
           type="button"
           onClick={onExit}
-          className="p-2 text-[#afafaf] hover:text-[#4b4b4b] rounded-full hover:bg-[#f5f5f5] transition-colors"
+          className="p-2 text-[#94a3b8] hover:text-[#1e1b2e] rounded-full hover:bg-[#f1f5f9] transition-colors"
           title="Exit Quest"
         >
           <X className="w-6 h-6" />
         </button>
 
-        <ProgressBar current={currentIndex + (checked ? 1 : 0)} total={tasks.length} className="flex-1" />
+        <ProgressBar current={currentIndex + (checked ? 1 : 0)} total={tasks.length} className="flex-1" variant="mint" />
 
-        <div className="flex items-center gap-1.5 text-xs font-black text-[#58cc02] bg-[#d7ffb8]/60 px-3 py-1.5 rounded-full">
-          <Sparkles className="w-4 h-4 fill-current" />
+        <div className="flex items-center gap-1.5 text-xs font-black text-[#b45309] bg-[#fef3c7] border border-[#fde68a] px-3 py-1.5 rounded-full">
+          <Sparkles className="w-4 h-4 fill-current text-[#f59e0b]" />
           <span>+10 XP</span>
         </div>
       </header>
 
       {/* Main Quest Interaction Stage */}
       <main className="max-w-xl w-full mx-auto px-4 py-6 flex-1 flex flex-col justify-center">
-        {/* Lipi Mascot Speech Bubble */}
+        {/* Gaju Scribe Elephant Mascot Speech Bubble */}
         <MascotBubble
           mood={checked ? 'happy' : currentTask.type === 'canvas_trace' ? 'writing' : 'idle'}
           message={currentTask.instruction}
@@ -203,31 +204,31 @@ export function QuestRunner({ questTitle, tasks, onComplete, onExit }: QuestRunn
         )}
       </main>
 
-      {/* Sticky Bottom Action Drawer (Duolingo Style) */}
+      {/* Sticky Bottom Action Drawer */}
       <footer
         className={`w-full border-t-2 py-5 px-4 transition-colors duration-200 ${
           checked
-            ? 'bg-[#d7ffb8]/40 border-[#58cc02]'
-            : 'bg-white border-[#e5e5e5]'
+            ? 'bg-[#ecfdf5] border-[#a7f3d0]'
+            : 'bg-white border-[#e2e8f0]'
         }`}
       >
         <div className="max-w-xl mx-auto flex items-center justify-between gap-4">
           {checked ? (
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#58cc02] text-white rounded-full">
+              <div className="p-2 bg-[#10b981] text-white rounded-full shadow-sm">
                 <CheckCircle className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-base font-extrabold text-[#58cc02]">
-                  {currentTask.type === 'variant_compare' ? 'Response Logged!' : 'Nicely Done!'}
+                <p className="text-base font-extrabold text-[#059669]">
+                  {currentTask.type === 'variant_compare' ? 'Observation Logged!' : 'Nicely Done!'}
                 </p>
-                <p className="text-xs font-semibold text-[#4b4b4b]">
+                <p className="text-xs font-semibold text-[#1e1b2e]">
                   {currentTask.explanation}
                 </p>
               </div>
             </div>
           ) : (
-            <div className="text-xs font-bold text-[#777777] hidden md:block">
+            <div className="text-xs font-bold text-[#64748b] hidden md:block">
               Select an answer to continue
             </div>
           )}

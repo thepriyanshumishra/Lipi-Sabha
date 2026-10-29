@@ -4,7 +4,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface TactileButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'action' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'amber' | 'mint' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
 }
@@ -13,15 +13,17 @@ export const TactileButton = React.forwardRef<HTMLButtonElement, TactileButtonPr
   ({ className, variant = 'primary', size = 'md', fullWidth = false, children, disabled, ...props }, ref) => {
     const variantStyles = {
       primary:
-        'bg-[#58cc02] text-white border-2 border-[#58cc02] shadow-[0_4px_0_#46a302] hover:brightness-105 active:translate-y-1 active:shadow-[0_0_0_#46a302]',
+        'bg-[#5d5fef] text-white border-2 border-[#5d5fef] shadow-[0_4px_0_#4647c9] hover:brightness-105 active:translate-y-1 active:shadow-[0_0_0_#4647c9]',
       secondary:
-        'bg-white text-[#1cb0f6] border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5] hover:border-[#1cb0f6] active:translate-y-1 active:shadow-[0_0_0_#e5e5e5]',
-      action:
-        'bg-[#1cb0f6] text-white border-2 border-[#1cb0f6] shadow-[0_4px_0_#1899d6] hover:brightness-105 active:translate-y-1 active:shadow-[0_0_0_#1899d6]',
+        'bg-white text-[#5d5fef] border-2 border-[#e2e8f0] shadow-[0_4px_0_#e2e8f0] hover:border-[#5d5fef] active:translate-y-1 active:shadow-[0_0_0_#e2e8f0]',
+      amber:
+        'bg-[#f59e0b] text-white border-2 border-[#f59e0b] shadow-[0_4px_0_#d97706] hover:brightness-105 active:translate-y-1 active:shadow-[0_0_0_#d97706]',
+      mint:
+        'bg-[#10b981] text-white border-2 border-[#10b981] shadow-[0_4px_0_#059669] hover:brightness-105 active:translate-y-1 active:shadow-[0_0_0_#059669]',
       danger:
-        'bg-[#ff4b4b] text-white border-2 border-[#ff4b4b] shadow-[0_4px_0_#d63f3f] hover:brightness-105 active:translate-y-1 active:shadow-[0_0_0_#d63f3f]',
+        'bg-[#f43f5e] text-white border-2 border-[#f43f5e] shadow-[0_4px_0_#e11d48] hover:brightness-105 active:translate-y-1 active:shadow-[0_0_0_#e11d48]',
       ghost:
-        'bg-transparent text-[#777777] border-2 border-transparent hover:bg-[#f7f7f7] active:bg-[#e5e5e5]',
+        'bg-transparent text-[#64748b] border-2 border-transparent hover:bg-[#f1f5f9] active:bg-[#e2e8f0]',
     };
 
     const sizeStyles = {

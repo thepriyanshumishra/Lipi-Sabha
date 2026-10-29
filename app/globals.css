@@ -1,75 +1,75 @@
 @import "tailwindcss";
 
 :root {
-  /* Duolingo Brand Palette */
-  --color-eager-green: #58cc02;
-  --color-eager-green-depth: #46a302;
-  --color-storybook-green: #d7ffb8;
-  --color-spark-blue: #1cb0f6;
-  --color-spark-blue-depth: #1899d6;
-  --color-fresh-leaf: #a5ed6e;
-  --color-night-ink: #000437;
+  /* Lipi Sabha Distinctive Royal Scribe Palette */
+  --color-brand-primary: #5d5fef;        /* Electric Royal Indigo - Primary Action */
+  --color-brand-primary-depth: #4647c9;  /* 3D button press border */
+  
+  --color-brand-amber: #f59e0b;          /* Golden Marigold / Saffron - Secondary CTA & XP */
+  --color-brand-amber-depth: #d97706;    /* 3D button press border */
 
-  /* Gamification & Accents */
-  --color-sun-yellow: #ffc800;
-  --color-sun-yellow-depth: #e5b400;
-  --color-coral-fire: #ff4b4b;
-  --color-coral-fire-depth: #d63f3f;
+  --color-brand-cyan: #06b6d4;           /* Cyan Aqua - Audio & Curiosity */
+  --color-brand-cyan-depth: #0891b2;     /* 3D button press border */
 
-  /* Neutrals */
+  --color-brand-mint: #10b981;           /* Emerald Mint - Success / Validated Feedback */
+  --color-brand-mint-depth: #059669;
+
+  --color-brand-coral: #f43f5e;          /* Ruby Terracotta - Streak Flame */
+  --color-brand-coral-depth: #e11d48;
+
+  /* Neutrals & Paper Canvas */
   --color-paper-white: #ffffff;
-  --color-canvas-cream: #fafafa;
-  --color-charcoal: #4b4b4b;
-  --color-pencil-gray: #777777;
-  --color-faded-gray: #afafaf;
-  --color-border-light: #e5e5e5;
-  --color-border-subtle: #f0f0f0;
+  --color-parchment-cream: #faf9f6;
+  --color-night-ink: #1e1b2e;            /* Deep Violet-Black Ink */
+  --color-pencil-gray: #64748b;          /* Slate secondary text */
+  --color-border-light: #e2e8f0;
+  --color-border-subtle: #f1f5f9;
 
-  /* Geometry */
-  --radius-tactile: 12px;
+  /* Geometry & Radii */
+  --radius-tactile: 14px;
   --border-tactile: 2px;
 }
 
 body {
   background-color: var(--color-paper-white);
-  color: var(--color-charcoal);
+  color: var(--color-night-ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 3D Tactile Button Press Physics */
+/* 3D Tactile Button Press Physics (Lipi Sabha Custom Palette) */
 .btn-tactile-primary {
-  background-color: var(--color-eager-green);
+  background-color: var(--color-brand-primary);
   color: #ffffff;
-  border-radius: 12px;
-  border: 2px solid var(--color-eager-green);
-  box-shadow: 0 4px 0 var(--color-eager-green-depth);
-  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+  border-radius: 14px;
+  border: 2px solid var(--color-brand-primary);
+  box-shadow: 0 4px 0 var(--color-brand-primary-depth);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
   font-weight: 700;
 }
 
 .btn-tactile-primary:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.06);
 }
 
 .btn-tactile-primary:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 var(--color-eager-green-depth);
+  box-shadow: 0 0 0 var(--color-brand-primary-depth);
 }
 
 .btn-tactile-secondary {
   background-color: #ffffff;
-  color: var(--color-spark-blue);
-  border-radius: 12px;
+  color: var(--color-brand-primary);
+  border-radius: 14px;
   border: 2px solid var(--color-border-light);
   box-shadow: 0 4px 0 var(--color-border-light);
-  transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.15s ease;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.15s ease;
   font-weight: 700;
 }
 
 .btn-tactile-secondary:hover {
-  border-color: var(--color-spark-blue);
+  border-color: var(--color-brand-primary);
 }
 
 .btn-tactile-secondary:active {
@@ -77,36 +77,55 @@ body {
   box-shadow: 0 0 0 var(--color-border-light);
 }
 
-.btn-tactile-action {
-  background-color: var(--color-spark-blue);
+.btn-tactile-amber {
+  background-color: var(--color-brand-amber);
   color: #ffffff;
-  border-radius: 12px;
-  border: 2px solid var(--color-spark-blue);
-  box-shadow: 0 4px 0 var(--color-spark-blue-depth);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  border-radius: 14px;
+  border: 2px solid var(--color-brand-amber);
+  box-shadow: 0 4px 0 var(--color-brand-amber-depth);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
   font-weight: 700;
 }
 
-.btn-tactile-action:active {
+.btn-tactile-amber:hover {
+  filter: brightness(1.06);
+}
+
+.btn-tactile-amber:active {
   transform: translateY(4px);
-  box-shadow: 0 0 0 var(--color-spark-blue-depth);
+  box-shadow: 0 0 0 var(--color-brand-amber-depth);
+}
+
+.btn-tactile-mint {
+  background-color: var(--color-brand-mint);
+  color: #ffffff;
+  border-radius: 14px;
+  border: 2px solid var(--color-brand-mint);
+  box-shadow: 0 4px 0 var(--color-brand-mint-depth);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  font-weight: 700;
+}
+
+.btn-tactile-mint:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--color-brand-mint-depth);
 }
 
 /* Tactile Sticker Cards */
 .card-tactile {
   background-color: #ffffff;
   border: 2px solid var(--color-border-light);
-  border-radius: 16px;
-  box-shadow: 0 3px 0 var(--color-border-subtle);
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 18px;
+  box-shadow: 0 4px 0 var(--color-border-subtle);
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .card-tactile:hover {
-  border-color: var(--color-spark-blue);
+  border-color: var(--color-brand-primary);
 }
 
 .card-tactile.selected {
-  border-color: var(--color-spark-blue);
-  background-color: #ddf4ff;
-  box-shadow: 0 4px 0 #bfe7fc;
+  border-color: var(--color-brand-primary);
+  background-color: #f5f5ff;
+  box-shadow: 0 4px 0 #d5d6fc;
 }
