@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy, ArrowLeft, ShieldCheck, Sparkles, User as UserIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,10 +57,10 @@ export function LeaderboardModal({ isOpen, onClose, defaultTab }: LeaderboardMod
     return <span className="font-mono text-xs font-black text-muted">#{rank + 1}</span>;
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-md flex justify-center items-start sm:items-center p-3 sm:p-6"
+        className="fixed inset-0 z-[9999] overflow-y-auto bg-black/75 backdrop-blur-md flex justify-center items-start sm:items-center p-3 sm:p-6"
         onClick={onClose}
       >
         <div className="min-h-full py-4 sm:py-8 flex items-center justify-center w-full max-w-xl">
@@ -273,6 +274,7 @@ export function LeaderboardModal({ isOpen, onClose, defaultTab }: LeaderboardMod
         </motion.div>
         </div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

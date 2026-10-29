@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, UserPlus, Check, ShieldCheck, User as UserIcon, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,9 +37,9 @@ export function UserSwitcherModal({ isOpen, onClose }: UserSwitcherModalProps) {
     onClose();
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -225,6 +226,7 @@ export function UserSwitcherModal({ isOpen, onClose }: UserSwitcherModalProps) {
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

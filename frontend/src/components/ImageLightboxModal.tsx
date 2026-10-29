@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { X, ZoomIn, ZoomOut, Download } from 'lucide-react';
 import { useState } from 'react';
 
@@ -14,10 +15,10 @@ export function ImageLightboxModal({ isOpen, imageUrl, title, onClose }: ImageLi
 
   if (!isOpen || !imageUrl) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
         onClick={onClose}
       >
         <motion.div
@@ -79,6 +80,7 @@ export function ImageLightboxModal({ isOpen, imageUrl, title, onClose }: ImageLi
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
