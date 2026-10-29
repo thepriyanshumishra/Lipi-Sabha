@@ -88,20 +88,30 @@ export function HeroSection() {
 
             {/* Community Member Strip */}
             <div className="pt-4 flex items-center gap-3">
-              {/* Scribe Avatars Strip */}
-              <div className="flex -space-x-2 overflow-hidden">
-                <div className="inline-block h-8 w-8 rounded-full ring-2 ring-[#070A12] bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-serif font-bold text-xs flex items-center justify-center shadow">
-                  VS
-                </div>
-                <div className="inline-block h-8 w-8 rounded-full ring-2 ring-[#070A12] bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white font-serif font-bold text-xs flex items-center justify-center shadow">
-                  RK
-                </div>
-                <div className="inline-block h-8 w-8 rounded-full ring-2 ring-[#070A12] bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white font-serif font-bold text-xs flex items-center justify-center shadow">
-                  SM
-                </div>
-                <div className="inline-block h-8 w-8 rounded-full ring-2 ring-[#070A12] bg-gradient-to-tr from-purple-600 to-purple-400 text-white font-serif font-bold text-xs flex items-center justify-center shadow">
-                  PM
-                </div>
+              {/* Replaceable Member Strip Asset Slot with CSS avatar fallback */}
+              <div className="w-28 h-9 rounded-full overflow-hidden flex-shrink-0">
+                <ImagePlaceholder
+                  assetId="hero-community-member-strip"
+                  aspectRatio="4/1"
+                  className="w-full h-full rounded-full border border-amber-500/40"
+                  showDetails={false}
+                  badgePosition="center"
+                >
+                  <div className="flex -space-x-2 overflow-hidden w-full h-full items-center pl-1">
+                    <div className="inline-block h-7 w-7 rounded-full ring-2 ring-[#070A12] bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 font-serif font-bold text-[10px] flex items-center justify-center shadow">
+                      VS
+                    </div>
+                    <div className="inline-block h-7 w-7 rounded-full ring-2 ring-[#070A12] bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white font-serif font-bold text-[10px] flex items-center justify-center shadow">
+                      RK
+                    </div>
+                    <div className="inline-block h-7 w-7 rounded-full ring-2 ring-[#070A12] bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white font-serif font-bold text-[10px] flex items-center justify-center shadow">
+                      SM
+                    </div>
+                    <div className="inline-block h-7 w-7 rounded-full ring-2 ring-[#070A12] bg-gradient-to-tr from-purple-600 to-purple-400 text-white font-serif font-bold text-[10px] flex items-center justify-center shadow">
+                      PM
+                    </div>
+                  </div>
+                </ImagePlaceholder>
               </div>
               <p className="text-xs text-slate-400 max-w-sm leading-tight">
                 A growing community of language enthusiasts, researchers and native speakers.

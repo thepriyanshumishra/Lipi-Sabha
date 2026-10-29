@@ -3,11 +3,22 @@
 import React from 'react';
 import Link from 'next/link';
 import { Feather } from 'lucide-react';
+import { ImagePlaceholder } from '@/components/ui/image-placeholder';
 
 export function SiteFooter() {
   return (
-    <footer className="bg-[#05070D] text-slate-400 pt-16 pb-12 px-4 sm:px-6 lg:px-8 border-t border-slate-900">
-      <div className="max-w-7xl mx-auto">
+    <footer className="relative bg-[#05070D] text-slate-400 pt-16 pb-12 px-4 sm:px-6 lg:px-8 border-t border-slate-900 overflow-hidden">
+      {/* Background Archival Texture Asset Slot */}
+      <div className="absolute inset-0 pointer-events-none opacity-15">
+        <ImagePlaceholder
+          assetId="bg-footer-archive-texture"
+          variant="background"
+          className="w-full h-full border-none"
+          showDetails={false}
+        />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10 pb-12 border-b border-slate-900">
           {/* Brand & Purpose Column (Spans 2 cols on lg) */}
           <div className="lg:col-span-2 space-y-4">

@@ -1,9 +1,9 @@
 /**
  * Lipi Sabha - Central Asset Manifest
  * 
- * Defines all visual image assets, backgrounds, and manuscript specimens.
+ * Defines all visual image assets, backgrounds, textures, and manuscript specimens.
  * When real image files are created and placed in `/public/images/`,
- * the `ImagePlaceholder` component will automatically display them.
+ * the `ImagePlaceholder` component will automatically display them without layout shifts.
  */
 
 export interface AssetMetadata {
@@ -12,7 +12,7 @@ export interface AssetMetadata {
   title: string;
   description: string;
   section: 'global' | 'hero' | 'fieldwork' | 'scripts' | 'projects' | 'ethics' | 'footer';
-  aspectRatio: string; // e.g. "16/9", "4/3", "1/1", "21/9"
+  aspectRatio: string; // e.g. "16/9", "4/3", "1/1", "21/9", "none"
   width: number;
   height: number;
   isBackground: boolean;
@@ -21,12 +21,12 @@ export interface AssetMetadata {
 }
 
 export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
-  // Global & Background Atmospheres
+  // 1. Global & Background Atmospheres
   'bg-global-ink-texture': {
     id: 'bg-global-ink-texture',
     fileName: 'bg-global-ink-texture.webp',
-    title: 'Global Ink & Grain Texture',
-    description: 'Subtle wet calligraphic ink texture with micro-paper fiber grain for dark backgrounds.',
+    title: 'Global Ink & Paper Grain Texture',
+    description: 'Subtle wet calligraphic ink texture with micro-paper fiber grain for full-page dark backgrounds.',
     section: 'global',
     aspectRatio: '16/9',
     width: 1920,
@@ -38,11 +38,23 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     id: 'bg-hero-archive-atmosphere',
     fileName: 'bg-hero-archive-atmosphere.webp',
     title: 'Hero Archive Atmospheric Backdrop',
-    description: 'Low-contrast archival library atmosphere with warm amber sidelight.',
+    description: 'Low-contrast archival library atmosphere with warm amber sidelight and soft focus bookshelves.',
     section: 'hero',
-    aspectRatio: '16/9',
+    aspectRatio: '21/9',
     width: 1920,
     height: 900,
+    isBackground: true,
+    objectFit: 'cover',
+  },
+  'bg-script-showcase-texture': {
+    id: 'bg-script-showcase-texture',
+    fileName: 'bg-script-showcase-texture.webp',
+    title: 'Script Showcase Archival Ground',
+    description: 'Dark carbon-ink texture with faint weathered parchment watermark for the scripts section.',
+    section: 'scripts',
+    aspectRatio: '16/9',
+    width: 1920,
+    height: 800,
     isBackground: true,
     objectFit: 'cover',
   },
@@ -58,11 +70,23 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     isBackground: true,
     objectFit: 'cover',
   },
+  'ethics-charter-background': {
+    id: 'ethics-charter-background',
+    fileName: 'bg-ethics-landscape.webp',
+    title: 'Ethics Charter Background (Alias)',
+    description: 'Ancient rock inscriptions and mountain panorama behind the sovereign charter statement.',
+    section: 'ethics',
+    aspectRatio: '21/9',
+    width: 1920,
+    height: 700,
+    isBackground: true,
+    objectFit: 'cover',
+  },
   'bg-footer-archive-texture': {
     id: 'bg-footer-archive-texture',
     fileName: 'bg-footer-archive-texture.webp',
     title: 'Footer Scribe Dark Texture',
-    description: 'Fine charcoal texture with subtle woodblock impression marks.',
+    description: 'Fine charcoal texture with subtle woodblock impression marks for the site footer.',
     section: 'footer',
     aspectRatio: '16/9',
     width: 1920,
@@ -71,12 +95,12 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     objectFit: 'cover',
   },
 
-  // Hero Section
+  // 2. Hero Section
   'hero-modi-manuscript-specimen': {
     id: 'hero-modi-manuscript-specimen',
     fileName: 'hero-modi-manuscript-specimen.webp',
     title: 'Marathi Modi Manuscript Specimen',
-    description: 'High-resolution archival macro photograph of an 18th-century Maratha administrative document in flowing Modi cursive script.',
+    description: 'High-resolution archival photograph of an 18th-century Maratha administrative document in flowing Modi cursive script.',
     section: 'hero',
     aspectRatio: '4/3',
     width: 780,
@@ -89,7 +113,7 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     id: 'hero-community-member-strip',
     fileName: 'hero-community-member-strip.webp',
     title: 'Fieldwork Scribes Portrait Strip',
-    description: 'Portraits of linguistic researchers, indigenous community elders, and young field scribes.',
+    description: 'Overlapping photographic portraits of linguistic researchers, indigenous elders, and young field scribes.',
     section: 'hero',
     aspectRatio: '4/1',
     width: 180,
@@ -98,16 +122,16 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     objectFit: 'cover',
   },
 
-  // Fieldwork Architecture
+  // 3. Fieldwork Architecture
   'fieldwork-blind-first-quest': {
     id: 'fieldwork-blind-first-quest',
     fileName: 'fieldwork-blind-first-quest.webp',
     title: 'Step 1: Blind-First Micro-Quest Specimen',
     description: 'Historic manuscript snippet showing a reed pen (kalam) resting beside fresh iron-gall ink decipherment lines.',
     section: 'fieldwork',
-    aspectRatio: '16/9',
+    aspectRatio: '16/10',
     width: 520,
-    height: 290,
+    height: 325,
     isBackground: false,
     objectFit: 'cover',
   },
@@ -117,9 +141,9 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     title: 'Step 2: Community Mirror Telemetry Graphic',
     description: 'Bar chart visualization with N ≥ 5 privacy bracket highlighting cohort consensus without de-anonymization.',
     section: 'fieldwork',
-    aspectRatio: '16/9',
+    aspectRatio: '16/10',
     width: 520,
-    height: 290,
+    height: 325,
     isBackground: false,
     objectFit: 'cover',
   },
@@ -127,16 +151,16 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     id: 'fieldwork-sovereign-governance',
     fileName: 'fieldwork-sovereign-governance.webp',
     title: 'Step 3: Sovereign Governance Deliberation',
-    description: 'Community elders, speakers, and field linguists gathered around an orthography consensus manuscript table.',
+    description: 'Community elders, native speakers, and field linguists gathered around an orthography consensus manuscript table.',
     section: 'fieldwork',
-    aspectRatio: '16/9',
+    aspectRatio: '16/10',
     width: 520,
-    height: 290,
+    height: 325,
     isBackground: false,
     objectFit: 'cover',
   },
 
-  // Scripts & Writing Traditions Showcase
+  // 4. Scripts & Writing Traditions Showcase
   'script-specimen-modi': {
     id: 'script-specimen-modi',
     fileName: 'script-specimen-modi.webp',
@@ -190,7 +214,7 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     historicalContext: 'South Asia · ancient inscription tradition',
   },
 
-  // Active Field Studies
+  // 5. Active Field Studies
   'project-image-modi-paleography': {
     id: 'project-image-modi-paleography',
     fileName: 'project-image-modi-paleography.webp',
@@ -226,5 +250,19 @@ export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
     height: 360,
     isBackground: false,
     objectFit: 'cover',
+  },
+
+  // 6. Sovereign Ethics Charter
+  'ethics-community-seal': {
+    id: 'ethics-community-seal',
+    fileName: 'ethics-community-seal.webp',
+    title: 'Sovereign Community Seal Emblem',
+    description: 'Circular gold seal emblem bearing "COMMUNITY DECIDES · ALWAYS DECIDES" and three-leaf botanical sprout motif.',
+    section: 'ethics',
+    aspectRatio: '1/1',
+    width: 400,
+    height: 400,
+    isBackground: false,
+    objectFit: 'contain',
   },
 };

@@ -55,35 +55,45 @@ export function EthicsCharter() {
             </div>
           </div>
 
-          {/* Right: The Sovereign Community Seal Emblem */}
+          {/* Right: The Sovereign Community Seal Emblem (Replaceable Asset Slot) */}
           <div className="lg:col-span-4 flex justify-center lg:justify-end">
-            <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full border-2 border-amber-500/40 bg-gradient-to-b from-amber-950/20 via-slate-950/80 to-slate-950 flex flex-col items-center justify-center p-6 shadow-2xl shadow-amber-950/30 group hover:border-amber-400 transition-colors">
-              {/* Concentric Decorative Rings */}
-              <div className="absolute inset-2 rounded-full border border-dashed border-amber-500/20" />
-              <div className="absolute inset-4 rounded-full border border-amber-500/30" />
+            <div className="w-48 h-48 sm:w-56 sm:h-56">
+              <ImagePlaceholder
+                assetId="ethics-community-seal"
+                aspectRatio="1/1"
+                className="w-full h-full rounded-full border-2 border-amber-500/40 bg-gradient-to-b from-amber-950/20 via-slate-950/80 to-slate-950"
+                showDetails={false}
+                badgePosition="bottom-right"
+              >
+                <div className="relative w-full h-full flex flex-col items-center justify-center p-6 shadow-2xl shadow-amber-950/30 group hover:border-amber-400 transition-colors">
+                  {/* Concentric Decorative Rings */}
+                  <div className="absolute inset-2 rounded-full border border-dashed border-amber-500/20" />
+                  <div className="absolute inset-4 rounded-full border border-amber-500/30" />
 
-              {/* Circular SVG Text */}
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
-                <path
-                  id="textPath-seal"
-                  d="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
-                  fill="none"
-                />
-                <text className="text-[9px] font-mono tracking-[0.22em] fill-amber-300 uppercase">
-                  <textPath href="#textPath-seal" startOffset="50%" textAnchor="middle">
-                    COMMUNITY DECIDES &bull; ALWAYS DECIDES
-                  </textPath>
-                </text>
-              </svg>
+                  {/* Circular SVG Text */}
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
+                    <path
+                      id="textPath-seal"
+                      d="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+                      fill="none"
+                    />
+                    <text className="text-[9px] font-mono tracking-[0.22em] fill-amber-300 uppercase">
+                      <textPath href="#textPath-seal" startOffset="50%" textAnchor="middle">
+                        COMMUNITY DECIDES &bull; ALWAYS DECIDES
+                      </textPath>
+                    </text>
+                  </svg>
 
-              {/* Center Botanical / Plant Sprout Icon (Three-leaf motif) */}
-              <div className="relative z-10 w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/40 flex items-center justify-center text-amber-300 group-hover:scale-105 transition-transform">
-                <Sprout className="w-8 h-8 text-amber-400" />
-              </div>
+                  {/* Center Botanical / Plant Sprout Icon (Three-leaf motif) */}
+                  <div className="relative z-10 w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/40 flex items-center justify-center text-amber-300 group-hover:scale-105 transition-transform">
+                    <Sprout className="w-8 h-8 text-amber-400" />
+                  </div>
 
-              <div className="mt-2 text-[8px] font-mono tracking-widest uppercase text-amber-500/80 font-bold">
-                SOVEREIGN TRUST
-              </div>
+                  <div className="mt-2 text-[8px] font-mono tracking-widest uppercase text-amber-500/80 font-bold">
+                    SOVEREIGN TRUST
+                  </div>
+                </div>
+              </ImagePlaceholder>
             </div>
           </div>
         </div>

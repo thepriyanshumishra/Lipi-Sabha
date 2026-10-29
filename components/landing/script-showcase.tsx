@@ -42,8 +42,18 @@ export function ScriptShowcase() {
   ];
 
   return (
-    <section id="scripts-traditions" className="bg-[#070A12] text-slate-100 py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80">
-      <div className="max-w-7xl mx-auto">
+    <section id="scripts-traditions" className="relative bg-[#070A12] text-slate-100 py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 overflow-hidden">
+      {/* Background Archival Ground Asset Slot */}
+      <div className="absolute inset-0 pointer-events-none opacity-15">
+        <ImagePlaceholder
+          assetId="bg-script-showcase-texture"
+          variant="background"
+          className="w-full h-full border-none"
+          showDetails={false}
+        />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
           <div className="max-w-2xl">

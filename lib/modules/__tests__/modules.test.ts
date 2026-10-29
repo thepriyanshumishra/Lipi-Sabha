@@ -17,6 +17,7 @@ import {
   evaluateItemResponse,
   summarizeQuestSession,
 } from '../quest/quest-engine';
+import { ASSET_MANIFEST } from '../../assets/manifest';
 
 describe('MetricsEngine', () => {
   it('computes 1.0 for identical strings and handles Indic Unicode graphemes', () => {
@@ -168,5 +169,48 @@ describe('QuestEngine', () => {
     expect(summary.newStreak).toBe(3);
     // 140 XP + 11 item XP + 15 completion XP = 166 XP -> Crosses 150 threshold to Patra Lekhak!
     expect(summary.currentRank.name).toBe('Patra Lekhak');
+  });
+});
+
+describe('AssetManifestAudit', () => {
+  const REQUIRED_ASSET_IDS = [
+    'bg-global-ink-texture',
+    'bg-hero-archive-atmosphere',
+    'bg-script-showcase-texture',
+    'bg-ethics-landscape',
+    'bg-footer-archive-texture',
+    'hero-modi-manuscript-specimen',
+    'hero-community-member-strip',
+    'fieldwork-blind-first-quest',
+    'fieldwork-community-mirror',
+    'fieldwork-sovereign-governance',
+    'script-specimen-modi',
+    'script-specimen-sharada',
+    'script-specimen-ol-chiki',
+    'script-specimen-brahmi',
+    'project-image-modi-paleography',
+    'project-image-sharada-manuscript',
+    'project-image-santhali-mapping',
+    'ethics-community-seal',
+  ];
+
+  it('contains every required asset ID from the specification', () => {
+    for (const assetId of REQUIRED_ASSET_IDS) {
+      expect(ASSET_MANIFEST).toHaveProperty(assetId);
+      const asset = ASSET_MANIFEST[assetId];
+      expect(asset.id).toBe(assetId);
+      expect(asset.fileName).toMatch(/\.(webp|png|jpg)$/);
+      expect(asset.width).toBeGreaterThan(0);
+      expect(asset.height).toBeGreaterThan(0);
+      expect(asset.description.length).toBeGreaterThan(10);
+    }
+  });
+
+  it('validates aspect ratios and dimensions are mathematically consistent', () => {
+    for (const [id, asset] of Object.entries(ASSET_MANIFEST)) {
+      expect(asset.width).toBeGreaterThan(0);
+      expect(asset.height).toBeGreaterThan(0);
+      expect(['global', 'hero', 'fieldwork', 'scripts', 'projects', 'ethics', 'footer']).toContain(asset.section);
+    }
   });
 });
