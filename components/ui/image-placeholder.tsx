@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ASSET_MANIFEST, AssetMetadata } from '@/lib/assets/manifest';
-import { Scroll, Image as ImageIcon, Sparkles, FileText } from 'lucide-react';
+import { Scroll, Image as ImageIcon, FileText } from 'lucide-react';
 
 export interface ImagePlaceholderProps {
   assetId: string;
@@ -11,8 +11,8 @@ export interface ImagePlaceholderProps {
   aspectRatio?: string;
   badgePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
   showDetails?: boolean;
-  overlayChildren?: boolean;
   children?: React.ReactNode;
+  overlayChildren?: React.ReactNode;
 }
 
 export function ImagePlaceholder({
@@ -22,8 +22,8 @@ export function ImagePlaceholder({
   aspectRatio,
   badgePosition = 'bottom-left',
   showDetails = true,
-  overlayChildren = false,
   children,
+  overlayChildren,
 }: ImagePlaceholderProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -58,7 +58,7 @@ export function ImagePlaceholder({
         <img
           src={imageSrc}
           alt={asset?.description || assetId}
-          className={`w-full h-full object-${asset?.objectFit || 'cover'} transition-opacity duration-300 ${
+          className={`absolute inset-0 w-full h-full object-${asset?.objectFit || 'cover'} transition-opacity duration-300 z-10 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setImageLoaded(true)}
@@ -68,7 +68,7 @@ export function ImagePlaceholder({
 
       {/* Styled Placeholder Fallback (shown when real image has not yet been placed in /images/) */}
       {(!imageLoaded || imageError) && (
-        <div className={`absolute inset-0 flex flex-col items-center justify-center ${isBackground ? 'p-2' : 'p-4'}`}>
+        <div className={`absolute inset-0 flex flex-col items-center justify-center z-0 ${isBackground ? 'p-2' : 'p-4'}`}>
           {/* Subtle Archival Blueprint / Grain Grid */}
           <div
             className={`absolute inset-0 opacity-15 pointer-events-none ${
@@ -88,8 +88,8 @@ export function ImagePlaceholder({
             </>
           )}
 
-          {/* Fallback Children (when NOT treated as persistent overlay) */}
-          {children && !overlayChildren ? (
+          {/* Fallback Children when provided (e.g. avatar strip or SVG seal) */}
+          {children ? (
             <div className="relative z-10 w-full h-full flex items-center justify-center">
               {children}
             </div>
@@ -154,10 +154,10 @@ export function ImagePlaceholder({
         </div>
       )}
 
-      {/* Persistent Interactive Overlay Children (e.g. Decipherment slider & reticle in Hero) */}
-      {children && overlayChildren && (
-        <div className="absolute inset-0 z-30 pointer-events-none [&>*]:pointer-events-auto">
-          {children}
+      {/* Overlay Children: Rendered on top of BOTH loaded real image and placeholder */}
+      {overlayChildren && (
+        <div className="absolute inset-0 z-30 pointer-events-auto">
+          {overlayChildren}
         </div>
       )}
     </div>

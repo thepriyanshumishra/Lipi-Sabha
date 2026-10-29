@@ -147,42 +147,44 @@ export function HeroSection() {
                       aspectRatio="4/3"
                       className="w-full h-full rounded-none border-none"
                       badgePosition="top-left"
-                      overlayChildren={true}
-                    >
-                      {/* Overlay Stroke Analysis Layer */}
-                      {showStrokeAnalysis && (
-                        <div className="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between">
-                          <div className="self-end bg-amber-500/20 border border-amber-500/50 text-amber-300 text-[10px] font-mono px-2 py-0.5 rounded backdrop-blur-sm">
-                            Cursive Flow Vector &bull; 87% confidence
-                          </div>
+                      overlayChildren={
+                        <>
+                          {/* Overlay Stroke Analysis Layer */}
+                          {showStrokeAnalysis && (
+                            <div className="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between">
+                              <div className="self-end bg-amber-950/80 border border-amber-500/70 text-amber-300 text-[10px] font-mono px-2 py-0.5 rounded shadow-lg backdrop-blur-md">
+                                Cursive Flow Vector &bull; 87% confidence
+                              </div>
 
-                          {/* Interactive Inspection Reticle */}
-                          <div
-                            className="absolute w-8 h-8 rounded-full border-2 border-amber-400/80 bg-amber-400/20 flex items-center justify-center text-amber-200 text-xs shadow-lg transition-all"
-                            style={{ left: `${sliderPosition}%`, top: '45%' }}
-                          >
-                            +
-                          </div>
-                        </div>
-                      )}
+                              {/* Interactive Inspection Reticle */}
+                              <div
+                                className="absolute w-8 h-8 rounded-full border-2 border-amber-400 bg-amber-400/30 flex items-center justify-center text-amber-200 text-xs shadow-xl transition-all"
+                                style={{ left: `${sliderPosition}%`, top: '45%' }}
+                              >
+                                +
+                              </div>
+                            </div>
+                          )}
 
-                      {/* Decipherment Split-Slider Input */}
-                      <div className="absolute bottom-3 left-4 right-4 z-20 bg-slate-950/80 border border-slate-700/60 rounded-lg p-2 backdrop-blur-sm">
-                        <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
-                          <span>Original Ink Specimen</span>
-                          <span className="text-amber-400 font-bold">{sliderPosition}% deciphered</span>
-                          <span>Modern Transcription</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={sliderPosition}
-                          onChange={(e) => setSliderPosition(Number(e.target.value))}
-                          className="w-full accent-amber-400 h-1 bg-slate-800 rounded-lg cursor-pointer"
-                        />
-                      </div>
-                    </ImagePlaceholder>
+                          {/* Decipherment Split-Slider Input */}
+                          <div className="absolute bottom-3 left-4 right-4 z-20 bg-slate-950/85 border border-slate-700/80 rounded-xl p-2.5 shadow-xl backdrop-blur-md">
+                            <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 mb-1">
+                              <span className="font-semibold text-slate-200">Original Modi Ink Specimen</span>
+                              <span className="text-amber-400 font-bold">{sliderPosition}% deciphered</span>
+                              <span className="font-semibold text-slate-200">Devanagari Balance</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={sliderPosition}
+                              onChange={(e) => setSliderPosition(Number(e.target.value))}
+                              className="w-full accent-amber-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                            />
+                          </div>
+                        </>
+                      }
+                    />
                   </div>
                 </div>
 
