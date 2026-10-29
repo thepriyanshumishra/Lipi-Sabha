@@ -17,14 +17,21 @@ import {
   Volume2,
   Eye,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Send,
+  MessageSquare,
+  Clock,
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/audio';
 import { useLipi } from '@/contexts/LipiContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function LabPage() {
-  const { activeLipi, allLipis, setLipiId } = useLipi();
-  const [activeTab, setActiveTab] = useState<'validator' | 'compare' | 'audit'>('validator');
+  const { activeLipi, allLipis, setLipiId, submissions, submitTestSample } = useLipi();
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'validator' | 'compare' | 'audit' | 'community'>('validator');
 
   // Interactive Validator State
   const [inputText, setInputText] = useState(activeLipi.labData.sampleText);
@@ -53,7 +60,16 @@ export function LabPage() {
     summary: string;
   } | null>(null);
 
+  // Community Submission Modal State
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [submitDialect, setSubmitDialect] = useState('');
+  const [submitPhonetics, setSubmitPhonetics] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
   const [copied, setCopied] = useState(false);
+
+  // Submissions filtered to the active Lipi
+  const activeLipiSubmissions = submissions.filter((s) => s.lipiId === activeLipi.id);
 
   // When active Lipi changes, reload sample text & clear challenges
   useEffect(() => {
@@ -68,6 +84,7 @@ export function LabPage() {
       feedback: `Canonical ${activeLipi.nameEnglish} standard: 100% compliant with ${activeLipi.era} orthographic canon.`
     });
     setUploadAudit(null);
+    setSubmitSuccess(false);
   }, [activeLipi.id]);
 
   const handleCopy = (text: string) => {
@@ -135,6 +152,34 @@ export function LabPage() {
     });
   };
 
+  const handleOpenSubmitModal = () => {
+    setSubmitDialect('');
+    setSubmitPhonetics(`Tested expression in ${activeLipi.nameNative} (${activeLipi.nameEnglish}) for orthographic calibration.`);
+    setShowSubmitModal(true);
+    setSubmitSuccess(false);
+  };
+
+  const handleSubmitToSabha = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+
+    submitTestSample({
+      lipiId: activeLipi.id,
+      lipiName: `${activeLipi.nameNative} (${activeLipi.nameEnglish})`,
+      text: inputText.trim(),
+      phoneticContext: submitPhonetics.trim() || 'Orthography test sample submitted for calibration.',
+      dialectRegion: submitDialect.trim() || 'Standard Classical Tradition',
+      author: user?.display_name || 'Aria (User)'
+    });
+
+    playSuccessChime();
+    setSubmitSuccess(true);
+    setTimeout(() => {
+      setShowSubmitModal(false);
+      setActiveTab('community');
+    }, 1500);
+  };
+
   return (
     <div className="bg-cream min-h-screen py-10 select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -153,7 +198,7 @@ export function LabPage() {
                 {activeLipi.nameNative} Testing Bench & Decipherment Studio
               </h1>
               <p className="text-muted text-sm sm:text-base font-serif leading-relaxed">
-                Test spelling conventions, explore authentic historical specimens in <span className="font-bold text-ink">{activeLipi.nameNative} ({activeLipi.nameEnglish})</span>, and verify acoustic consistency with live speech synthesis.
+                Test spelling conventions, explore authentic historical specimens in <span className="font-bold text-ink">{activeLipi.nameNative} ({activeLipi.nameEnglish})</span>, and submit your tests to authorized reviewers.
               </p>
             </div>
 
@@ -232,6 +277,18 @@ export function LabPage() {
             >
               <Eye size={15} />
               <span>3. Historical Decipherment & Audit</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('community')}
+              className={`px-5 py-2.5 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer flex items-center gap-2 ${
+                activeTab === 'community'
+                  ? 'btn-chunky-purple'
+                  : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
+              }`}
+            >
+              <ShieldCheck size={15} />
+              <span>4. Sabha Verified Corpus ({activeLipiSubmissions.length})</span>
             </button>
           </div>
         </div>
@@ -313,11 +370,11 @@ export function LabPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       onClick={handleValidateInput}
-                      className="btn-chunky-purple px-6 py-2.5 text-xs inline-flex items-center gap-1.5 cursor-pointer"
+                      className="btn-chunky-purple px-5 py-2.5 text-xs inline-flex items-center gap-1.5 cursor-pointer"
                     >
                       <CheckCircle2 size={14} />
                       <span>Validate Against Sabha Standard</span>
@@ -329,10 +386,21 @@ export function LabPage() {
                         playAcousticChime(560, 0.3);
                         playPronunciation(inputText, activeLipi.gardenLetters[0]?.lang || 'hi-IN');
                       }}
-                      className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border-[1.5px] border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer"
+                      className="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border-[1.5px] border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer"
                     >
                       <Volume2 size={14} className="text-[#B45309]" />
-                      <span>Hear Pronunciation</span>
+                      <span>Hear Audio</span>
+                    </button>
+
+                    {/* Submit to Reviewers Button */}
+                    <button
+                      type="button"
+                      onClick={handleOpenSubmitModal}
+                      className="px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border-[1.5px] border-[#78350F]/40 hover:border-[#78350F] text-xs font-display font-extrabold text-[#78350F] dark:text-amber-300 inline-flex items-center gap-1.5 shadow-soft cursor-pointer transition-all"
+                      title="Send this test to authorized Reviewers for Sabha calibration"
+                    >
+                      <Send size={13} />
+                      <span>Submit to Reviewers →</span>
                     </button>
                   </div>
 
@@ -633,6 +701,217 @@ export function LabPage() {
             </div>
           </div>
         )}
+
+        {/* ========================================================
+            TAB 4: SABHA COMMUNITY TEST QUEUE & VERIFIED CORPUS
+            Directly connected to Reviewers for this specific Lipi!
+            ======================================================== */}
+        {activeTab === 'community' && (
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-[1.5px] border-border pb-4">
+              <div>
+                <h3 className="font-display text-xl font-black text-ink flex items-center gap-2">
+                  <ShieldCheck size={20} className="text-[#B45309]" />
+                  <span>Sabha Verified Corpus for {activeLipi.nameNative}</span>
+                </h3>
+                <p className="text-xs font-serif text-muted mt-0.5">
+                  Submissions made by users from the workbench and reviewed by authorized {activeLipi.nameEnglish} specialists.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpenSubmitModal}
+                className="btn-chunky-purple px-4 py-2 text-xs inline-flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+              >
+                <Send size={13} />
+                <span>+ Submit Current Test ({inputText.slice(0, 10)}...)</span>
+              </button>
+            </div>
+
+            {activeLipiSubmissions.length === 0 ? (
+              <div className="p-8 text-center border-[1.5px] border-dashed border-border rounded-2xl space-y-2">
+                <span className="text-3xl block">📜</span>
+                <p className="font-display font-bold text-ink text-sm">No community submissions recorded yet for {activeLipi.nameNative}.</p>
+                <p className="text-xs text-muted max-w-md mx-auto font-serif">
+                  Be the first! Validate a word or sentence in Tab 1 and click &quot;Submit to Reviewers&quot;.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {activeLipiSubmissions.map((sub) => {
+                  const isApproved = sub.status === 'approved';
+                  return (
+                    <div
+                      key={sub.id}
+                      className={`p-5 rounded-2xl border-[1.5px] transition-all space-y-3 ${
+                        isApproved
+                          ? 'bg-mint/15 border-mint-dark/30 shadow-soft'
+                          : 'bg-[#FFFDF9] dark:bg-slate-800/80 border-border shadow-soft'
+                      }`}
+                      style={{ borderBottomWidth: '3.5px', borderBottomColor: isApproved ? '#059669' : '#DCCFB9' }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono font-bold text-muted uppercase">
+                          Author: {sub.author} • {sub.submittedAt}
+                        </span>
+                        <span
+                          className={`text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full uppercase ${
+                            isApproved
+                              ? 'bg-mint-dark text-white'
+                              : 'bg-amber-100 text-[#78350F] dark:bg-amber-950 dark:text-amber-300'
+                          }`}
+                        >
+                          {isApproved ? '✓ Verified Canon' : '⏳ Awaiting Calibration'}
+                        </span>
+                      </div>
+
+                      {/* Submitted Sacred Text */}
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-border flex items-center justify-between gap-3">
+                        <span className="font-serif font-black text-2xl text-ink">
+                          {sub.text}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            playAcousticChime(580, 0.25);
+                            playPronunciation(sub.text, activeLipi.gardenLetters[0]?.lang || 'hi-IN');
+                          }}
+                          className="p-1.5 rounded-lg bg-neutral hover:bg-[#78350F] hover:text-white transition-colors cursor-pointer text-[#78350F]"
+                          title="Hear sound"
+                        >
+                          <Volume2 size={14} />
+                        </button>
+                      </div>
+
+                      <div className="space-y-1 text-xs">
+                        <p className="font-serif text-muted">
+                          <strong className="text-ink">Dialect Context:</strong> {sub.dialectRegion}
+                        </p>
+                        <p className="font-serif text-muted">
+                          <strong className="text-ink">Linguistic Notes:</strong> {sub.phoneticContext}
+                        </p>
+                      </div>
+
+                      {/* Reviewer Rationale if approved */}
+                      {isApproved && sub.reviewerRationale && (
+                        <div className="p-3 rounded-xl bg-mint/30 dark:bg-emerald-950/40 border border-mint-dark/30 text-xs space-y-1">
+                          <span className="font-bold text-mint-dark flex items-center gap-1 text-[11px]">
+                            <ShieldCheck size={13} />
+                            <span>Reviewed & Approved by {sub.reviewerName || 'Lipi Specialist'}:</span>
+                          </span>
+                          <p className="text-ink font-serif italic">{sub.reviewerRationale}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================
+            SUBMIT TO SABHA REVIEW MODAL
+            ======================================================== */}
+        <AnimatePresence>
+          {showSubmitModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-[#FFFDF8] dark:bg-slate-900 rounded-3xl border-[1.5px] border-[#78350F]/30 p-6 sm:p-8 max-w-lg w-full shadow-elevated space-y-5"
+              >
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-lg bg-[#78350F] text-white flex items-center justify-center font-serif font-black text-base">
+                      {activeLipi.symbol}
+                    </span>
+                    <div>
+                      <h3 className="font-display font-black text-base text-ink">
+                        Submit to {activeLipi.nameNative} Reviewers
+                      </h3>
+                      <p className="text-[11px] font-mono text-muted">Direct routing to authorized specialists</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowSubmitModal(false)}
+                    className="p-1 rounded-lg text-muted hover:text-ink cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {submitSuccess ? (
+                  <div className="p-6 text-center space-y-2 bg-mint/30 rounded-2xl border border-mint-dark/30">
+                    <CheckCircle2 size={32} className="text-mint-dark mx-auto" />
+                    <h4 className="font-display font-black text-base text-ink">Submission Dispatched!</h4>
+                    <p className="text-xs font-serif text-muted">
+                      Your test sample has been placed in the dedicated <strong className="text-ink">{activeLipi.nameNative} Review Queue</strong>. An authorized reviewer will inspect it shortly.
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmitToSabha} className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-display font-bold text-ink uppercase">
+                        Specimen to Submit:
+                      </label>
+                      <div className="p-3 rounded-xl bg-neutral/50 dark:bg-slate-800 border border-border font-serif text-xl font-black text-ink">
+                        {inputText}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-display font-bold text-ink uppercase">
+                        Dialect or Speaker Tradition:
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={submitDialect}
+                        onChange={(e) => setSubmitDialect(e.target.value)}
+                        placeholder="e.g. Classical Sanskrit, Varanasi Chanting, Pune Chancellery..."
+                        className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-border focus:border-[#78350F] text-xs text-ink"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-display font-bold text-ink uppercase">
+                        Linguistic Purpose / Observation:
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        value={submitPhonetics}
+                        onChange={(e) => setSubmitPhonetics(e.target.value)}
+                        placeholder="Explain what phoneme or rule is being tested..."
+                        className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-border focus:border-[#78350F] text-xs text-ink font-serif"
+                      />
+                    </div>
+
+                    <div className="pt-2 flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowSubmitModal(false)}
+                        className="px-4 py-2 rounded-xl border border-border text-xs font-bold text-muted hover:text-ink cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn-chunky-purple px-5 py-2 text-xs inline-flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Send size={13} />
+                        <span>Confirm & Dispatch (+50 XP)</span>
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
       </div>
     </div>

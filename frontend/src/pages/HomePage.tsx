@@ -20,26 +20,27 @@ import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/
 import { useLipi } from '@/contexts/LipiContext';
 
 export function HomePage() {
-  const { activeLipi, allLipis, setLipiId } = useLipi();
-  const knowledgeNodes = activeLipi.knowledgeNodes;
+  const { activeLipi, allLipis, setLipiId, activeLipiNodes } = useLipi();
+  const knowledgeNodes = activeLipiNodes;
 
-  const [selectedNodeId, setSelectedNodeId] = useState<string>(knowledgeNodes[0]?.id || '');
+  const [selectedNodeId, setSelectedNodeId] = useState<string>(activeLipiNodes[0]?.id || '');
   const [activeStep, setActiveStep] = useState<'learn' | 'quiz' | 'deep'>('learn');
   const [quizSelection, setQuizSelection] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [earnedXP, setEarnedXP] = useState(450);
   const [activeGardenLetterIdx, setActiveGardenLetterIdx] = useState<number>(0);
 
-  // When activeLipi changes, reset to the first node of the new Lipi
+  // When activeLipi changes or reviewer adds a node, stay in sync
   useEffect(() => {
-    if (activeLipi.knowledgeNodes.length > 0) {
-      setSelectedNodeId(activeLipi.knowledgeNodes[0].id);
-      setActiveStep('learn');
-      setQuizSelection(null);
-      setQuizSubmitted(false);
-      setActiveGardenLetterIdx(0);
+    if (activeLipiNodes.length > 0) {
+      if (!activeLipiNodes.some((n) => n.id === selectedNodeId)) {
+        setSelectedNodeId(activeLipiNodes[0].id);
+        setActiveStep('learn');
+        setQuizSelection(null);
+        setQuizSubmitted(false);
+      }
     }
-  }, [activeLipi.id]);
+  }, [activeLipi.id, activeLipiNodes]);
 
   const activeNode = knowledgeNodes.find((n) => n.id === selectedNodeId) || knowledgeNodes[0];
 

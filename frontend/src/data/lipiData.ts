@@ -1644,3 +1644,111 @@ export const SUPPORTED_LIPIS: LipiDefinition[] = [
 export function getLipiById(id: string): LipiDefinition {
   return SUPPORTED_LIPIS.find((l) => l.id === id) || SUPPORTED_LIPIS[0];
 }
+
+export interface LipiTestSubmission {
+  id: string;
+  lipiId: string;
+  lipiName: string;
+  text: string;
+  phoneticContext: string;
+  dialectRegion: string;
+  author: string;
+  status: 'pending' | 'approved' | 'rejected' | 'revisions_requested';
+  reviewerRationale?: string;
+  reviewerName?: string;
+  submittedAt: string;
+  evaluatedAt?: string;
+}
+
+export const DEFAULT_SUBMISSIONS: LipiTestSubmission[] = [
+  // Devanagari submissions
+  {
+    id: 'sub-dev-1',
+    lipiId: 'devanagari',
+    lipiName: 'देवनागरी (Devanagari)',
+    text: 'सत्यमेव जयते नानृतम्',
+    phoneticContext: 'Mundaka Upanishad 3.1.6 ("Truth alone triumphs, not falsehood"). Testing Sandhi resolution between जयते and नानृतम्.',
+    dialectRegion: 'Classical Vedic / Northern India',
+    author: 'Aria (User)',
+    status: 'pending',
+    submittedAt: 'Today, 11:20 AM'
+  },
+  {
+    id: 'sub-dev-2',
+    lipiId: 'devanagari',
+    lipiName: 'देवनागरी (Devanagari)',
+    text: 'गङ्गा जलम् निर्मलम् भवति',
+    phoneticContext: 'Testing classical pancham varna ligature (ङ्क/ङ्ग) vs modern simplified anusvara (गंगा).',
+    dialectRegion: 'Varanasi Sanskrit Tradition',
+    author: 'Kavi (User)',
+    status: 'approved',
+    reviewerRationale: 'Consensus approved. Both homorganic nasal (ङ्) and modern bindu (ं) are acceptable; classical Vedic texts recommend preserving the explicit velar conjunct.',
+    reviewerName: 'Meera (Devanagari Reviewer)',
+    submittedAt: 'Yesterday, 3:45 PM',
+    evaluatedAt: 'Yesterday, 5:10 PM'
+  },
+  // Brahmi submissions
+  {
+    id: 'sub-brahmi-1',
+    lipiId: 'brahmi',
+    lipiName: 'ब्राह्मी (Ashokan Brahmi)',
+    text: '𑀤𑁂𑀯𑀸𑀦𑀁 𑀧𑀺𑀬𑁂𑀦 𑀧𑀺𑀬𑀤𑀲𑀺',
+    phoneticContext: 'Testing vowel tick orientation on imperial titular phrase from Girnar Rock Edict II.',
+    dialectRegion: 'Girnar / Saurashtra Prakrit',
+    author: 'Scribe Asha',
+    status: 'pending',
+    submittedAt: 'Today, 9:15 AM'
+  },
+  // Modi submissions
+  {
+    id: 'sub-modi-1',
+    lipiId: 'modi',
+    lipiName: 'मोडी (Modi Script)',
+    text: '𑘭𑘿𑘪𑘨𑘰𑘕𑘿𑘧 𑘮𑘰 𑘦𑘰𑘛𑘰 𑘕𑘡𑘿𑘦𑘭𑘲𑘟𑘿𑘠 𑘮𑘎𑘿𑘎 𑘁𑘮𑘹',
+    phoneticContext: 'Historic proclamation ("Swarajya is my birthright") in continuous unlifted scribal hand.',
+    dialectRegion: 'Pune Chancellery Archive',
+    author: 'Rajesh (Pune Archivist)',
+    status: 'pending',
+    submittedAt: 'Today, 10:05 AM'
+  },
+  // Sharada submissions
+  {
+    id: 'sub-sharada-1',
+    lipiId: 'sharada',
+    lipiName: 'शारदा (Sharada Script)',
+    text: '𑆯𑆳𑆫𑆢𑆳 𑆥𑆵𑆜 𑆑𑆳𑆯𑇀𑆩𑆵𑆫',
+    phoneticContext: 'Testing birch-bark triangular apex alignment on sacred place names.',
+    dialectRegion: 'Kashmir Valley Manuscript Scriptorium',
+    author: 'Sunil (Kashmir Heritage)',
+    status: 'pending',
+    submittedAt: 'Yesterday, 6:00 PM'
+  },
+  // Grantha submissions
+  {
+    id: 'sub-grantha-1',
+    lipiId: 'grantha',
+    lipiName: 'ग्रन्थ (Grantha Script)',
+    text: '𑌓𑌁 𑌨𑌮𑌃 𑌶𑌿𑌵𑌾𑌯',
+    phoneticContext: 'Panchakshari mantra carved with non-tearing rounded curves on Palmyra talapatra.',
+    dialectRegion: 'Thanjavur Sanskrit Vedic Circle',
+    author: 'Sundaram (Vedic Scribe)',
+    status: 'pending',
+    submittedAt: 'Today, 8:40 AM'
+  },
+  // IAST submissions
+  {
+    id: 'sub-iast-1',
+    lipiId: 'iast',
+    lipiName: 'रोमन (IAST Diacritics)',
+    text: 'sarve bhavantu sukhinaḥ sarve santu nirāmayāḥ',
+    phoneticContext: 'Testing macron strictness (ā) against double vowels (aa) in international digital printing.',
+    dialectRegion: 'Geneva 1894 Classical Standard',
+    author: 'Elena (Linguist)',
+    status: 'approved',
+    reviewerRationale: 'Conforms 100% to IAST Unicode NFC standards. Macrons correctly replace digraphs.',
+    reviewerName: 'Meera (Orthography Reviewer)',
+    submittedAt: '2 days ago',
+    evaluatedAt: 'Yesterday, 11:00 AM'
+  }
+];
+
