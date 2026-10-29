@@ -11,6 +11,7 @@ export interface ImagePlaceholderProps {
   aspectRatio?: string;
   badgePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
   showDetails?: boolean;
+  overlayChildren?: boolean;
   children?: React.ReactNode;
 }
 
@@ -21,6 +22,7 @@ export function ImagePlaceholder({
   aspectRatio,
   badgePosition = 'bottom-left',
   showDetails = true,
+  overlayChildren = false,
   children,
 }: ImagePlaceholderProps) {
   const [imageError, setImageError] = useState(false);
@@ -86,8 +88,8 @@ export function ImagePlaceholder({
             </>
           )}
 
-          {/* Children Overlay when provided (e.g. avatar strip or SVG seal) */}
-          {children ? (
+          {/* Fallback Children (when NOT treated as persistent overlay) */}
+          {children && !overlayChildren ? (
             <div className="relative z-10 w-full h-full flex items-center justify-center">
               {children}
             </div>
@@ -149,6 +151,13 @@ export function ImagePlaceholder({
             [{isBackground ? 'bg-slot' : 'slot'}: {assetId}]
             {asset && !isBackground && <span className="opacity-70 ml-1">({asset.width}&times;{asset.height})</span>}
           </div>
+        </div>
+      )}
+
+      {/* Persistent Interactive Overlay Children (e.g. Decipherment slider & reticle in Hero) */}
+      {children && overlayChildren && (
+        <div className="absolute inset-0 z-30 pointer-events-none [&>*]:pointer-events-auto">
+          {children}
         </div>
       )}
     </div>

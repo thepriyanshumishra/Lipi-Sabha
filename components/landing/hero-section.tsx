@@ -147,6 +147,7 @@ export function HeroSection() {
                       aspectRatio="4/3"
                       className="w-full h-full rounded-none border-none"
                       badgePosition="top-left"
+                      overlayChildren={true}
                     >
                       {/* Overlay Stroke Analysis Layer */}
                       {showStrokeAnalysis && (
