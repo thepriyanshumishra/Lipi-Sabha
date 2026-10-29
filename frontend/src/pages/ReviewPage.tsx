@@ -22,12 +22,16 @@ import {
   X,
   FileCheck2,
   Radio,
-  Send
+  Send,
+  Compass,
+  ThumbsUp,
+  Image as ImageIcon,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLipi } from '@/contexts/LipiContext';
 import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/audio';
-import type { LipiKnowledgeNode } from '@/data/lipiData';
+import type { LipiKnowledgeNode, ScriptProject } from '@/data/lipiData';
 
 export function ReviewPage() {
   const { user, isReviewer } = useAuth();
@@ -40,15 +44,41 @@ export function ReviewPage() {
     deleteKnowledgeNode,
     submissions,
     approveSubmission,
-    rejectSubmission
+    rejectSubmission,
+    projects,
+    ratifyProject
   } = useLipi();
 
-  const [activeTab, setActiveTab] = useState<'queue' | 'treeBuilder' | 'principles'>('queue');
+  const [activeTab, setActiveTab] = useState<'dilemmas' | 'queue' | 'treeBuilder' | 'principles'>('dilemmas');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved'>('all');
+  const [dilemmaFilter, setDilemmaFilter] = useState<'all' | 'consultation' | 'ratified'>('all');
 
-  // Review Rationale state map
+  // Review Rationale & Chat state map
   const [rationaleMap, setRationaleMap] = useState<Record<string, string>>({});
   const [decisionFeedback, setDecisionFeedback] = useState<string | null>(null);
+  const [endorsedBranchMap, setEndorsedBranchMap] = useState<Record<string, string>>({});
+  const [projectChatMap, setProjectChatMap] = useState<Record<string, string>>({});
+
+  // Dilemma projects scoped to active Lipi
+  const lipiProjects = projects.filter((p) => p.lipiId === activeLipi.id);
+  const filteredProjects = lipiProjects.filter((p) => {
+    if (dilemmaFilter === 'consultation') return p.status === 'consultation';
+    if (dilemmaFilter === 'ratified') return p.status === 'ratified';
+    return true;
+  });
+  const pendingDilemmas = lipiProjects.filter((p) => p.status === 'consultation').length;
+  const ratifiedDilemmas = lipiProjects.filter((p) => p.status === 'ratified').length;
+
+  const handleRatifyDilemma = (proj: ScriptProject) => {
+    const branchId = endorsedBranchMap[proj.id] || proj.branches[0]?.id;
+    const rationale =
+      projectChatMap[proj.id]?.trim() ||
+      `Verified by ${user?.display_name || 'Lipi Specialist'}. Conforms with documented ${activeLipi.nameNative} orthography and community consensus.`;
+    ratifyProject(proj.id, branchId, rationale, user?.display_name || 'Meera (Reviewer)');
+    playSuccessChime();
+    setDecisionFeedback(`Sabha consensus ratified for "${proj.title}"! Decision tree is now certified.`);
+    setTimeout(() => setDecisionFeedback(null), 3500);
+  };
 
   // New Tree Node Form State
   const [showAddNodeModal, setShowAddNodeModal] = useState(false);
@@ -227,7 +257,16 @@ export function ReviewPage() {
             </div>
 
             {/* Scope Badge & Stats */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-3 shrink-0 flex-wrap">
+              <div className="p-4 rounded-2xl bg-[#FFFDF9] dark:bg-slate-800 border-[1.5px] border-border text-center space-y-1 shadow-soft">
+                <span className="text-[10px] font-mono font-bold uppercase text-muted block">
+                  Dilemmas
+                </span>
+                <span className="font-display font-black text-2xl text-[#78350F] dark:text-amber-400">
+                  {pendingDilemmas}
+                </span>
+              </div>
+
               <div className="p-4 rounded-2xl bg-[#FFFDF9] dark:bg-slate-800 border-[1.5px] border-border text-center space-y-1 shadow-soft">
                 <span className="text-[10px] font-mono font-bold uppercase text-muted block">
                   Pending Tests
@@ -251,7 +290,7 @@ export function ReviewPage() {
                   Ratified Canon
                 </span>
                 <span className="font-display font-black text-2xl text-mint-dark">
-                  {approvedCount}
+                  {approvedCount + ratifiedDilemmas}
                 </span>
               </div>
             </div>
@@ -283,6 +322,18 @@ export function ReviewPage() {
           {/* Workbench Tabs */}
           <div className="flex flex-wrap gap-2.5 pt-2">
             <button
+              onClick={() => setActiveTab('dilemmas')}
+              className={`px-5 py-2.5 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer flex items-center gap-2 ${
+                activeTab === 'dilemmas'
+                  ? 'btn-chunky-purple'
+                  : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
+              }`}
+            >
+              <Compass size={15} />
+              <span>1. Community Dilemmas & Projects ({pendingDilemmas} in consultation)</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('queue')}
               className={`px-5 py-2.5 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer flex items-center gap-2 ${
                 activeTab === 'queue'
@@ -291,7 +342,7 @@ export function ReviewPage() {
               }`}
             >
               <ShieldCheck size={15} />
-              <span>1. {activeLipi.nameNative} Test Queue ({pendingCount} pending)</span>
+              <span>2. {activeLipi.nameNative} Test Queue ({pendingCount} pending)</span>
             </button>
 
             <button
@@ -303,7 +354,7 @@ export function ReviewPage() {
               }`}
             >
               <PlusCircle size={15} />
-              <span>2. Curate Knowledge Tree & Quests ({activeLipiNodes.length} Levels)</span>
+              <span>3. Curate Tree & Quests ({activeLipiNodes.length} Levels)</span>
             </button>
 
             <button
@@ -315,7 +366,7 @@ export function ReviewPage() {
               }`}
             >
               <Scale size={15} />
-              <span>3. Sabha Calibration Principles</span>
+              <span>4. Sabha Calibration Principles</span>
             </button>
           </div>
         </div>
@@ -333,7 +384,297 @@ export function ReviewPage() {
         )}
 
         {/* ========================================================
-            TAB 1: ORTHOGRAPHY REVIEW QUEUE FOR ACTIVE LIPI
+            TAB 1: COMMUNITY DILEMMA CONSULTATION & CHAT (MVP CORE)
+            Solves: "Reena" R-I-N-A vs R-E-E-N-A vs रीना, photo decipherments
+            Reviewer votes, provides linguistic chat rationale, and ratifies!
+            ======================================================== */}
+        {activeTab === 'dilemmas' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-[#78350F] dark:text-amber-300 text-[10px] font-mono font-bold uppercase tracking-wider mb-1">
+                  <span>PS 5.4 Sovereign Consultation • Bhasha & Bol Bharat</span>
+                </div>
+                <h2 className="font-display text-xl font-black text-ink">
+                  Community Dilemmas & Projects for {activeLipi.nameNative}
+                </h2>
+                <p className="text-xs font-serif text-muted">
+                  Spoken vernacular words and inscription photos submitted by native speakers. Reviewers provide linguistic guidance without overriding speaker sovereignty.
+                </p>
+              </div>
+
+              {/* Status Filter */}
+              <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-slate-800 rounded-xl border border-border self-start sm:self-auto">
+                <button
+                  onClick={() => setDilemmaFilter('all')}
+                  className={`px-3 py-1 rounded-lg text-xs font-display font-bold cursor-pointer ${
+                    dilemmaFilter === 'all' ? 'bg-[#78350F] text-white shadow-soft' : 'text-muted hover:text-ink'
+                  }`}
+                >
+                  All ({lipiProjects.length})
+                </button>
+                <button
+                  onClick={() => setDilemmaFilter('consultation')}
+                  className={`px-3 py-1 rounded-lg text-xs font-display font-bold cursor-pointer ${
+                    dilemmaFilter === 'consultation' ? 'bg-[#78350F] text-white shadow-soft' : 'text-muted hover:text-ink'
+                  }`}
+                >
+                  In Consultation ({pendingDilemmas})
+                </button>
+                <button
+                  onClick={() => setDilemmaFilter('ratified')}
+                  className={`px-3 py-1 rounded-lg text-xs font-display font-bold cursor-pointer ${
+                    dilemmaFilter === 'ratified' ? 'bg-[#78350F] text-white shadow-soft' : 'text-muted hover:text-ink'
+                  }`}
+                >
+                  Ratified ({ratifiedDilemmas})
+                </button>
+              </div>
+            </div>
+
+            {filteredProjects.length === 0 ? (
+              <div className="p-12 text-center bg-white dark:bg-slate-900 border-[1.5px] border-dashed border-border rounded-3xl space-y-3">
+                <span className="text-4xl block">✨</span>
+                <h3 className="font-display font-bold text-base text-ink">
+                  No {dilemmaFilter === 'consultation' ? 'pending' : ''} dilemmas for {activeLipi.nameNative}.
+                </h3>
+                <p className="text-xs text-muted max-w-md mx-auto font-serif">
+                  All community projects for this script have been evaluated, or new ones can be posted from the Lab!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredProjects.map((proj) => {
+                  const isRatified = proj.status === 'ratified';
+                  const selectedBranchId = endorsedBranchMap[proj.id] || proj.branches[0].id;
+                  const chatComment = projectChatMap[proj.id] || '';
+
+                  return (
+                    <div
+                      key={proj.id}
+                      className={`p-6 sm:p-8 rounded-3xl border-[1.5px] transition-all space-y-6 ${
+                        isRatified
+                          ? 'bg-mint/10 border-mint-dark/30 shadow-card'
+                          : 'bg-white dark:bg-slate-900 border-border shadow-card'
+                      }`}
+                      style={{
+                        borderBottomWidth: '4px',
+                        borderBottomColor: isRatified ? '#059669' : '#78350F'
+                      }}
+                    >
+                      {/* Project Meta Bar */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-[#78350F] dark:text-amber-300 text-[10px] font-mono font-bold uppercase">
+                              {proj.dialectContext}
+                            </span>
+                            <span className="text-[11px] font-mono text-muted">
+                              Author: {proj.author} • {proj.submittedAt}
+                            </span>
+                          </div>
+                          <h3 className="font-display text-xl sm:text-2xl font-black text-ink">
+                            {proj.title}
+                          </h3>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              playAcousticChime(560, 0.3);
+                              playPronunciation(proj.spokenWord, 'hi-IN');
+                            }}
+                            className="btn-chunky-purple px-4 py-2 text-xs inline-flex items-center gap-1.5 cursor-pointer shadow-soft"
+                          >
+                            <Volume2 size={15} />
+                            <span>Hear Spoken Word ({proj.spokenWord.split('/')[0]})</span>
+                          </button>
+
+                          <span
+                            className={`text-[10px] font-mono font-extrabold px-3 py-1 rounded-full uppercase ${
+                              isRatified
+                                ? 'bg-mint-dark text-white'
+                                : 'bg-amber-100 text-[#78350F] dark:bg-amber-950 dark:text-amber-300'
+                            }`}
+                          >
+                            {isRatified ? '✓ Ratified Sabha Consensus' : '⚖️ In Community Consultation'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Photo Specimen if uploaded */}
+                      {proj.imageUrl && (
+                        <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-slate-800 border border-[#78350F]/20 flex items-center gap-4">
+                          <img
+                            src={proj.imageUrl}
+                            alt="Specimen"
+                            className="w-24 h-24 object-cover rounded-xl border border-border shadow-soft"
+                          />
+                          <div>
+                            <span className="font-mono text-[10px] font-bold text-[#78350F] uppercase block">
+                              Attached Inscription / Fieldwork Photo:
+                            </span>
+                            <p className="font-serif text-xs text-ink mt-0.5">
+                              Visual artifact submitted for decipherment and script standardization.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      <p className="font-serif text-xs sm:text-sm text-ink leading-relaxed">
+                        {proj.description}
+                      </p>
+
+                      {/* Competing Branches & Community Votes */}
+                      <div className="space-y-3">
+                        <span className="text-xs font-display font-extrabold uppercase text-muted tracking-wider block">
+                          Competing Knowledge Tree Branches & Live Speaker Votes:
+                        </span>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {proj.branches.map((branch) => {
+                            const isRecommended = isRatified
+                              ? proj.reviewerVerdict?.recommendedBranchId === branch.id
+                              : selectedBranchId === branch.id;
+
+                            return (
+                              <div
+                                key={branch.id}
+                                onClick={() => !isRatified && setEndorsedBranchMap((prev) => ({ ...prev, [proj.id]: branch.id }))}
+                                className={`p-4 rounded-2xl border-[1.5px] transition-all space-y-3 cursor-pointer ${
+                                  isRecommended
+                                    ? 'bg-amber-50/80 dark:bg-amber-950/40 border-[#78350F] shadow-soft'
+                                    : 'bg-white dark:bg-slate-800 border-border hover:border-border-dark'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between border-b border-border pb-2">
+                                  <span className="font-display font-bold text-xs text-ink">
+                                    {branch.label}
+                                  </span>
+                                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-neutral text-muted">
+                                    {branch.scriptType}
+                                  </span>
+                                </div>
+
+                                <div className="text-center py-2">
+                                  <span className="font-serif font-black text-3xl text-ink block">
+                                    {branch.representation}
+                                  </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                                  <div className="p-2 rounded-lg bg-neutral/80 dark:bg-slate-700/60">
+                                    <span className="text-muted block">Keypad Ease:</span>
+                                    <span className="font-bold text-ink">{branch.easeOfLearning}</span>
+                                  </div>
+                                  <div className="p-2 rounded-lg bg-neutral/80 dark:bg-slate-700/60">
+                                    <span className="text-muted block">Phonetic Fit:</span>
+                                    <span className="font-bold text-ink">{branch.phoneticAccuracy}%</span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center justify-between text-xs pt-1 border-t border-border">
+                                  <span className="font-mono font-bold text-[#78350F] dark:text-amber-300">
+                                    👍 {branch.communityVotes} Votes
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      playAcousticChime(600, 0.2);
+                                      playPronunciation(branch.audioPronunciation, 'hi-IN');
+                                    }}
+                                    className="p-1 rounded-lg text-muted hover:text-[#78350F] cursor-pointer"
+                                    title="Hear branch audio"
+                                  >
+                                    <Volume2 size={14} />
+                                  </button>
+                                </div>
+
+                                <p className="text-[11px] font-serif text-muted leading-tight">
+                                  {branch.rationale}
+                                </p>
+
+                                {!isRatified && (
+                                  <div className="pt-2">
+                                    <label className="flex items-center gap-2 cursor-pointer text-xs font-display font-bold text-ink">
+                                      <input
+                                        type="radio"
+                                        name={`endorse-${proj.id}`}
+                                        checked={selectedBranchId === branch.id}
+                                        onChange={() => setEndorsedBranchMap((prev) => ({ ...prev, [proj.id]: branch.id }))}
+                                        className="accent-[#78350F]"
+                                      />
+                                      <span>Endorse this branch</span>
+                                    </label>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Reviewer Consultation / Chat / Verdict Console */}
+                      {isRatified && proj.reviewerVerdict ? (
+                        <div className="p-5 rounded-2xl bg-mint/20 dark:bg-emerald-950/30 border-[1.5px] border-mint-dark/40 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-display font-extrabold text-mint-dark uppercase flex items-center gap-1.5">
+                              <ShieldCheck size={16} />
+                              <span>Ratified by {proj.reviewerVerdict.reviewerName}</span>
+                            </span>
+                            <span className="text-[10px] font-mono text-muted">{proj.reviewerVerdict.ratifiedAt}</span>
+                          </div>
+                          <p className="text-xs font-serif text-ink italic leading-relaxed">
+                            &ldquo;{proj.reviewerVerdict.rationale}&rdquo;
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="p-5 rounded-2xl bg-amber-50/50 dark:bg-slate-800/80 border-[1.5px] border-[#78350F]/20 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <MessageSquare size={16} className="text-[#B45309]" />
+                            <span className="text-xs font-display font-black text-ink uppercase tracking-wider">
+                              Reviewer Chat & Linguistic Guidance (रिव्यूअर संवाद एवं सर्वसम्मति):
+                            </span>
+                          </div>
+
+                          <textarea
+                            rows={2}
+                            value={chatComment}
+                            onChange={(e) => setProjectChatMap((prev) => ({ ...prev, [proj.id]: e.target.value }))}
+                            placeholder="Write your qualified linguistic analysis (e.g. vowel length phonology, keypad accessibility, dialect balance)..."
+                            className="w-full p-3 rounded-xl bg-white dark:bg-slate-900 border border-border focus:border-[#78350F] text-xs font-serif text-ink"
+                          />
+
+                          <div className="flex items-center justify-between pt-1">
+                            <div className="text-[11px] font-serif text-muted">
+                              Endorsing:{' '}
+                              <strong className="text-ink">
+                                {proj.branches.find((b) => b.id === selectedBranchId)?.label}
+                              </strong>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRatifyDilemma(proj)}
+                              className="btn-chunky-purple px-6 py-2.5 text-xs inline-flex items-center gap-2 cursor-pointer shadow-soft"
+                            >
+                              <ShieldCheck size={15} />
+                              <span>Ratify Community Consensus (सभा निर्णय पुष्टि)</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+        {/* ========================================================
+            TAB 2: ORTHOGRAPHY REVIEW QUEUE FOR ACTIVE LIPI
             Reviewer receives ONLY tests posted for this specific Lipi
             ======================================================== */}
         {activeTab === 'queue' && (

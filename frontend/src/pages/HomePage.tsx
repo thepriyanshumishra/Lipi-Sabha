@@ -14,15 +14,28 @@ import {
   X,
   Radio,
   Compass,
-  Layers
+  Layers,
+  ThumbsUp,
+  Image as ImageIcon,
+  ShieldCheck,
+  PlusCircle,
+  HelpCircle
 } from 'lucide-react';
 import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/audio';
 import { useLipi } from '@/contexts/LipiContext';
+import { CreateProjectModal } from '@/components/CreateProjectModal';
 
 export function HomePage() {
-  const { activeLipi, allLipis, setLipiId, activeLipiNodes } = useLipi();
+  const { activeLipi, allLipis, setLipiId, activeLipiNodes, projects, voteOnBranch } = useLipi();
   const knowledgeNodes = activeLipiNodes;
 
+  // View mode: 'communityDilemmas' (MVP core: Reena dilemma & user project trees) vs 'heritage' (4-level foundational trail)
+  const [treeMode, setTreeMode] = useState<'communityDilemmas' | 'heritage'>('communityDilemmas');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id || 'proj-reena-orthography');
+  const [votedBranches, setVotedBranches] = useState<Record<string, boolean>>({});
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Heritage Tree State
   const [selectedNodeId, setSelectedNodeId] = useState<string>(activeLipiNodes[0]?.id || '');
   const [activeStep, setActiveStep] = useState<'learn' | 'quiz' | 'deep'>('learn');
   const [quizSelection, setQuizSelection] = useState<number | null>(null);
@@ -42,6 +55,7 @@ export function HomePage() {
   }, [activeLipi.id, activeLipiNodes]);
 
   const activeNode = knowledgeNodes.find((n) => n.id === selectedNodeId) || knowledgeNodes[0];
+  const activeProject = projects.find((p) => p.id === selectedProjectId) || projects[0];
 
   const handleSelectNode = (nodeId: string) => {
     setSelectedNodeId(nodeId);
@@ -62,12 +76,18 @@ export function HomePage() {
     }
   };
 
+  const handleVote = (branchId: string) => {
+    if (votedBranches[branchId]) return;
+    voteOnBranch(activeProject.id, branchId);
+    setVotedBranches((prev) => ({ ...prev, [branchId]: true }));
+    playSuccessChime();
+  };
 
   return (
     <div className="bg-cream text-ink min-h-screen select-none">
       {/* ========================================================
           HERO: ILLUMINATED GITA BOOK / SACRED MANUSCRIPT OPENING
-          Clean, minimal, uncluttered
+          Clean, minimal, uncluttered as requested
           ======================================================== */}
       <section className="relative pt-12 pb-14 lg:pt-16 lg:pb-16 border-b-[1.5px] border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
@@ -87,483 +107,619 @@ export function HomePage() {
       </section>
 
       {/* ========================================================
-          PAGE 1: ज्ञान वृक्ष — THE 3D KNOWLEDGE TREE
-          Sculpted 3D medallions, organic golden branching path,
-          and interactive 3-stage deep wisdom bloom
+          ज्ञान वृक्ष — THE KNOWLEDGE & DECISION TREE
+          Features:
+          1. Community Dilemma Trees (e.g. "Reena" R-I-N-A vs R-E-E-N-A vs रीना)
+          2. Heritage Trail & Quests
           ======================================================== */}
-      <section id="tree-of-knowledge" className="py-14 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <div className="inline-block px-3 py-1 rounded-full bg-purple-light border border-purple/30 text-xs font-serif font-bold text-purple uppercase">
-            ज्ञान वृक्ष • The 3D Knowledge Tree
+      <section id="tree-of-knowledge" className="py-12 lg:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        
+        {/* Tree Mode Switcher Tabs */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-[1.5px] border-border pb-4">
+          <div className="space-y-1">
+            <div className="inline-block px-3 py-1 rounded-full bg-purple-light border border-purple/30 text-xs font-serif font-bold text-purple uppercase">
+              ज्ञान वृक्ष • Sovereign Knowledge & Decision Tree
+            </div>
+            <h2 className="font-display text-2xl sm:text-3xl font-black text-ink">
+              {treeMode === 'communityDilemmas'
+                ? 'Community Orthography Dilemmas & Decision Trees'
+                : `The Sacred Heritage Trail of ${activeLipi.nameNative}`}
+            </h2>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl font-black text-ink">
-            Ascend the Living Tree of {activeLipi.nameNative}
-          </h2>
-          <p className="text-muted text-sm font-serif">
-            Step upon the sculpted 3D medallions along the golden vine. Each node unpacks an authentic orthographic lesson, an interactive quiz, and living community wisdom for {activeLipi.nameEnglish}.
-          </p>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setTreeMode('communityDilemmas')}
+              className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+                treeMode === 'communityDilemmas'
+                  ? 'btn-chunky-purple'
+                  : 'bg-white dark:bg-slate-800 border-[1.5px] border-border text-muted hover:text-ink'
+              }`}
+            >
+              <Compass size={14} />
+              <span>Community Dilemma Trees ({projects.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTreeMode('heritage')}
+              className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+                treeMode === 'heritage'
+                  ? 'btn-chunky-purple'
+                  : 'bg-white dark:bg-slate-800 border-[1.5px] border-border text-muted hover:text-ink'
+              }`}
+            >
+              <BookOpen size={14} />
+              <span>Script Heritage Lessons ({knowledgeNodes.length})</span>
+            </button>
+          </div>
         </div>
 
-        {/* The 3D Tree & Detail Canvas */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: 3D Sculpted Tree Path */}
-          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 shadow-card space-y-6">
-            <div className="flex items-center justify-between border-b-[1.5px] border-border pb-3">
-              <span className="text-xs font-display font-extrabold uppercase tracking-wider text-[#B45309] dark:text-amber-400 flex items-center gap-1.5">
-                <span>🌿</span>
-                <span>The 3D Discovery Trail</span>
+        {/* ========================================================
+            MODE A: COMMUNITY ORTHOGRAPHY DILEMMA TREE (MVP CORE)
+            Solves: "How should Reena be written? R-I-N-A, R-E-E-N-A, or रीना?"
+            ======================================================== */}
+        {treeMode === 'communityDilemmas' && activeProject && (
+          <div className="space-y-8">
+            {/* Dilemma Selector Tabs if multiple projects exist */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-mono font-bold uppercase text-muted tracking-wider">
+                Select Active Dilemma:
               </span>
-              <span className="text-xs font-mono font-bold text-muted">
-                Branch {activeNode?.level || 1} of {knowledgeNodes.length}
-              </span>
+              {projects.map((proj) => (
+                <button
+                  key={proj.id}
+                  type="button"
+                  onClick={() => setSelectedProjectId(proj.id)}
+                  className={`px-3 py-1.5 rounded-xl font-display text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                    proj.id === activeProject.id
+                      ? 'bg-[#78350F] text-white shadow-soft font-bold'
+                      : 'bg-white dark:bg-slate-800 border border-border text-ink hover:border-[#78350F]/50'
+                  }`}
+                >
+                  <span>{proj.status === 'ratified' ? '✓' : '⚖️'}</span>
+                  <span className="truncate max-w-[200px]">{proj.title}</span>
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="ml-auto text-xs font-display font-extrabold text-[#78350F] dark:text-amber-300 hover:text-purple bg-amber-50 dark:bg-amber-950/40 border border-[#78350F]/30 hover:border-[#78350F] px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-soft transition-all"
+              >
+                <PlusCircle size={14} />
+                <span>+ नया लिपि प्रोजेक्ट बनाएं (Create Dilemma)</span>
+              </button>
             </div>
 
-            {/* 3D Stepping Stone Nodes */}
-            <div className="space-y-4 relative py-2">
-              {/* Organic 3D Golden Vine Line with Soft Drop Shadow */}
-              <div
-                className="absolute left-[34px] top-6 bottom-6 w-1 rounded-full -z-0"
-                style={{
-                  background: 'linear-gradient(to bottom, #D97706, #B45309, #15803D, #4338CA)',
-                  boxShadow: '0 0 10px rgba(180, 83, 9, 0.35)'
-                }}
-              />
+            {/* Dilemma Header Card */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-5">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-[#78350F] dark:bg-amber-950 dark:text-amber-300">
+                      {activeProject.dialectContext}
+                    </span>
+                    <span className="text-[11px] font-mono text-muted">Submitted by {activeProject.author}</span>
+                  </div>
+                  <h3 className="font-display text-2xl sm:text-3xl font-black text-ink">
+                    {activeProject.title}
+                  </h3>
+                </div>
 
-              {knowledgeNodes.map((node) => {
-                const isSelected = node.id === selectedNodeId;
-                return (
+                <div className="flex items-center gap-2 shrink-0">
                   <button
-                    key={node.id}
-                    onClick={() => handleSelectNode(node.id)}
-                    className={`relative z-10 w-full text-left p-3.5 rounded-2xl transition-all flex items-center gap-4 cursor-pointer group ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-amber-50/90 to-white dark:from-amber-950/40 dark:to-slate-800 border-2 border-[#78350F] shadow-elevated -translate-y-1'
-                        : 'bg-white dark:bg-slate-800 border-[1.5px] border-border hover:border-[#78350F]/60 hover:-translate-y-0.5 shadow-soft'
-                    }`}
-                    style={{
-                      borderBottomWidth: isSelected ? '4.5px' : '3.5px',
-                      borderBottomColor: isSelected ? '#78350F' : '#DCCFB9'
+                    type="button"
+                    onClick={() => {
+                      playAcousticChime(540, 0.3);
+                      playPronunciation(activeProject.spokenWord, 'hi-IN');
                     }}
+                    className="btn-chunky-purple px-4 py-2 text-xs inline-flex items-center gap-1.5 cursor-pointer shadow-soft"
                   >
-                    {/* 3D Tactile Circular Medallion / Stepping Stone */}
-                    <div
-                      className={`relative w-13 h-13 rounded-2xl flex items-center justify-center font-display font-black text-2xl shrink-0 transition-all select-none ${
-                        isSelected
-                          ? 'scale-105 text-white'
-                          : 'text-ink bg-neutral border border-border group-hover:scale-102'
-                      }`}
-                      style={
-                        isSelected
-                          ? {
-                              background: 'linear-gradient(180deg, #D97706 0%, #B45309 60%, #78350F 100%)',
-                              border: '2px solid #FCD34D',
-                              boxShadow: '0 6px 0px #451A03, 0 10px 18px rgba(120, 53, 15, 0.4)'
-                            }
-                          : {
-                              background: 'linear-gradient(180deg, #FFFDF9 0%, #F5EFE4 100%)',
-                              border: '1.5px solid #DCCFB9',
-                              boxShadow: '0 4px 0px #C4B59D, 0 6px 12px rgba(28, 25, 23, 0.08)'
-                            }
-                      }
-                    >
-                      {/* Top Specular 3D Reflection */}
-                      <span className="absolute inset-x-2 top-1 h-2 rounded-full bg-white/30 pointer-events-none" />
-                      <span className="relative z-10 drop-shadow-sm">{node.glyph}</span>
-                    </div>
+                    <Volume2 size={15} />
+                    <span>Hear Spoken Sound ({activeProject.spokenWord.split('/')[0]})</span>
+                  </button>
+                </div>
+              </div>
 
-                    {/* Node Metadata & Title */}
-                    <div className="space-y-0.5 min-w-0 flex-1">
+              {/* Photo preview if user uploaded an image */}
+              {activeProject.imageUrl && (
+                <div className="p-4 rounded-2xl bg-neutral/50 dark:bg-slate-800 border border-border flex items-center gap-4">
+                  <img
+                    src={activeProject.imageUrl}
+                    alt="Uploaded Inscription Specimen"
+                    className="w-24 h-24 object-cover rounded-xl border border-border shadow-soft"
+                  />
+                  <div>
+                    <span className="font-mono text-[10px] font-bold text-muted uppercase block">
+                      Uploaded Inscription / Specimen Photo
+                    </span>
+                    <p className="font-serif text-xs text-ink mt-0.5">
+                      Visual evidence submitted by community member for orthographic comparison.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <p className="font-serif text-sm text-muted leading-relaxed">
+                {activeProject.description}
+              </p>
+
+              {/* Sovereign Principle Quote */}
+              <div className="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-[#78350F]/20 text-xs font-serif text-[#78350F] dark:text-amber-300 italic">
+                &ldquo;The community is the decision-maker, not just the dataset. Compare keyboard ease of learning against acoustic fidelity below.&rdquo;
+              </div>
+
+              {/* Reviewer Ratification Banner if approved */}
+              {activeProject.status === 'ratified' && activeProject.reviewerVerdict && (
+                <div className="p-5 rounded-2xl bg-mint/20 dark:bg-emerald-950/30 border-[1.5px] border-mint-dark/40 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-display font-extrabold text-mint-dark uppercase flex items-center gap-1.5">
+                      <ShieldCheck size={16} />
+                      <span>Sovereign Sabha Ratified Decision</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-muted">{activeProject.reviewerVerdict.ratifiedAt}</span>
+                  </div>
+                  <p className="text-xs font-serif text-ink leading-relaxed font-semibold">
+                    Decision by {activeProject.reviewerVerdict.reviewerName}:
+                  </p>
+                  <p className="text-xs font-serif text-ink italic leading-relaxed">
+                    {activeProject.reviewerVerdict.rationale}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* The Competing Decision Tree Branches */}
+            <div className="space-y-4">
+              <h4 className="font-display text-lg font-black text-ink flex items-center gap-2">
+                <span>🌳</span>
+                <span>Competing Orthography Branches ({activeProject.branches.length} Proposals)</span>
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {activeProject.branches.map((branch, bIdx) => {
+                  const isWinningVerdict =
+                    activeProject.reviewerVerdict?.recommendedBranchId === branch.id;
+                  const hasVoted = votedBranches[branch.id];
+
+                  return (
+                    <div
+                      key={branch.id}
+                      className={`p-6 rounded-3xl border-[1.5px] transition-all space-y-4 relative ${
+                        isWinningVerdict
+                          ? 'bg-mint/10 dark:bg-emerald-950/20 border-mint-dark shadow-elevated'
+                          : 'bg-white dark:bg-slate-900 border-border shadow-card hover:border-[#78350F]/50'
+                      }`}
+                      style={{
+                        borderBottomWidth: '4.5px',
+                        borderBottomColor: isWinningVerdict ? '#059669' : '#DCCFB9'
+                      }}
+                    >
+                      {/* Top Badges */}
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono font-bold uppercase text-[#B45309] dark:text-amber-400 tracking-wider">
-                          Level {node.level} • {node.badgeLabel}
+                        <span className="text-[10px] font-mono font-bold uppercase text-[#78350F] dark:text-amber-400">
+                          {branch.scriptType}
                         </span>
-                        {isSelected && (
-                          <span className="text-[9px] font-mono font-black bg-[#78350F] text-white px-2 py-0.5 rounded-full shadow-sm">
-                            BLOOMING
+                        {isWinningVerdict && (
+                          <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-mint-dark text-white shadow-soft">
+                            ✓ Ratified Choice
                           </span>
                         )}
                       </div>
-                      <h3 className="font-display font-bold text-sm text-ink truncate group-hover:text-[#B45309] transition-colors">
-                        {node.title.split(':')[0]}
-                      </h3>
-                      <p className="text-xs text-muted font-sans line-clamp-1">
-                        {node.subtitle}
+
+                      {/* Representation Box with Audio Playback */}
+                      <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/30 border border-[#78350F]/20 text-center space-y-1">
+                        <span className="font-serif font-black text-3xl sm:text-4xl text-ink tracking-wide block">
+                          {branch.representation}
+                        </span>
+                        <span className="text-xs font-display font-bold text-muted block">
+                          {branch.label}
+                        </span>
+                      </div>
+
+                      {/* Metrics: Ease of Learning vs Phonetic Precision */}
+                      <div className="grid grid-cols-2 gap-2 text-center text-xs">
+                        <div className="p-2.5 rounded-xl bg-neutral/50 dark:bg-slate-800 border border-border space-y-0.5">
+                          <span className="text-[9px] font-mono text-muted uppercase block">Keypad Ease</span>
+                          <span className="font-display font-black text-ink">{branch.easeOfLearning}</span>
+                        </div>
+
+                        <div className="p-2.5 rounded-xl bg-neutral/50 dark:bg-slate-800 border border-border space-y-0.5">
+                          <span className="text-[9px] font-mono text-muted uppercase block">Acoustic Match</span>
+                          <span className="font-display font-black text-mint-dark">{branch.phoneticAccuracy}%</span>
+                        </div>
+                      </div>
+
+                      {/* Linguistic Rationale */}
+                      <p className="text-xs font-serif text-muted leading-relaxed">
+                        {branch.rationale}
                       </p>
+
+                      {/* Actions: Listen & Vote */}
+                      <div className="pt-2 border-t border-border flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            playAcousticChime(560 + bIdx * 60, 0.25);
+                            playPronunciation(branch.audioPronunciation, 'hi-IN');
+                          }}
+                          className="p-2 rounded-xl border border-border text-xs font-display font-bold text-[#78350F] hover:bg-[#78350F] hover:text-white transition-all cursor-pointer shadow-soft"
+                          title="Listen to pronunciation of this branch"
+                        >
+                          <Volume2 size={15} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleVote(branch.id)}
+                          className={`flex-1 py-2 px-3 rounded-xl text-xs font-display font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                            hasVoted
+                              ? 'bg-mint-dark text-white shadow-soft'
+                              : 'bg-white dark:bg-slate-800 border border-border text-ink hover:border-[#78350F]'
+                          }`}
+                        >
+                          <ThumbsUp size={13} />
+                          <span>{hasVoted ? 'Voted' : 'Vote'} ({branch.communityVotes})</span>
+                        </button>
+                      </div>
                     </div>
-                  </button>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Right Column: 3D Interactive Detail Bloom Container */}
-          <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-6">
-            {/* 3D Header Emblem with Holographic Glow */}
-            <div className="flex items-center justify-between border-b-[1.5px] border-border pb-5">
-              <div className="flex items-center gap-4">
-                {/* 3D Focal Glyph Orb */}
+        {/* ========================================================
+            MODE B: SCRIPT HERITAGE TRAIL (4-Level Core Lessons)
+            ======================================================== */}
+        {treeMode === 'heritage' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column: 3D Sculpted Tree Path */}
+            <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 shadow-card space-y-6">
+              <div className="flex items-center justify-between border-b-[1.5px] border-border pb-3">
+                <span className="text-xs font-display font-extrabold uppercase tracking-wider text-[#B45309] dark:text-amber-400 flex items-center gap-1.5">
+                  <span>🌿</span>
+                  <span>The 3D Discovery Trail</span>
+                </span>
+                <span className="text-xs font-mono font-bold text-muted">
+                  Branch {activeNode?.level || 1} of {knowledgeNodes.length}
+                </span>
+              </div>
+
+              {/* 3D Stepping Stone Nodes */}
+              <div className="space-y-4 relative py-2">
                 <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center font-display font-black text-3xl text-white shadow-elevated relative overflow-hidden"
+                  className="absolute left-[34px] top-6 bottom-6 w-1 rounded-full -z-0"
                   style={{
-                    background: 'linear-gradient(135deg, #D97706 0%, #B45309 60%, #78350F 100%)',
-                    border: '2px solid #FDE68A',
-                    boxShadow: '0 8px 0px #451A03, 0 12px 24px rgba(180, 83, 9, 0.35)'
+                    background: 'linear-gradient(to bottom, #D97706, #B45309, #15803D, #4338CA)',
+                    boxShadow: '0 0 10px rgba(180, 83, 9, 0.35)'
                   }}
-                >
-                  <span className="absolute inset-x-2 top-1 h-2.5 rounded-full bg-white/40" />
-                  <span className="relative z-10">{activeNode.glyph}</span>
+                />
+
+                {knowledgeNodes.map((node) => {
+                  const isSelected = node.id === selectedNodeId;
+                  return (
+                    <button
+                      key={node.id}
+                      onClick={() => handleSelectNode(node.id)}
+                      className={`relative z-10 w-full text-left p-3.5 rounded-2xl transition-all flex items-center gap-4 cursor-pointer group ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-amber-50/90 to-white dark:from-amber-950/40 dark:to-slate-800 border-2 border-[#78350F] shadow-elevated -translate-y-1'
+                          : 'bg-white dark:bg-slate-800 border-[1.5px] border-border hover:border-[#78350F]/60 hover:-translate-y-0.5 shadow-soft'
+                      }`}
+                      style={{
+                        borderBottomWidth: isSelected ? '4.5px' : '3.5px',
+                        borderBottomColor: isSelected ? '#78350F' : '#DCCFB9'
+                      }}
+                    >
+                      <div
+                        className={`relative w-13 h-13 rounded-2xl flex items-center justify-center font-display font-black text-2xl shrink-0 transition-all select-none ${
+                          isSelected
+                            ? 'scale-105 text-white'
+                            : 'text-ink bg-neutral border border-border group-hover:scale-102'
+                        }`}
+                        style={
+                          isSelected
+                            ? {
+                                background: 'linear-gradient(180deg, #D97706 0%, #B45309 60%, #78350F 100%)',
+                                border: '2px solid #FCD34D',
+                                boxShadow: '0 6px 0px #451A03, 0 10px 18px rgba(120, 53, 15, 0.4)'
+                              }
+                            : {
+                                background: 'linear-gradient(180deg, #FFFDF9 0%, #F5EFE4 100%)',
+                                border: '1.5px solid #DCCFB9',
+                                boxShadow: '0 4px 0px #C4B59D, 0 6px 12px rgba(28, 25, 23, 0.08)'
+                              }
+                        }
+                      >
+                        <span className="absolute inset-x-2 top-1 h-2 rounded-full bg-white/30 pointer-events-none" />
+                        <span className="relative z-10 drop-shadow-sm">{node.glyph}</span>
+                      </div>
+
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase text-[#B45309] dark:text-amber-400 tracking-wider">
+                            Level {node.level} • {node.badgeLabel}
+                          </span>
+                          {isSelected && (
+                            <span className="text-[9px] font-mono font-black bg-[#78350F] text-white px-2 py-0.5 rounded-full shadow-sm">
+                              BLOOMING
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="font-display font-bold text-sm text-ink truncate group-hover:text-[#B45309] transition-colors">
+                          {node.title.split(':')[0]}
+                        </h3>
+                        <p className="text-xs text-muted font-sans line-clamp-1">
+                          {node.subtitle}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right Column: Detail Bloom */}
+            <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-6">
+              <div className="flex items-center justify-between border-b-[1.5px] border-border pb-5">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center font-display font-black text-3xl text-white shadow-elevated relative overflow-hidden"
+                    style={{
+                      background: 'linear-gradient(135deg, #D97706 0%, #B45309 60%, #78350F 100%)',
+                      border: '2px solid #FDE68A',
+                      boxShadow: '0 8px 0px #451A03, 0 12px 24px rgba(180, 83, 9, 0.35)'
+                    }}
+                  >
+                    <span className="absolute inset-x-2 top-1 h-2.5 rounded-full bg-white/40" />
+                    <span className="relative z-10">{activeNode.glyph}</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400 uppercase">
+                        {activeNode.scriptName}
+                      </span>
+                      <button
+                        onClick={() => {
+                          playAcousticChime(580, 0.3);
+                          playPronunciation(activeNode.spokenForm, activeNode.lang);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-[#78350F]/30 text-[11px] font-sans font-bold text-[#78350F] dark:text-amber-300 hover:bg-[#78350F] hover:text-white transition-all shadow-soft cursor-pointer"
+                      >
+                        <Volume2 size={13} />
+                        <span>Hear ({activeNode.glyph})</span>
+                      </button>
+                    </div>
+                    <h3 className="font-display text-xl sm:text-2xl font-black text-ink">
+                      {activeNode.title}
+                    </h3>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400 uppercase">
-                      {activeNode.scriptName}
+                <div className="hidden sm:flex flex-col items-end">
+                  <span className="text-[10px] font-mono uppercase text-muted">Audited XP</span>
+                  <span className="text-xs font-mono font-bold text-mint-dark">+{earnedXP} XP</span>
+                </div>
+              </div>
+
+              {/* Stage Selector Tabs */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <button
+                  onClick={() => setActiveStep('learn')}
+                  className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer ${
+                    activeStep === 'learn'
+                      ? 'btn-chunky-purple'
+                      : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
+                  }`}
+                >
+                  📖 1. Learn & Trace
+                </button>
+
+                <button
+                  onClick={() => setActiveStep('quiz')}
+                  className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer ${
+                    activeStep === 'quiz'
+                      ? 'btn-chunky-purple'
+                      : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
+                  }`}
+                >
+                  🎯 2. Interactive Quiz {quizSubmitted && '✓'}
+                </button>
+
+                <button
+                  onClick={() => setActiveStep('deep')}
+                  className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer ${
+                    activeStep === 'deep'
+                      ? 'btn-chunky-purple'
+                      : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
+                  }`}
+                >
+                  📜 3. Deep Wisdom & Sabha Rules
+                </button>
+              </div>
+
+              {/* STAGE 1 */}
+              {activeStep === 'learn' && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pt-2">
+                  <div className="space-y-2">
+                    <h4 className="font-display text-xl font-black text-ink">{activeNode.learnTitle}</h4>
+                    <p className="text-sm font-serif text-muted leading-relaxed">{activeNode.learnExplanation}</p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-neutral/60 dark:bg-slate-800/60 border border-border space-y-1">
+                    <span className="text-[11px] font-display font-extrabold uppercase text-[#B45309] dark:text-amber-400 flex items-center gap-1">
+                      <Lightbulb size={13} />
+                      <span>Historical Scribal Lineage</span>
                     </span>
-                    <button
-                      onClick={() => {
-                        playAcousticChime(580, 0.3);
-                        playPronunciation(activeNode.spokenForm, activeNode.lang);
-                      }}
-                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-[#78350F]/30 text-[11px] font-sans font-bold text-[#78350F] dark:text-amber-300 hover:bg-[#78350F] hover:text-white transition-all shadow-soft cursor-pointer"
-                      title="Click to hear authentic audio pronunciation"
-                    >
-                      <Volume2 size={13} />
-                      <span>Hear ({activeNode.glyph})</span>
+                    <p className="text-xs font-serif text-ink leading-relaxed">{activeNode.culturalNote}</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <span className="text-xs font-display font-bold text-muted uppercase tracking-wider block">
+                      Glyph Anatomy (Click to hear sound):
+                    </span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {activeNode.sampleWords.map((sample, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            playAcousticChime(520 + idx * 75, 0.25);
+                            playPronunciation(sample.char, activeNode.lang);
+                          }}
+                          className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-border hover:border-[#78350F] transition-all text-center space-y-1 shadow-soft cursor-pointer hover:-translate-y-1 group active:translate-y-0.5"
+                          style={{ borderBottomWidth: '3px', borderBottomColor: '#DCCFB9' }}
+                        >
+                          <div className="flex items-center justify-center gap-1 text-[10px] text-muted group-hover:text-[#B45309]">
+                            <Volume2 size={11} />
+                            <span>Listen</span>
+                          </div>
+                          <span className="font-display text-2xl font-black text-ink block group-hover:text-[#B45309]">
+                            {sample.char}
+                          </span>
+                          <span className="font-mono text-[10px] text-[#B45309] dark:text-amber-400 block font-semibold">
+                            {sample.ipa}
+                          </span>
+                          <span className="text-[9px] font-sans text-muted block leading-tight">{sample.gloss}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-border flex justify-end">
+                    <button onClick={() => setActiveStep('quiz')} className="btn-chunky-purple px-5 py-2.5 text-xs inline-flex items-center gap-2">
+                      <span>Proceed to Interactive Quiz</span>
+                      <ArrowRight size={14} />
                     </button>
                   </div>
-                  <h3 className="font-display text-xl sm:text-2xl font-black text-ink">
-                    {activeNode.title}
-                  </h3>
-                </div>
-              </div>
+                </motion.div>
+              )}
 
-              <div className="hidden sm:flex flex-col items-end">
-                <span className="text-[10px] font-mono uppercase text-muted">Audited XP</span>
-                <span className="text-xs font-mono font-bold text-mint-dark">+{earnedXP} XP</span>
-              </div>
-            </div>
-
-            {/* Stage Selector Tabs with 3D Tactile Push */}
-            <div className="flex flex-wrap gap-2 pt-1">
-              <button
-                onClick={() => setActiveStep('learn')}
-                className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer ${
-                  activeStep === 'learn'
-                    ? 'btn-chunky-purple'
-                    : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
-                }`}
-              >
-                📖 1. Learn & Trace
-              </button>
-
-              <button
-                onClick={() => setActiveStep('quiz')}
-                className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer ${
-                  activeStep === 'quiz'
-                    ? 'btn-chunky-purple'
-                    : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
-                }`}
-              >
-                🎯 2. Interactive Quiz {quizSubmitted && '✓'}
-              </button>
-
-              <button
-                onClick={() => setActiveStep('deep')}
-                className={`px-4 py-2 rounded-xl text-xs font-display font-extrabold transition-all cursor-pointer ${
-                  activeStep === 'deep'
-                    ? 'btn-chunky-purple'
-                    : 'bg-neutral dark:bg-slate-800 text-muted border border-border hover:text-ink'
-                }`}
-              >
-                📜 3. Deep Wisdom & Sabha Rules
-              </button>
-            </div>
-
-            {/* STAGE 1: LEARN & TRACE */}
-            {activeStep === 'learn' && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6 pt-2"
-              >
-                <div className="space-y-2">
-                  <h4 className="font-display text-xl font-black text-ink">
-                    {activeNode.learnTitle}
-                  </h4>
-                  <p className="text-sm font-serif text-muted leading-relaxed">
-                    {activeNode.learnExplanation}
-                  </p>
-                </div>
-
-                {/* Cultural Heritage Card */}
-                <div className="p-4 rounded-2xl bg-neutral/60 dark:bg-slate-800/60 border border-border space-y-1">
-                  <span className="text-[11px] font-display font-extrabold uppercase text-[#B45309] dark:text-amber-400 flex items-center gap-1">
-                    <Lightbulb size={13} />
-                    <span>Historical Scribal Lineage</span>
-                  </span>
-                  <p className="text-xs font-serif text-ink leading-relaxed">
-                    {activeNode.culturalNote}
-                  </p>
-                </div>
-
-                {/* Interactive Letter Anatomy Swatches with Audio Pronunciation */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-display font-bold text-muted uppercase tracking-wider block">
-                      Interactive Glyph Anatomy (Click to hear sound):
+              {/* STAGE 2 */}
+              {activeStep === 'quiz' && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pt-2">
+                  <div className="space-y-2">
+                    <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400 uppercase">
+                      Level {activeNode.level} Knowledge Check
                     </span>
-                    <span className="text-[11px] font-serif text-[#B45309] dark:text-amber-400 flex items-center gap-1">
-                      <Volume2 size={12} />
-                      <span>Audio Enabled</span>
-                    </span>
+                    <h4 className="font-display text-xl sm:text-2xl font-black text-ink">{activeNode.quizQuestion}</h4>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {activeNode.sampleWords.map((sample, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          playAcousticChime(520 + idx * 75, 0.25);
-                          playPronunciation(sample.char, activeNode.lang);
-                        }}
-                        className="p-3 rounded-2xl bg-white dark:bg-slate-800 border border-border hover:border-[#78350F] transition-all text-center space-y-1 shadow-soft cursor-pointer hover:-translate-y-1 group active:translate-y-0.5"
-                        style={{ borderBottomWidth: '3px', borderBottomColor: '#DCCFB9' }}
-                        title="Click to hear authentic sound"
-                      >
-                        <div className="flex items-center justify-center gap-1 text-[10px] text-muted group-hover:text-[#B45309]">
-                          <Volume2 size={11} />
-                          <span>Listen</span>
-                        </div>
-                        <span className="font-display text-2xl font-black text-ink block group-hover:text-[#B45309]">
-                          {sample.char}
-                        </span>
-                        <span className="font-mono text-[10px] text-[#B45309] dark:text-amber-400 block font-semibold">
-                          {sample.ipa}
-                        </span>
-                        <span className="text-[9px] font-sans text-muted block leading-tight">
-                          {sample.gloss}
-                        </span>
-                      </button>
-                    ))}
+                  <div className="space-y-3">
+                    {activeNode.quizOptions.map((opt, oIdx) => {
+                      const isSelected = quizSelection === oIdx;
+                      return (
+                        <button
+                          key={oIdx}
+                          onClick={() => handleQuizAnswer(oIdx)}
+                          className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
+                            isSelected
+                              ? opt.isCorrect
+                                ? 'bg-mint/60 border-mint-dark text-ink shadow-soft'
+                                : 'bg-danger-light border-danger text-ink'
+                              : 'bg-white dark:bg-slate-800 border-border hover:border-[#78350F]/50'
+                          }`}
+                          style={{
+                            borderBottomWidth: '3.5px',
+                            borderBottomColor: isSelected ? (opt.isCorrect ? '#059669' : '#DC2626') : '#DCCFB9'
+                          }}
+                        >
+                          <div className="space-y-0.5">
+                            <p className="font-display font-bold text-sm text-ink">{opt.text}</p>
+                            <p className="text-xs font-sans text-muted">{opt.subtext}</p>
+                          </div>
+                          {isSelected && (
+                            <span className="shrink-0 pt-0.5">
+                              {opt.isCorrect ? <CheckCircle2 size={18} className="text-mint-dark" /> : <X size={18} className="text-danger" />}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
 
-                <div className="pt-4 border-t border-border flex justify-end">
-                  <button
-                    onClick={() => setActiveStep('quiz')}
-                    className="btn-chunky-purple px-5 py-2.5 text-xs inline-flex items-center gap-2"
-                  >
-                    <span>Proceed to Interactive Quiz</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              </motion.div>
-            )}
+                  {quizSubmitted && (
+                    <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="p-4 rounded-2xl bg-mint/40 border border-mint-dark/30 space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-display font-black text-mint-dark">
+                        <Award size={16} />
+                        <span>{quizSelection !== null && activeNode.quizOptions[quizSelection]?.isCorrect ? 'Splendid! +50 XP Awarded' : 'Insightful Exploration!'}</span>
+                      </div>
+                      <p className="text-xs font-serif text-ink leading-relaxed">{activeNode.quizExplanation}</p>
+                    </motion.div>
+                  )}
 
-            {/* STAGE 2: INTERACTIVE QUIZ */}
-            {activeStep === 'quiz' && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6 pt-2"
-              >
-                <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400 uppercase">
-                    Level {activeNode.level} Knowledge Check
-                  </span>
-                  <h4 className="font-display text-xl sm:text-2xl font-black text-ink">
-                    {activeNode.quizQuestion}
-                  </h4>
-                </div>
+                  <div className="pt-4 border-t border-border flex justify-between items-center">
+                    <button onClick={() => { setQuizSelection(null); setQuizSubmitted(false); }} className="text-xs font-sans text-muted hover:text-ink inline-flex items-center gap-1">
+                      <RotateCcw size={12} />
+                      <span>Reset Quiz</span>
+                    </button>
+                    <button onClick={() => setActiveStep('deep')} className="btn-chunky-purple px-5 py-2.5 text-xs inline-flex items-center gap-2">
+                      <span>Unpack Deep Wisdom</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
 
-                {/* Options List */}
-                <div className="space-y-3">
-                  {activeNode.quizOptions.map((opt, oIdx) => {
-                    const isSelected = quizSelection === oIdx;
-                    return (
-                      <button
-                        key={oIdx}
-                        onClick={() => handleQuizAnswer(oIdx)}
-                        className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
-                          isSelected
-                            ? opt.isCorrect
-                              ? 'bg-mint/60 border-mint-dark text-ink shadow-soft'
-                              : 'bg-danger-light border-danger text-ink'
-                            : 'bg-white dark:bg-slate-800 border-border hover:border-[#78350F]/50'
-                        }`}
-                        style={{
-                          borderBottomWidth: '3.5px',
-                          borderBottomColor: isSelected
-                            ? opt.isCorrect
-                              ? '#059669'
-                              : '#DC2626'
-                            : '#DCCFB9'
-                        }}
-                      >
-                        <div className="space-y-0.5">
-                          <p className="font-display font-bold text-sm text-ink">{opt.text}</p>
-                          <p className="text-xs font-sans text-muted">{opt.subtext}</p>
-                        </div>
-                        {isSelected && (
-                          <span className="shrink-0 pt-0.5">
-                            {opt.isCorrect ? (
-                              <CheckCircle2 size={18} className="text-mint-dark" />
-                            ) : (
-                              <X size={18} className="text-danger" />
-                            )}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* STAGE 3 */}
+              {activeStep === 'deep' && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pt-2">
+                  <div className="space-y-2">
+                    <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400 uppercase">
+                      Wisdom & Living Tradition
+                    </span>
+                    <h4 className="font-display text-2xl font-black text-ink">{activeNode.deepTitle}</h4>
+                    <p className="text-sm font-serif text-muted leading-relaxed">{activeNode.deepLore}</p>
+                  </div>
 
-                {/* Rewarding Feedback */}
-                {quizSubmitted && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="p-4 rounded-2xl bg-mint/40 border border-mint-dark/30 space-y-2"
-                  >
-                    <div className="flex items-center gap-2 text-xs font-display font-black text-mint-dark">
-                      <Award size={16} />
-                      <span>{quizSelection !== null && activeNode.quizOptions[quizSelection]?.isCorrect ? 'Splendid! +50 XP Awarded' : 'Insightful Exploration!'}</span>
-                    </div>
-                    <p className="text-xs font-serif text-ink leading-relaxed">
-                      {activeNode.quizExplanation}
-                    </p>
-                  </motion.div>
-                )}
-
-                <div className="pt-4 border-t border-border flex justify-between items-center">
-                  <button
-                    onClick={() => { setQuizSelection(null); setQuizSubmitted(false); }}
-                    className="text-xs font-sans text-muted hover:text-ink inline-flex items-center gap-1"
-                  >
-                    <RotateCcw size={12} />
-                    <span>Reset Quiz</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveStep('deep')}
-                    className="btn-chunky-purple px-5 py-2.5 text-xs inline-flex items-center gap-2"
-                  >
-                    <span>Unpack Deep Wisdom</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* STAGE 3: DEEP WISDOM */}
-            {activeStep === 'deep' && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6 pt-2"
-              >
-                <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-[#B45309] dark:text-amber-400 uppercase">
-                    Wisdom & Living Tradition
-                  </span>
-                  <h4 className="font-display text-2xl font-black text-ink">
-                    {activeNode.deepTitle}
-                  </h4>
-                  <p className="text-sm font-serif text-muted leading-relaxed">
-                    {activeNode.deepLore}
-                  </p>
-                </div>
-
-                {/* Dialect Respect & Interactive Acoustic Audition */}
-                <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/30 border border-[#78350F]/20 space-y-2.5">
-                  <div className="flex items-center justify-between">
+                  <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/30 border border-[#78350F]/20 space-y-2.5">
                     <span className="text-[11px] font-display font-extrabold uppercase text-[#B45309] dark:text-amber-400 flex items-center gap-1.5">
                       <Volume2 size={14} />
                       <span>Dialect Respect & Spoken Variety</span>
                     </span>
-                    <span className="text-[10px] font-mono font-bold text-muted">Acoustic Audio</span>
+                    <p className="text-xs font-serif text-ink leading-relaxed">{activeNode.dialectInsight}</p>
+                    <div className="pt-1 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => {
+                          playAcousticChime(540, 0.25);
+                          playPronunciation(activeNode.spokenForm, activeNode.lang);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer"
+                      >
+                        <Volume2 size={13} className="text-[#B45309]" />
+                        <span>Hear Standard ({activeNode.glyph})</span>
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-xs font-serif text-ink leading-relaxed">
-                    {activeNode.dialectInsight}
-                  </p>
-                  <div className="pt-1 flex flex-wrap gap-2">
+
+                  <div className="p-4 rounded-2xl bg-neutral/80 dark:bg-slate-800/80 border border-border space-y-1">
+                    <span className="text-[10px] font-mono font-black uppercase text-muted">Ratified Sabha Principle</span>
+                    <p className="text-xs font-mono font-bold text-ink">{activeNode.communityRule}</p>
+                  </div>
+
+                  <div className="pt-4 border-t border-border flex justify-between items-center">
                     <button
                       onClick={() => {
-                        playAcousticChime(540, 0.25);
-                        playPronunciation(activeNode.spokenForm, activeNode.lang);
+                        const currIdx = knowledgeNodes.findIndex((n) => n.id === selectedNodeId);
+                        const nextNode = knowledgeNodes[(currIdx + 1) % knowledgeNodes.length];
+                        handleSelectNode(nextNode.id);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer active:translate-y-0.5"
+                      className="btn-chunky-purple px-6 py-2.5 text-xs inline-flex items-center gap-2"
                     >
-                      <Volume2 size={13} className="text-[#B45309]" />
-                      <span>Hear Standard ({activeNode.glyph})</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        playAcousticChime(480, 0.25);
-                        playPronunciation(activeNode.dialectSample.text, activeNode.dialectSample.lang);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer active:translate-y-0.5"
-                    >
-                      <Radio size={13} className="text-[#B45309]" />
-                      <span>{activeNode.dialectSample.label}</span>
+                      <span>Next Branch on the Tree</span>
+                      <ArrowRight size={14} />
                     </button>
                   </div>
-                </div>
-
-                {/* Formally Codified Sabha Rule */}
-                <div className="p-4 rounded-2xl bg-neutral/80 dark:bg-slate-800/80 border border-border space-y-1">
-                  <span className="text-[10px] font-mono font-black uppercase text-muted">
-                    Ratified Sabha Principle
-                  </span>
-                  <p className="text-xs font-mono font-bold text-ink">
-                    {activeNode.communityRule}
-                  </p>
-                </div>
-
-                <div className="pt-4 border-t border-border flex justify-between items-center">
-                  <button
-                    onClick={() => {
-                      const currIdx = knowledgeNodes.findIndex((n) => n.id === selectedNodeId);
-                      const nextNode = knowledgeNodes[(currIdx + 1) % knowledgeNodes.length];
-                      handleSelectNode(nextNode.id);
-                    }}
-                    className="btn-chunky-purple px-6 py-2.5 text-xs inline-flex items-center gap-2"
-                  >
-                    <span>Next Branch on the Tree</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        )}
 
-      {/* ========================================================
-          LINK TO PAGE 2 (प्रयोग शाला)
-          ======================================================== */}
-      <section className="py-12 bg-neutral/50 border-t-[1.5px] border-border">
-        <div className="max-w-4xl mx-auto px-4 text-center space-y-4">
-          <span className="text-xs font-display font-extrabold uppercase tracking-wider text-[#B45309] dark:text-amber-400">
-            Dedicated Workbench
-          </span>
-          <h3 className="font-display text-2xl font-black text-ink">
-            Ready to test your {activeLipi.nameEnglish} orthography rules?
-          </h3>
-          <p className="text-xs sm:text-sm font-serif text-muted max-w-xl mx-auto leading-relaxed">
-            Visit the dedicated Script Testing Studio to type with tactile glyph keys, validate sentences against community rules, and run consistency audits for {activeLipi.nameNative}.
-          </p>
-          <div className="pt-2">
-            <Link
-              to="/lab"
-              className="btn-chunky-purple px-7 py-3 text-xs inline-flex items-center gap-2"
-            >
-              <FlaskConical size={16} />
-              <span>Enter प्रयोग शाला (Test & Verify Studio)</span>
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
       </section>
 
       {/* Footer */}
@@ -577,6 +733,16 @@ export function HomePage() {
           </p>
         </div>
       </footer>
+
+      {/* Create Script Dilemma Modal */}
+      <CreateProjectModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={(newId) => {
+          setSelectedProjectId(newId);
+          setTreeMode('communityDilemmas');
+        }}
+      />
     </div>
   );
 }

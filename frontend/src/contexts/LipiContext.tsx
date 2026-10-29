@@ -4,7 +4,10 @@ import {
   type LipiDefinition,
   type LipiKnowledgeNode,
   type LipiTestSubmission,
+  type ScriptProject,
+  type ScriptProjectBranch,
   DEFAULT_SUBMISSIONS,
+  DEFAULT_PROJECTS,
   getLipiById
 } from '@/data/lipiData';
 
@@ -28,6 +31,20 @@ interface LipiContextType {
   ) => LipiTestSubmission;
   approveSubmission: (submissionId: string, rationale: string, reviewerName: string) => void;
   rejectSubmission: (submissionId: string, rationale: string, reviewerName: string) => void;
+
+  // Community Script Projects & Dilemma Trees (The MVP Core)
+  projects: ScriptProject[];
+  getProjectsForLipi: (lipiId: string) => ScriptProject[];
+  createProject: (
+    data: Omit<ScriptProject, 'id' | 'submittedAt' | 'status'>
+  ) => ScriptProject;
+  voteOnBranch: (projectId: string, branchId: string) => void;
+  ratifyProject: (
+    projectId: string,
+    recommendedBranchId: string,
+    rationale: string,
+    reviewerName: string
+  ) => void;
 }
 
 const LipiContext = createContext<LipiContextType | undefined>(undefined);
@@ -35,8 +52,8 @@ const LipiContext = createContext<LipiContextType | undefined>(undefined);
 const STORAGE_KEY_LIPI = 'lipi_sabha_active_lipi_id';
 const STORAGE_KEY_NODES = 'lipi_sabha_dynamic_nodes_map';
 const STORAGE_KEY_SUBS = 'lipi_sabha_test_submissions_list';
+const STORAGE_KEY_PROJS = 'lipi_sabha_script_projects_list';
 
-// Helper to construct initial nodes map from canonical lipiData
 function getInitialNodesMap(): Record<string, LipiKnowledgeNode[]> {
   try {
     const saved = localStorage.getItem(STORAGE_KEY_NODES);
@@ -57,7 +74,6 @@ function getInitialNodesMap(): Record<string, LipiKnowledgeNode[]> {
   return map;
 }
 
-// Helper to construct initial submissions
 function getInitialSubmissions(): LipiTestSubmission[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEY_SUBS);
@@ -73,6 +89,21 @@ function getInitialSubmissions(): LipiTestSubmission[] {
   return [...DEFAULT_SUBMISSIONS];
 }
 
+function getInitialProjects(): ScriptProject[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_PROJS);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return [...DEFAULT_PROJECTS];
+}
+
 export function LipiProvider({ children }: { children: ReactNode }) {
   const [activeLipiId, setActiveLipiIdState] = useState<string>(() => {
     try {
@@ -81,13 +112,14 @@ export function LipiProvider({ children }: { children: ReactNode }) {
         return saved;
       }
     } catch {
-      // ignore localStorage errors
+      // ignore
     }
     return 'devanagari';
   });
 
   const [nodesMap, setNodesMap] = useState<Record<string, LipiKnowledgeNode[]>>(getInitialNodesMap);
   const [submissions, setSubmissions] = useState<LipiTestSubmission[]>(getInitialSubmissions);
+  const [projects, setProjects] = useState<ScriptProject[]>(getInitialProjects);
 
   const activeLipi = getLipiById(activeLipiId);
 
@@ -106,7 +138,6 @@ export function LipiProvider({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute('data-active-lipi', activeLipiId);
   }, [activeLipiId]);
 
-  // Persist nodes map whenever updated
   const saveNodesMap = (newMap: Record<string, LipiKnowledgeNode[]>) => {
     setNodesMap(newMap);
     try {
@@ -116,7 +147,6 @@ export function LipiProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Persist submissions whenever updated
   const saveSubmissions = (newSubs: LipiTestSubmission[]) => {
     setSubmissions(newSubs);
     try {
@@ -126,14 +156,21 @@ export function LipiProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Retrieve nodes for a specific Lipi
+  const saveProjects = (newProjs: ScriptProject[]) => {
+    setProjects(newProjs);
+    try {
+      localStorage.setItem(STORAGE_KEY_PROJS, JSON.stringify(newProjs));
+    } catch {
+      // ignore
+    }
+  };
+
   const getNodesForLipi = (lipiId: string): LipiKnowledgeNode[] => {
     return nodesMap[lipiId] || getLipiById(lipiId).knowledgeNodes;
   };
 
   const activeLipiNodes = getNodesForLipi(activeLipiId);
 
-  // Reviewer actions: Add knowledge node / tree level
   const addKnowledgeNode = (lipiId: string, node: LipiKnowledgeNode) => {
     const existing = nodesMap[lipiId] || [...getLipiById(lipiId).knowledgeNodes];
     const updated = [...existing, node];
@@ -152,7 +189,6 @@ export function LipiProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  // User actions: Submit a test sample
   const submitTestSample = (
     data: Omit<LipiTestSubmission, 'id' | 'status' | 'submittedAt'>
   ): LipiTestSubmission => {
@@ -166,7 +202,6 @@ export function LipiProvider({ children }: { children: ReactNode }) {
     return newSub;
   };
 
-  // Reviewer actions: Calibrate & Approve / Reject
   const approveSubmission = (submissionId: string, rationale: string, reviewerName: string) => {
     const updated = submissions.map((sub) => {
       if (sub.id === submissionId) {
@@ -203,6 +238,64 @@ export function LipiProvider({ children }: { children: ReactNode }) {
     return submissions.filter((s) => s.lipiId === lipiId);
   };
 
+  // MVP: Script Project Methods
+  const createProject = (
+    data: Omit<ScriptProject, 'id' | 'submittedAt' | 'status'>
+  ): ScriptProject => {
+    const newProj: ScriptProject = {
+      ...data,
+      id: `proj-${Date.now()}`,
+      status: 'consultation',
+      submittedAt: 'Just now'
+    };
+    saveProjects([newProj, ...projects]);
+    return newProj;
+  };
+
+  const voteOnBranch = (projectId: string, branchId: string) => {
+    const updated = projects.map((proj) => {
+      if (proj.id === projectId) {
+        const updatedBranches = proj.branches.map((b) => {
+          if (b.id === branchId) {
+            return { ...b, communityVotes: b.communityVotes + 1 };
+          }
+          return b;
+        });
+        return { ...proj, branches: updatedBranches };
+      }
+      return proj;
+    });
+    saveProjects(updated);
+  };
+
+  const ratifyProject = (
+    projectId: string,
+    recommendedBranchId: string,
+    rationale: string,
+    reviewerName: string
+  ) => {
+    const updated = projects.map((proj) => {
+      if (proj.id === projectId) {
+        return {
+          ...proj,
+          status: 'ratified' as const,
+          reviewerVerdict: {
+            recommendedBranchId,
+            reviewerName,
+            rationale,
+            ratifiedAt: 'Just now'
+          }
+        };
+      }
+      return proj;
+    });
+    saveProjects(updated);
+  };
+
+  const getProjectsForLipi = (lipiId: string): ScriptProject[] => {
+    return projects.filter((p) => p.lipiId === lipiId);
+  };
+
   return (
     <LipiContext.Provider
       value={{
@@ -218,7 +311,12 @@ export function LipiProvider({ children }: { children: ReactNode }) {
         getSubmissionsForLipi,
         submitTestSample,
         approveSubmission,
-        rejectSubmission
+        rejectSubmission,
+        projects,
+        getProjectsForLipi,
+        createProject,
+        voteOnBranch,
+        ratifyProject
       }}
     >
       {children}

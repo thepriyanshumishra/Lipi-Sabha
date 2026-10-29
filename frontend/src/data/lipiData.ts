@@ -1752,3 +1752,129 @@ export const DEFAULT_SUBMISSIONS: LipiTestSubmission[] = [
   }
 ];
 
+export interface ScriptProjectBranch {
+  id: string;
+  label: string; // e.g. "R-I-N-A"
+  representation: string; // e.g. "Rina"
+  scriptType: string; // "ASCII Latin" | "English Digraph" | "Devanagari" | "IAST"
+  phoneticAccuracy: number; // 0 - 100
+  easeOfLearning: 'High' | 'Medium' | 'Complex';
+  communityVotes: number;
+  audioPronunciation: string;
+  rationale: string;
+}
+
+export interface ScriptProject {
+  id: string;
+  title: string;
+  spokenWord: string;
+  dialectContext: string;
+  lipiId: string;
+  lipiName: string;
+  imageUrl?: string;
+  description: string;
+  author: string;
+  submittedAt: string;
+  status: 'consultation' | 'ratified';
+  branches: ScriptProjectBranch[];
+  reviewerVerdict?: {
+    recommendedBranchId: string;
+    reviewerName: string;
+    rationale: string;
+    ratifiedAt: string;
+  };
+}
+
+export const DEFAULT_PROJECTS: ScriptProject[] = [
+  {
+    id: 'proj-reena-orthography',
+    title: 'How should the spoken name "Reena" (रीना) be written?',
+    spokenWord: 'रीना / Reena',
+    dialectContext: 'Bhasha & Bol Bharat — Living Oral & Written Variety',
+    lipiId: 'devanagari',
+    lipiName: 'देवनागरी (Devanagari)',
+    description: 'Community members are debating between ASCII mobile typing (R-I-N-A), English digraphs (R-E-E-N-A), and native Devanagari (रीना). Outsiders should not decide for native speakers. Compare learning ease against acoustic fidelity.',
+    author: 'Aria (User)',
+    submittedAt: 'Today, 10:15 AM',
+    status: 'consultation',
+    branches: [
+      {
+        id: 'branch-rina',
+        label: 'Option A: R-I-N-A',
+        representation: 'Rina',
+        scriptType: 'ASCII Latin',
+        phoneticAccuracy: 75,
+        easeOfLearning: 'High',
+        communityVotes: 19,
+        audioPronunciation: 'Rina',
+        rationale: 'High keyboard accessibility on basic feature phones. However, the short "i" can be ambiguous between short /ɪ/ and long /iː/.'
+      },
+      {
+        id: 'branch-reena',
+        label: 'Option B: R-E-E-N-A',
+        representation: 'Reena',
+        scriptType: 'English Digraph Latin',
+        phoneticAccuracy: 88,
+        easeOfLearning: 'High',
+        communityVotes: 34,
+        audioPronunciation: 'Reena',
+        rationale: 'Familiar to younger mobile texters. Clearly indicates vowel lengthening without requiring special diacritic fonts.'
+      },
+      {
+        id: 'branch-deva-reena',
+        label: 'Option C: रीना',
+        representation: 'रीना',
+        scriptType: 'Devanagari Script',
+        phoneticAccuracy: 100,
+        easeOfLearning: 'Medium',
+        communityVotes: 52,
+        audioPronunciation: 'रीना',
+        rationale: 'Lossless phonetic truth: Ra + Dirgha Ee Matra (ी) + Na + Aa Matra (ा). Exact acoustic match with unbroken breath.'
+      }
+    ]
+  },
+  {
+    id: 'proj-inscription-photo',
+    title: 'Deciphering Unwritten Word on Village Heritage Inscription',
+    spokenWord: 'नमः शिवाय / Namaḥ Śivāya',
+    dialectContext: 'Himalayan Temple Epigraph / Birch-Bark Oral Lineage',
+    lipiId: 'sharada',
+    lipiName: 'शारदा (Sharada Script)',
+    description: 'A villager found an eroded stone carving in Himachal Pradesh. The community recites the sacred phrase verbally but debates whether to standardize the inscription in Devanagari or Sharada.',
+    author: 'Kavi (Fieldwork Contributor)',
+    submittedAt: 'Yesterday, 4:30 PM',
+    status: 'ratified',
+    branches: [
+      {
+        id: 'branch-inscr-deva',
+        label: 'Devanagari Classical',
+        representation: 'नमः शिवाय',
+        scriptType: 'Devanagari',
+        phoneticAccuracy: 98,
+        easeOfLearning: 'High',
+        communityVotes: 24,
+        audioPronunciation: 'नमः शिवाय',
+        rationale: 'Widely readable across modern Indian schoolbooks and keyboards.'
+      },
+      {
+        id: 'branch-inscr-sharada',
+        label: 'Sharada Himalayan Ductus',
+        representation: '𑆤𑆩𑆃 𑆯𑆴𑆮𑆳𑆪',
+        scriptType: 'Sharada Script',
+        phoneticAccuracy: 100,
+        easeOfLearning: 'Complex',
+        communityVotes: 61,
+        audioPronunciation: 'नमः शिवाय',
+        rationale: 'Preserves the authentic regional cultural heritage and original stone cutter ductus.'
+      }
+    ],
+    reviewerVerdict: {
+      recommendedBranchId: 'branch-inscr-sharada',
+      reviewerName: 'Meera (Sharada Specialist)',
+      rationale: 'Ratified by community Sabha: The primary epigraphical record shall preserve Sharada script for cultural dignity, with parallel Devanagari glosses for learners.',
+      ratifiedAt: 'Yesterday, 6:00 PM'
+    }
+  }
+];
+
+

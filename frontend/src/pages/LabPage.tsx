@@ -27,11 +27,13 @@ import {
 import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/audio';
 import { useLipi } from '@/contexts/LipiContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { CreateProjectModal } from '@/components/CreateProjectModal';
 
 export function LabPage() {
   const { activeLipi, allLipis, setLipiId, submissions, submitTestSample } = useLipi();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'validator' | 'compare' | 'audit' | 'community'>('validator');
+  const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
 
   // Interactive Validator State
   const [inputText, setInputText] = useState(activeLipi.labData.sampleText);
@@ -219,6 +221,26 @@ export function LabPage() {
             </div>
           </div>
 
+          {/* Dilemma / Project Creator Banner (PS 5.4 MVP) */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-[#78350F]/20">
+            <div className="space-y-0.5">
+              <span className="text-xs font-display font-black text-ink flex items-center gap-1.5">
+                <Sparkles size={14} className="text-[#B45309]" />
+                <span>PS 5.4: Unwritten Spoken Word or Inscription Specimen?</span>
+              </span>
+              <p className="text-[11px] font-serif text-muted">
+                Create a community decision tree (e.g. &ldquo;Reena&rdquo; → R-I-N-A vs R-E-E-N-A vs रीना) with photo upload & acoustic playback.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCreateProjectModal(true)}
+              className="btn-chunky-purple px-4 py-2 text-xs shrink-0 inline-flex items-center gap-2 cursor-pointer shadow-soft"
+            >
+              <FlaskConical size={14} />
+              <span>+ Create Script Dilemma Project</span>
+            </button>
+          </div>
 
           {/* Workbench Tabs */}
           <div className="flex flex-wrap gap-2.5 pt-2">
@@ -891,6 +913,12 @@ export function LabPage() {
             </div>
           )}
         </AnimatePresence>
+
+        {/* Script Project / Dilemma Creator Modal */}
+        <CreateProjectModal
+          isOpen={showCreateProjectModal}
+          onClose={() => setShowCreateProjectModal(false)}
+        />
 
       </div>
     </div>
