@@ -153,6 +153,50 @@ export function HomePage() {
           <p className="text-muted text-base sm:text-lg font-serif max-w-2xl mx-auto leading-relaxed">
             {activeLipi.overview}
           </p>
+
+          {/* Quick CTA Actions */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <a
+              href="#tree-of-knowledge"
+              className="btn-chunky-purple px-6 py-2.5 text-xs font-display font-black inline-flex items-center gap-2 cursor-pointer shadow-elevated"
+            >
+              <BookOpen size={15} />
+              <span>ज्ञान वृक्ष (The 3D Knowledge Tree) →</span>
+            </a>
+
+            <Link
+              to="/lab"
+              className="px-6 py-2.5 rounded-xl border-[2px] border-[#78350F]/30 bg-[#FFFDF9] dark:bg-slate-800 text-ink hover:border-[#78350F] text-xs font-display font-black inline-flex items-center gap-2 cursor-pointer shadow-soft transition-all"
+            >
+              <FlaskConical size={15} className="text-[#B45309]" />
+              <span>प्रयोग शाला (Test {activeLipi.nameNative} Script) →</span>
+            </Link>
+          </div>
+
+          {/* Fast Lipi Switcher Bar */}
+          <div className="flex items-center justify-center gap-2 flex-wrap pt-3">
+            <span className="text-[10px] font-mono font-bold uppercase text-muted tracking-wider">
+              Switch Lipi:
+            </span>
+            {allLipis.map((lipi) => {
+              const isSelected = lipi.id === activeLipi.id;
+              return (
+                <button
+                  key={lipi.id}
+                  type="button"
+                  onClick={() => setLipiId(lipi.id)}
+                  className={`px-3 py-1 rounded-xl text-xs font-display font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#78350F] text-white shadow-soft font-black scale-105'
+                      : 'bg-white dark:bg-slate-800 border border-border text-ink hover:border-[#78350F]/50'
+                  }`}
+                >
+                  <span className="font-serif font-black">{lipi.symbol}</span>
+                  <span>{lipi.nameNative}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -283,35 +327,55 @@ export function HomePage() {
             </div>
 
             {/* Dilemma Header Card with Prominent Specialist Resolution */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {activeProject.reviewerVerdict ? (
-                      <span className={`text-[10px] font-mono font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
-                        activeProject.status === 'flagged'
-                          ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
-                          : 'bg-mint/40 text-mint-dark dark:bg-emerald-950 dark:text-emerald-300'
-                      }`}>
-                        {activeProject.status === 'flagged' ? '🚩 Flagged' : '✓ Verified by'} {activeProject.reviewerVerdict.reviewerName}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-[#78350F] dark:bg-amber-950 dark:text-amber-300">
-                        ⏳ Review Pending (जांच जारी है)
-                      </span>
-                    )}
-
-                    <span className="text-[11px] font-mono text-muted">
-                      Asked by <strong className="text-ink">{activeProject.author}</strong> • {activeProject.submittedAt}
+            <div
+              className="bg-gradient-to-br from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE4] dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 rounded-3xl border-[2px] border-[#DCCFB9] dark:border-slate-800 p-6 sm:p-8 shadow-card space-y-6"
+              style={{ borderBottomWidth: '5px', borderBottomColor: '#78350F' }}
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#DCCFB9] dark:border-slate-800 pb-5">
+                <div className="flex items-center gap-4 min-w-0">
+                  {/* 3D Sculpted Glyph Emblem */}
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center font-serif font-black text-2xl text-white shrink-0 shadow-elevated relative overflow-hidden select-none"
+                    style={{
+                      background: 'linear-gradient(180deg, #D97706 0%, #B45309 60%, #78350F 100%)',
+                      border: '2px solid #FCD34D',
+                      boxShadow: '0 6px 0px #451A03, 0 10px 18px rgba(120, 53, 15, 0.4)'
+                    }}
+                  >
+                    <span className="absolute inset-x-2 top-1 h-2 rounded-full bg-white/30 pointer-events-none" />
+                    <span className="relative z-10 drop-shadow-sm">
+                      {activeProject.spokenWord?.charAt(0) || 'ल'}
                     </span>
                   </div>
 
-                  <h3 className="font-display text-2xl sm:text-3xl font-black text-ink">
-                    {activeProject.spokenWord || activeProject.title}
-                  </h3>
-                  {activeProject.title !== activeProject.spokenWord && (
-                    <p className="text-xs font-serif text-muted">{activeProject.title}</p>
-                  )}
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {activeProject.reviewerVerdict ? (
+                        <span className={`text-[10px] font-mono font-black uppercase px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm border ${
+                          activeProject.status === 'flagged'
+                            ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200 border-rose-300 dark:border-rose-900'
+                            : 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200 border-emerald-300 dark:border-emerald-900'
+                        }`}>
+                          {activeProject.status === 'flagged' ? '🚩 Flagged' : '✓ Verified by'} {activeProject.reviewerVerdict.reviewerName}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono font-bold uppercase px-3 py-1 rounded-full bg-amber-100 text-[#78350F] dark:bg-amber-950 dark:text-amber-300 border border-[#78350F]/30 shadow-sm">
+                          ⏳ Review Pending (जांच जारी है)
+                        </span>
+                      )}
+
+                      <span className="text-[11px] font-mono text-muted">
+                        Asked by <strong className="text-ink">{activeProject.author}</strong> • {activeProject.submittedAt}
+                      </span>
+                    </div>
+
+                    <h3 className="font-serif font-black text-2xl sm:text-3xl text-ink truncate">
+                      {activeProject.spokenWord || activeProject.title}
+                    </h3>
+                    {activeProject.title !== activeProject.spokenWord && (
+                      <p className="text-xs font-serif text-muted truncate">{activeProject.title}</p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
@@ -554,7 +618,7 @@ export function HomePage() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {publicDecisionProjects.map((item) => {
                   const isFlagged = item.status === 'flagged';
                   const userVote = userVotesMap[item.id];
@@ -562,34 +626,34 @@ export function HomePage() {
                   return (
                     <div
                       key={item.id}
-                      className={`p-5 sm:p-6 rounded-3xl border-[1.5px] shadow-card space-y-3.5 transition-all ${
+                      className={`p-6 rounded-3xl border-[2px] shadow-card space-y-4 transition-all relative group hover:-translate-y-1 ${
                         isFlagged
-                          ? 'bg-rose-50/20 dark:bg-rose-950/20 border-rose-300 dark:border-rose-900/50'
-                          : 'bg-white dark:bg-slate-900 border-mint-dark/30'
+                          ? 'bg-gradient-to-br from-rose-50/50 via-[#FFFDF9] to-[#FDF8F8] dark:from-rose-950/20 dark:via-slate-900 dark:to-slate-950 border-rose-300 dark:border-rose-900/50'
+                          : 'bg-gradient-to-br from-emerald-50/40 via-[#FFFDF9] to-[#FAF6EE] dark:from-emerald-950/20 dark:via-slate-900 dark:to-slate-950 border-[#DCCFB9] dark:border-slate-800'
                       }`}
                       style={{
-                        borderBottomWidth: '4px',
-                        borderBottomColor: isFlagged ? '#E11D48' : '#059669'
+                        borderBottomWidth: '4.5px',
+                        borderBottomColor: isFlagged ? '#DC2626' : '#059669'
                       }}
                     >
-                      {/* Header: Verified seal or Red Flag */}
-                      <div className="flex items-center justify-between border-b border-border pb-2.5">
+                      {/* Header: Verified seal or Rectified Flag */}
+                      <div className="flex items-center justify-between border-b border-[#DCCFB9]/70 dark:border-slate-800 pb-3">
                         <span
-                          className={`text-[10px] font-mono font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                          className={`text-[10px] font-mono font-black uppercase px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm border ${
                             isFlagged
-                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
-                              : 'bg-mint/40 text-mint-dark dark:bg-emerald-950 dark:text-emerald-300'
+                              ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200 border-rose-300 dark:border-rose-900'
+                              : 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200 border-emerald-300 dark:border-emerald-900'
                           }`}
                         >
                           {isFlagged ? (
                             <>
-                              <Flag size={11} className="text-rose-600 fill-rose-600" />
-                              <span>🚩 Flagged / Rectified by {item.reviewerVerdict?.reviewerName || 'Lipi Specialist'}</span>
+                              <Flag size={12} className="text-rose-600 fill-rose-600" />
+                              <span>🚩 RECTIFIED BY {item.reviewerVerdict?.reviewerName || 'Lipi Specialist'}</span>
                             </>
                           ) : (
                             <>
-                              <ShieldCheck size={12} className="text-mint-dark" />
-                              <span>✓ Verified by {item.reviewerVerdict?.reviewerName || 'Lipi Specialist'}</span>
+                              <ShieldCheck size={13} className="text-emerald-700 dark:text-emerald-400" />
+                              <span>✓ CANON VERIFIED • {item.reviewerVerdict?.reviewerName || 'Lipi Specialist'}</span>
                             </>
                           )}
                         </span>
@@ -598,18 +662,34 @@ export function HomePage() {
                         </span>
                       </div>
 
-                      {/* User Doubt / Spoken Word with Audio */}
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="space-y-0.5">
-                          <span className="text-[10px] font-mono text-muted uppercase block">
-                            User Question / Spoken Word:
-                          </span>
-                          <h4 className="font-serif font-black text-xl sm:text-2xl text-ink">
-                            {item.spokenWord}
-                          </h4>
-                          {item.title !== item.spokenWord && (
-                            <p className="text-xs font-serif text-muted">{item.title}</p>
-                          )}
+                      {/* User Doubt / Spoken Word with 3D Sculpted Glyph Emblem & Audio */}
+                      <div className="flex items-center justify-between gap-3 pt-1">
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div
+                            className="w-12 h-12 rounded-2xl flex items-center justify-center font-serif font-black text-xl text-white shrink-0 shadow-soft relative overflow-hidden select-none"
+                            style={{
+                              background: isFlagged
+                                ? 'linear-gradient(180deg, #F43F5E 0%, #E11D48 60%, #9F1239 100%)'
+                                : 'linear-gradient(180deg, #D97706 0%, #B45309 60%, #78350F 100%)',
+                              border: isFlagged ? '2px solid #FDA4AF' : '2px solid #FCD34D',
+                              boxShadow: isFlagged ? '0 4px 0px #881337' : '0 4px 0px #451A03'
+                            }}
+                          >
+                            <span className="absolute inset-x-1.5 top-0.5 h-1.5 rounded-full bg-white/30 pointer-events-none" />
+                            <span className="relative z-10">{item.spokenWord?.charAt(0) || 'ल'}</span>
+                          </div>
+
+                          <div className="min-w-0 space-y-0.5">
+                            <span className="text-[10px] font-mono text-muted uppercase block">
+                              User Inquiry / Spoken Word:
+                            </span>
+                            <h4 className="font-serif font-black text-xl sm:text-2xl text-ink truncate">
+                              {item.spokenWord}
+                            </h4>
+                            {item.title !== item.spokenWord && (
+                              <p className="text-xs font-serif text-muted truncate">{item.title}</p>
+                            )}
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
@@ -618,9 +698,12 @@ export function HomePage() {
                           ) : (
                             <button
                               type="button"
-                              onClick={() => playPronunciation(item.spokenWord, 'hi-IN')}
-                              className="p-2 rounded-xl bg-amber-50 dark:bg-slate-800 text-[#78350F] hover:bg-[#78350F] hover:text-white transition-colors cursor-pointer shadow-soft"
-                              title="Hear pronunciation"
+                              onClick={() => {
+                                playAcousticChime(560, 0.2);
+                                playPronunciation(item.spokenWord, 'hi-IN');
+                              }}
+                              className="p-2.5 rounded-xl bg-amber-50 dark:bg-slate-800 text-[#78350F] dark:text-amber-300 border border-[#78350F]/20 hover:bg-[#78350F] hover:text-white transition-all cursor-pointer shadow-soft"
+                              title="Hear acoustic pronunciation"
                             >
                               <Volume2 size={15} />
                             </button>
@@ -635,26 +718,26 @@ export function HomePage() {
                             src={item.imageUrl}
                             alt="Specimen"
                             onClick={() => setLightboxImage({ url: item.imageUrl!, title: item.spokenWord })}
-                            className="w-full h-36 sm:h-44 object-cover rounded-xl border border-border shadow-soft cursor-pointer group-hover:opacity-90 group-hover:scale-[1.01] transition-all"
+                            className="w-full h-36 sm:h-44 object-cover rounded-2xl border-[1.5px] border-[#DCCFB9] shadow-soft cursor-pointer group-hover:opacity-90 group-hover:scale-[1.01] transition-all"
                             title="Click to open & zoom picture"
                           />
                           <div
                             onClick={() => setLightboxImage({ url: item.imageUrl!, title: item.spokenWord })}
-                            className="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-black/70 text-white text-[10px] font-mono cursor-pointer backdrop-blur-sm opacity-90 group-hover:opacity-100 flex items-center gap-1"
+                            className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-xl bg-black/75 text-white text-[10px] font-mono font-bold cursor-pointer backdrop-blur-sm opacity-90 group-hover:opacity-100 flex items-center gap-1 shadow-soft"
                           >
-                            <span>🔍 Click to expand</span>
+                            <span>🔍 Click to expand picture</span>
                           </div>
                         </div>
                       )}
 
-                      {/* Accepted Spelling Option Pill (if reviewer endorsed one) */}
+                      {/* Endorsed Standard Spelling Option Pill (if reviewer endorsed one) */}
                       {item.reviewerVerdict?.acceptedOption && (
-                        <div className="p-2.5 rounded-xl bg-amber-50/60 dark:bg-slate-800/60 border border-[#78350F]/20 space-y-1">
+                        <div className="p-3 rounded-2xl bg-amber-50/70 dark:bg-slate-800/60 border border-[#78350F]/20 space-y-1.5">
                           <span className="text-[10px] font-mono font-bold uppercase text-[#78350F] dark:text-amber-400 block">
-                            Endorsed Standard Spelling:
+                            Approved Standard Spelling (स्वीकृत मानक वर्तनी):
                           </span>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2.5 py-1 rounded-lg bg-mint-dark text-white font-serif font-black text-xs shadow-soft flex items-center gap-1">
+                            <span className="px-3 py-1.5 rounded-xl bg-mint-dark text-white font-serif font-black text-sm shadow-soft flex items-center gap-1.5">
                               <span>✓</span>
                               <span>{item.reviewerVerdict.acceptedOption}</span>
                             </span>
@@ -664,7 +747,7 @@ export function HomePage() {
                                 .map((opt, oIdx) => (
                                   <span
                                     key={oIdx}
-                                    className="px-2 py-0.5 rounded-lg bg-neutral dark:bg-slate-700 text-muted font-serif text-xs opacity-70 line-through"
+                                    className="px-2.5 py-1 rounded-xl bg-neutral dark:bg-slate-700 text-muted font-serif text-xs opacity-70 line-through"
                                   >
                                     {opt}
                                   </span>
@@ -673,69 +756,69 @@ export function HomePage() {
                         </div>
                       )}
 
-                      {/* Reviewer Commentary */}
+                      {/* Reviewer Commentary & Rationale */}
                       {item.reviewerVerdict?.rationale && (
                         <div
-                          className={`p-3.5 rounded-2xl text-xs font-serif space-y-1 border ${
+                          className={`p-4 rounded-2xl text-xs font-serif space-y-1.5 border shadow-inner ${
                             isFlagged
-                              ? 'bg-rose-50/50 dark:bg-rose-950/30 border-rose-200 text-ink'
-                              : 'bg-amber-50/50 dark:bg-slate-800/60 border-[#78350F]/20 text-ink'
+                              ? 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/50 text-ink'
+                              : 'bg-white/80 dark:bg-slate-800/80 border-[#DCCFB9] dark:border-slate-800 text-ink'
                           }`}
                         >
                           <span
-                            className={`font-bold text-[11px] block ${
+                            className={`font-mono text-[10px] font-bold uppercase tracking-wider block ${
                               isFlagged ? 'text-rose-700 dark:text-rose-400' : 'text-[#78350F] dark:text-amber-400'
                             }`}
                           >
-                            {isFlagged ? 'Specialist Rectification:' : 'Specialist Guidance:'}
+                            {isFlagged ? 'Specialist Rectification & Correction:' : 'Specialist Guidance:'}
                           </span>
-                          <p className="leading-relaxed italic">
+                          <p className="leading-relaxed italic text-sm text-ink font-serif">
                             &ldquo;{item.reviewerVerdict.rationale}&rdquo;
                           </p>
                         </div>
                       )}
 
                       {/* Footer Meta & 1-Vote-per-User Upvote/Downvote Bar */}
-                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/70 text-xs">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#DCCFB9]/70 dark:border-slate-800 text-xs">
                         <div className="text-[10px] font-mono text-muted space-y-0.5">
                           <span>Contributor: <strong className="text-ink">{item.author}</strong></span>
                           <span className="block">Scope: {item.lipiName}</span>
                         </div>
 
                         {/* Voting Column: Upvote & Downvote */}
-                        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-neutral/80 dark:bg-slate-800 border border-border">
+                        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white dark:bg-slate-800 border-[1.5px] border-border shadow-soft">
                           <button
                             type="button"
                             onClick={() => voteOnProject(item.id, 'up')}
-                            className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                               userVote === 'up'
                                 ? 'bg-mint-dark text-white shadow-soft scale-105'
                                 : 'text-muted hover:text-ink'
                             }`}
                             title={userVote === 'up' ? 'Click to remove upvote' : 'Upvote resolution'}
                           >
-                            <ThumbsUp size={12} className={userVote === 'up' ? 'fill-white' : ''} />
+                            <ThumbsUp size={13} className={userVote === 'up' ? 'fill-white' : ''} />
                             <span>{item.upvotes || 0}</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => voteOnProject(item.id, 'down')}
-                            className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                               userVote === 'down'
                                 ? 'bg-danger text-white shadow-soft scale-105'
                                 : 'text-muted hover:text-ink'
                             }`}
                             title={userVote === 'down' ? 'Click to remove downvote' : 'Downvote resolution'}
                           >
-                            <ThumbsDown size={12} className={userVote === 'down' ? 'fill-white' : ''} />
+                            <ThumbsDown size={13} className={userVote === 'down' ? 'fill-white' : ''} />
                             <span>{item.downvotes || 0}</span>
                           </button>
                         </div>
                       </div>
 
                       {/* Expandable Community Discussion Panel (Instagram style) */}
-                      <div className="pt-2 border-t border-border/70">
+                      <div className="pt-2 border-t border-[#DCCFB9]/70 dark:border-slate-800">
                         <ProjectDiscussionPanel
                           projectId={item.id}
                           projectTitle={item.title}

@@ -184,8 +184,22 @@ export function Navbar() {
 
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                {/* Live Real-time XP Pill - Click to Open Leaderboard */}
-                {activeWorkspace === 'user' ? (
+                {/* Live Real-time XP Pill - Contextual for Learner vs Reviewer */}
+                {isReviewer ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLeaderboardTab('reviewers');
+                      setLeaderboardOpen(true);
+                      playAcousticChime(620, 0.25);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border-[1.5px] border-[#78350F]/40 shadow-soft text-xs font-mono font-bold text-[#78350F] dark:text-amber-300 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+                    title="Click to view Specialist Reviewer Leaderboard 🏆"
+                  >
+                    <ShieldCheck size={14} className="text-[#B45309] group-hover:rotate-12 transition-transform" />
+                    <span>{user?.review_xp || 650} Review XP</span>
+                  </button>
+                ) : (
                   <button
                     type="button"
                     onClick={() => {
@@ -198,20 +212,6 @@ export function Navbar() {
                   >
                     <span className="text-base group-hover:rotate-12 transition-transform">🌱</span>
                     <span>{user?.learning_xp || 0} XP</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLeaderboardTab('reviewers');
-                      setLeaderboardOpen(true);
-                      playAcousticChime(620, 0.25);
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-mint/50 border-[1.5px] border-mint-dark/30 shadow-soft text-xs font-mono font-bold text-mint-dark hover:scale-105 active:scale-95 transition-all cursor-pointer group"
-                    title="Click to view Specialist Reviewer Leaderboard 🏆"
-                  >
-                    <ShieldCheck size={14} className="group-hover:rotate-12 transition-transform" />
-                    <span>{user?.review_xp || 650} XP</span>
                   </button>
                 )}
 

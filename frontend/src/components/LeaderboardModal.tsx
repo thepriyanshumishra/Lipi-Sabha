@@ -59,17 +59,18 @@ export function LeaderboardModal({ isOpen, onClose, defaultTab }: LeaderboardMod
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5"
+        className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-md flex justify-center items-start sm:items-center p-3 sm:p-6"
         onClick={onClose}
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl border-[2px] border-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh] my-auto"
-          style={{ borderBottomWidth: '4px', borderBottomColor: '#78350F' }}
-        >
+        <div className="min-h-full py-4 sm:py-8 flex items-center justify-center w-full max-w-xl">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full bg-white dark:bg-slate-900 rounded-3xl border-[2px] border-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+            style={{ borderBottomWidth: '4px', borderBottomColor: '#78350F' }}
+          >
           {/* Header with prominent Back & Close button */}
           <div className="p-4 sm:p-5 border-b border-border bg-[#FFFDF9] dark:bg-slate-800 flex items-center justify-between gap-3 shrink-0">
             <div className="flex items-center gap-3 min-w-0">
@@ -270,6 +271,7 @@ export function LeaderboardModal({ isOpen, onClose, defaultTab }: LeaderboardMod
             </button>
           </div>
         </motion.div>
+        </div>
       </div>
     </AnimatePresence>
   );
