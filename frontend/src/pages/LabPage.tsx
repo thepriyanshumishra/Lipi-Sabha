@@ -219,27 +219,6 @@ export function LabPage() {
             </div>
           </div>
 
-          {/* Lipi Quick Select Row inside Lab */}
-          <div className="flex items-center gap-2 flex-wrap pt-2 border-t-[1.5px] border-border">
-            <span className="text-[10px] font-mono font-bold uppercase text-muted tracking-wider">
-              Switch Workbench Lipi:
-            </span>
-            {allLipis.map((lipi) => (
-              <button
-                key={lipi.id}
-                type="button"
-                onClick={() => setLipiId(lipi.id)}
-                className={`px-3 py-1 rounded-xl font-display text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
-                  lipi.id === activeLipi.id
-                    ? 'bg-[#78350F] text-white shadow-soft font-bold'
-                    : 'bg-white dark:bg-slate-800 border-[1.5px] border-border text-ink hover:border-[#78350F]/50'
-                }`}
-              >
-                <span className="font-serif font-black">{lipi.symbol}</span>
-                <span>{lipi.nameNative}</span>
-              </button>
-            ))}
-          </div>
 
           {/* Workbench Tabs */}
           <div className="flex flex-wrap gap-2.5 pt-2">

@@ -343,81 +343,49 @@ export function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -6, scale: 0.96 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 mt-2 w-80 bg-[#FFFDF8] dark:bg-slate-900 rounded-2xl border-[1.5px] border-[#78350F]/30 dark:border-amber-900/50 shadow-elevated py-2.5 z-50 overflow-hidden"
+                    className="absolute right-0 mt-2 w-64 bg-[#FFFDF8] dark:bg-slate-900 rounded-2xl border-[1.5px] border-[#78350F]/25 dark:border-amber-900/40 shadow-elevated p-1.5 z-50 space-y-0.5"
                     role="menu"
                   >
-                    {/* Header info */}
-                    <div className="px-4 py-2 border-b border-[#78350F]/10 dark:border-amber-900/30">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#78350F] dark:text-amber-400">
-                          📜 Sacred & Living Lipis
-                        </span>
-                        <span className="text-[10px] font-mono bg-[#78350F]/10 dark:bg-amber-950 text-[#78350F] dark:text-amber-300 px-2 py-0.5 rounded-full font-bold">
-                          {allLipis.length} Scripts
-                        </span>
-                      </div>
-                      <p className="text-[11px] font-serif text-muted mt-1 leading-snug">
-                        Selecting a Lipi adapts both <span className="font-bold text-ink">ज्ञान वृक्ष</span> and <span className="font-bold text-ink">प्रयोग शाला</span> instantly.
-                      </p>
-                    </div>
-
-                    {/* Lipis List */}
-                    <div className="max-h-80 overflow-y-auto px-2 py-1.5 space-y-1">
-                      {allLipis.map((lipi) => {
-                        const isSelected = lipi.id === activeLipi.id;
-                        return (
-                          <button
-                            key={lipi.id}
-                            type="button"
-                            onClick={() => {
-                              setLipiId(lipi.id);
-                              setLipiDropdownOpen(false);
-                            }}
-                            className={`w-full text-left p-2.5 rounded-xl transition-all flex items-center justify-between gap-3 cursor-pointer group ${
-                              isSelected
-                                ? 'bg-amber-50 dark:bg-amber-950/40 border border-[#78350F]/40 shadow-soft'
-                                : 'hover:bg-neutral/80 dark:hover:bg-slate-800/80 border border-transparent'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              {/* Symbol box */}
-                              <div
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center font-serif font-black text-base shrink-0 transition-all ${
-                                  isSelected
-                                    ? 'bg-[#78350F] text-white shadow-sm'
-                                    : 'bg-[#78350F]/10 dark:bg-amber-950 text-[#78350F] dark:text-amber-300 group-hover:scale-105'
-                                }`}
-                              >
-                                {lipi.symbol}
-                              </div>
-
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-display font-extrabold text-xs text-ink truncate">
-                                    {lipi.nameNative}
-                                  </span>
-                                  <span className="text-[10px] font-sans text-muted truncate">
-                                    ({lipi.nameEnglish})
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[10px] font-mono text-muted">
-                                  <span>{lipi.era}</span>
-                                  <span>•</span>
-                                  <span className="truncate">{lipi.region.split(',')[0]}</span>
-                                </div>
-                              </div>
+                    {allLipis.map((lipi) => {
+                      const isSelected = lipi.id === activeLipi.id;
+                      return (
+                        <button
+                          key={lipi.id}
+                          type="button"
+                          onClick={() => {
+                            setLipiId(lipi.id);
+                            setLipiDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-2.5 py-2 rounded-xl transition-all flex items-center justify-between gap-2.5 cursor-pointer group ${
+                            isSelected
+                              ? 'bg-amber-100/70 dark:bg-amber-950/50 text-[#78350F] dark:text-amber-300 font-bold'
+                              : 'hover:bg-neutral/80 dark:hover:bg-slate-800 text-ink'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center font-serif font-black text-sm shrink-0 transition-transform ${
+                                isSelected
+                                  ? 'bg-[#78350F] text-white shadow-soft'
+                                  : 'bg-[#78350F]/10 dark:bg-amber-950/60 text-[#78350F] dark:text-amber-300 group-hover:scale-105'
+                              }`}
+                            >
+                              {lipi.symbol}
                             </div>
+                            <span className="font-display font-bold text-xs truncate">
+                              {lipi.nameNative}{' '}
+                              <span className="text-muted font-sans font-normal text-[11px]">
+                                ({lipi.nameEnglish})
+                              </span>
+                            </span>
+                          </div>
 
-                            {/* Active Checkmark */}
-                            {isSelected && (
-                              <div className="shrink-0 w-5 h-5 rounded-full bg-[#78350F] text-white flex items-center justify-center">
-                                <Check size={12} strokeWidth={3} />
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
+                          {isSelected && (
+                            <Check size={14} className="text-[#78350F] dark:text-amber-400 shrink-0" strokeWidth={2.5} />
+                          )}
+                        </button>
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>

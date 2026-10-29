@@ -28,7 +28,6 @@ export function HomePage() {
   const [quizSelection, setQuizSelection] = useState<number | null>(null);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [earnedXP, setEarnedXP] = useState(450);
-  const [activeGardenLetterIdx, setActiveGardenLetterIdx] = useState<number>(0);
 
   // When activeLipi changes or reviewer adds a node, stay in sync
   useEffect(() => {
@@ -63,29 +62,15 @@ export function HomePage() {
     }
   };
 
-  const activeGardenLetter = activeLipi.gardenLetters[activeGardenLetterIdx] || activeLipi.gardenLetters[0];
 
   return (
     <div className="bg-cream text-ink min-h-screen select-none">
       {/* ========================================================
           HERO: ILLUMINATED GITA BOOK / SACRED MANUSCRIPT OPENING
-          Dynamically tuned to the selected Lipi
+          Clean, minimal, uncluttered
           ======================================================== */}
-      <section className="relative pt-12 pb-14 lg:pt-16 lg:pb-20 border-b-[1.5px] border-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-6">
-          
-          {/* Active Lipi Badge with Era & Region */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border-[1.5px] border-[#78350F]/25 dark:border-amber-900/40 text-xs font-serif shadow-soft">
-            <span className="w-5 h-5 rounded-md bg-[#78350F] text-white flex items-center justify-center font-bold text-xs">
-              {activeLipi.symbol}
-            </span>
-            <span className="font-bold text-[#78350F] dark:text-amber-300">
-              {activeLipi.nameNative} ({activeLipi.nameEnglish})
-            </span>
-            <span className="text-muted">•</span>
-            <span className="text-muted font-mono">{activeLipi.era}</span>
-          </div>
-
+      <section className="relative pt-12 pb-14 lg:pt-16 lg:pb-16 border-b-[1.5px] border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-ink tracking-tight leading-[1.18]">
             Every letter has a{' '}
             <span className="hero-story-underline text-purple">
@@ -98,167 +83,6 @@ export function HomePage() {
           <p className="text-muted text-base sm:text-lg font-serif max-w-2xl mx-auto leading-relaxed">
             {activeLipi.overview}
           </p>
-
-          {/* Quick Dual Jump Scrolls */}
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
-            <a
-              href="#tree-of-knowledge"
-              className="btn-chunky-purple px-7 py-3.5 text-sm inline-flex items-center gap-2"
-            >
-              <BookOpen size={17} />
-              <span>ज्ञान वृक्ष (The 3D Knowledge Tree)</span>
-              <ArrowRight size={16} />
-            </a>
-
-            <Link
-              to="/lab"
-              className="btn-chunky-white px-7 py-3.5 text-sm inline-flex items-center gap-2"
-            >
-              <FlaskConical size={17} className="text-[#B45309]" />
-              <span>प्रयोग शाला (Test {activeLipi.nameEnglish} Script) →</span>
-            </Link>
-          </div>
-
-          {/* Lipi Quick-Switcher Pills below Hero */}
-          <div className="pt-4 flex items-center justify-center gap-2 flex-wrap text-xs">
-            <span className="font-mono text-muted uppercase text-[10px] tracking-wider font-bold">
-              Switch Lipi:
-            </span>
-            {allLipis.map((lipi) => (
-              <button
-                key={lipi.id}
-                type="button"
-                onClick={() => setLipiId(lipi.id)}
-                className={`px-3 py-1 rounded-xl font-display text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
-                  lipi.id === activeLipi.id
-                    ? 'bg-[#78350F] text-white shadow-soft font-bold'
-                    : 'bg-white dark:bg-slate-800 border-[1.5px] border-border text-ink hover:border-[#78350F]/50'
-                }`}
-              >
-                <span className="font-serif font-black">{lipi.symbol}</span>
-                <span>{lipi.nameNative}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================
-          THE 3D LETTER GARDEN (Tactile Blooms of Active Lipi)
-          Click to hear authentic pronunciation and anatomical insight
-          ======================================================== */}
-      <section className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b-[1.5px] border-border">
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border-[1.5px] border-border p-6 sm:p-8 shadow-card space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-[1.5px] border-border pb-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🌸</span>
-                <h3 className="font-display text-lg sm:text-xl font-black text-ink">
-                  The Living Letter Garden of {activeLipi.nameNative}
-                </h3>
-              </div>
-              <p className="text-xs font-serif text-muted">
-                Click any signature character to hear its acoustic resonance and inspect its scribal role.
-              </p>
-            </div>
-
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint/50 border border-mint-dark/30 text-xs font-mono font-bold text-mint-dark shrink-0">
-              <Volume2 size={13} />
-              <span>Audio Synthesis Ready</span>
-            </div>
-          </div>
-
-          {/* Letter Petals Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {activeLipi.gardenLetters.map((letter, idx) => {
-              const isActive = activeGardenLetterIdx === idx;
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    setActiveGardenLetterIdx(idx);
-                    playAcousticChime(500 + idx * 80, 0.3);
-                    playPronunciation(letter.audioText, letter.lang);
-                  }}
-                  className={`p-4 rounded-2xl transition-all cursor-pointer text-center relative overflow-hidden group ${
-                    isActive
-                      ? 'bg-amber-50/90 dark:bg-amber-950/40 border-2 border-[#78350F] shadow-elevated -translate-y-1'
-                      : 'bg-[#FFFDF9] dark:bg-slate-800/80 border-[1.5px] border-border hover:border-[#78350F]/50 hover:-translate-y-0.5 shadow-soft'
-                  }`}
-                  style={{
-                    borderBottomWidth: isActive ? '4px' : '3px',
-                    borderBottomColor: isActive ? '#78350F' : '#DCCFB9'
-                  }}
-                >
-                  <div className="flex items-center justify-between text-[10px] text-muted mb-2">
-                    <span className="font-mono font-bold uppercase">Petal {idx + 1}</span>
-                    <span className="text-purple group-hover:scale-110 transition-transform">
-                      <Volume2 size={13} />
-                    </span>
-                  </div>
-
-                  {/* 3D Glyphs */}
-                  <div className="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center font-serif font-black text-3xl my-2 shadow-soft transition-transform group-hover:scale-105"
-                    style={{
-                      background: isActive
-                        ? 'linear-gradient(135deg, #D97706 0%, #B45309 60%, #78350F 100%)'
-                        : 'linear-gradient(180deg, #FFFFFF 0%, #F5EFE4 100%)',
-                      color: isActive ? '#FFFFFF' : '#1C1917',
-                      border: isActive ? '2px solid #FDE68A' : '1.5px solid #DCCFB9',
-                      boxShadow: isActive ? '0 6px 0px #451A03' : '0 3px 0px #C4B59D'
-                    }}
-                  >
-                    {letter.char}
-                  </div>
-
-                  <span className="font-display font-extrabold text-xs text-ink block truncate mt-1">
-                    {letter.name}
-                  </span>
-                  <span className="font-mono text-[11px] text-[#B45309] dark:text-amber-400 block font-bold">
-                    {letter.ipa}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Active Bloom Description Banner */}
-          {activeGardenLetter && (
-            <motion.div
-              key={activeGardenLetter.char}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border-[1.5px] border-[#78350F]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-3">
-                <span className="w-10 h-10 rounded-xl bg-[#78350F] text-white flex items-center justify-center font-serif font-black text-xl shrink-0 shadow-soft">
-                  {activeGardenLetter.char}
-                </span>
-                <div>
-                  <h4 className="font-display font-bold text-sm text-ink flex items-center gap-2">
-                    <span>{activeGardenLetter.name}</span>
-                    <span className="font-mono text-xs text-purple font-semibold">({activeGardenLetter.ipa})</span>
-                  </h4>
-                  <p className="text-xs font-serif text-muted mt-0.5 leading-relaxed">
-                    {activeGardenLetter.meaning}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  playAcousticChime(600, 0.3);
-                  playPronunciation(activeGardenLetter.audioText, activeGardenLetter.lang);
-                }}
-                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border-[1.5px] border-border text-xs font-display font-bold text-ink hover:border-[#78350F] inline-flex items-center gap-1.5 shadow-soft cursor-pointer shrink-0 self-start sm:self-auto"
-              >
-                <Volume2 size={14} className="text-[#B45309]" />
-                <span>Hear Resonance ({activeGardenLetter.char})</span>
-              </button>
-            </motion.div>
-          )}
         </div>
       </section>
 
