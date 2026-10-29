@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+:root {
+  /* Duolingo Brand Palette */
+  --color-eager-green: #58cc02;
+  --color-eager-green-depth: #46a302;
+  --color-storybook-green: #d7ffb8;
+  --color-spark-blue: #1cb0f6;
+  --color-spark-blue-depth: #1899d6;
+  --color-fresh-leaf: #a5ed6e;
+  --color-night-ink: #000437;
+
+  /* Gamification & Accents */
+  --color-sun-yellow: #ffc800;
+  --color-sun-yellow-depth: #e5b400;
+  --color-coral-fire: #ff4b4b;
+  --color-coral-fire-depth: #d63f3f;
+
+  /* Neutrals */
+  --color-paper-white: #ffffff;
+  --color-canvas-cream: #fafafa;
+  --color-charcoal: #4b4b4b;
+  --color-pencil-gray: #777777;
+  --color-faded-gray: #afafaf;
+  --color-border-light: #e5e5e5;
+  --color-border-subtle: #f0f0f0;
+
+  /* Geometry */
+  --radius-tactile: 12px;
+  --border-tactile: 2px;
+}
+
+body {
+  background-color: var(--color-paper-white);
+  color: var(--color-charcoal);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 3D Tactile Button Press Physics */
+.btn-tactile-primary {
+  background-color: var(--color-eager-green);
+  color: #ffffff;
+  border-radius: 12px;
+  border: 2px solid var(--color-eager-green);
+  box-shadow: 0 4px 0 var(--color-eager-green-depth);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+  font-weight: 700;
+}
+
+.btn-tactile-primary:hover {
+  filter: brightness(1.05);
+}
+
+.btn-tactile-primary:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--color-eager-green-depth);
+}
+
+.btn-tactile-secondary {
+  background-color: #ffffff;
+  color: var(--color-spark-blue);
+  border-radius: 12px;
+  border: 2px solid var(--color-border-light);
+  box-shadow: 0 4px 0 var(--color-border-light);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.15s ease;
+  font-weight: 700;
+}
+
+.btn-tactile-secondary:hover {
+  border-color: var(--color-spark-blue);
+}
+
+.btn-tactile-secondary:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--color-border-light);
+}
+
+.btn-tactile-action {
+  background-color: var(--color-spark-blue);
+  color: #ffffff;
+  border-radius: 12px;
+  border: 2px solid var(--color-spark-blue);
+  box-shadow: 0 4px 0 var(--color-spark-blue-depth);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  font-weight: 700;
+}
+
+.btn-tactile-action:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--color-spark-blue-depth);
+}
+
+/* Tactile Sticker Cards */
+.card-tactile {
+  background-color: #ffffff;
+  border: 2px solid var(--color-border-light);
+  border-radius: 16px;
+  box-shadow: 0 3px 0 var(--color-border-subtle);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-tactile:hover {
+  border-color: var(--color-spark-blue);
+}
+
+.card-tactile.selected {
+  border-color: var(--color-spark-blue);
+  background-color: #ddf4ff;
+  box-shadow: 0 4px 0 #bfe7fc;
+}

@@ -29,12 +29,12 @@
 | ID | Status | Decision | Rationale / Boundary |
 |---|---|---|---|
 | T-01 | LOCKED | Next.js 15 (App Router) + React 19 + TypeScript. | Compact full-stack architecture for responsive UI and server actions. |
-| T-02 | LOCKED | Supabase PostgreSQL + Supabase Auth. | Relational integrity, auth, managed service, and Row Level Security (RLS). |
-| T-03 | LOCKED | Tailwind CSS v4 + Radix UI + Custom 3D Tactile Tokens. | Reusable accessible primitives styled to Duolingo design system specifications. |
-| T-04 | LOCKED | Deep Module Seam Architecture (`codebase-design`). | Four isolated deep modules: `QuestEngine`, `MetricsEngine`, `GovernanceWorkflow`, `GamificationLedger`. |
-| T-05 | LOCKED | No secrets in client bundles; no service-role key in browser code. | Strict security boundary enforced by Next.js and Supabase RLS. |
-| T-06 | LOCKED | Incremental SQL migrations and RLS policy tests are required. | Authorization must be reproducible, auditable, and automated. |
-| T-07 | LOCKED | No Redis, separate Express service, vector DB, or microservices in MVP. | Prevents premature complexity. |
+| T-02 | LOCKED | Neon Serverless PostgreSQL + Drizzle ORM. | Superior serverless connection pooling, instant branching, fast query execution, zero vendor lock-in. |
+| T-03 | LOCKED | NextAuth.js with Direct Google OAuth. | Clean session management with direct Google Cloud OAuth application. |
+| T-04 | LOCKED | Cloudinary for media and audio assets. | Fast CDN-hosted media for manuscript images, mascot illustrations, and pronunciation audio clips. |
+| T-05 | LOCKED | Tailwind CSS v4 + Radix UI + Custom 3D Tactile Tokens. | Reusable accessible primitives styled to Duolingo design system specifications. |
+| T-06 | LOCKED | Deep Module Seam Architecture (`codebase-design`). | Four isolated deep modules: `QuestEngine`, `MetricsEngine`, `GovernanceWorkflow`, `GamificationLedger`. |
+| T-07 | LOCKED | Deployments on Vercel / Render. | Optimized for Next.js 15 edge runtime and background services. |
 | T-08 | LOCKED | `codebase-memory-mcp` integration for persistent structural repo intelligence. | Saves context tokens and prevents repetitive full-codebase scanning. |
 
 ---

@@ -13,11 +13,14 @@
 | **Web Framework** | Next.js 15 (App Router) + React 19 + TypeScript | Full-stack TypeScript architecture; React Server Components (RSC) for zero-JS landing pages and secure server actions. |
 | **Styling & Design System** | Tailwind CSS v4 + Radix UI Primitives | Implements the Duolingo tactile token system ([`00-design-system.md`](./00-design-system.md)); custom 3D button press physics and sticker cards. |
 | **Animation Engine** | Framer Motion + Canvas API + HyperFrames motion tokens | Delivers velocity-matched seams (`cut-the-curve`), card waterfall entries, and responsive glyph tracing canvases. |
-| **Database & Auth** | Supabase PostgreSQL + Supabase Auth | Relational foreign key cascades, JSONB variant metadata, and declarative Row Level Security (RLS) policies. |
-| **API & Mutations** | Next.js Server Actions & Route Handlers | Server-side mutations validated with Zod schemas; zero public exposure of service-role keys. |
+| **Database** | Neon Serverless PostgreSQL (`@neondatabase/serverless`) + Drizzle ORM | Blazing fast connection pooling, branching, high-performance edge/serverless queries, zero vendor lock-in. |
+| **Authentication** | NextAuth.js (Auth.js) + Direct Google OAuth | Direct Google Cloud OAuth provider (Client ID/Secret) + credential fallback; clean session management. |
+| **Media / Storage** | Cloudinary | CDN-backed storage for manuscript scans, scribe mascot vector assets, and native audio pronunciation clips. |
+| **API & Mutations** | Next.js Server Actions & Route Handlers | Server-side mutations validated with Zod schemas; strict trust boundary. |
 | **Validation Layer** | Zod (v3) | Strict input and response boundary schemas preventing schema poisoning. |
+| **Deployment Targets** | Vercel / Render | Native Next.js edge performance on Vercel or flexible Docker deployment on Render. |
 | **Code Intelligence** | `codebase-memory-mcp` | Persistent local SQLite structural graph of symbols, call trees, and routes to streamline AI development. |
-| **Testing Suite** | Vitest + React Testing Library + Playwright | Unit tests for scoring logic, component interaction tests, and end-to-end RLS authorization tests. |
+| **Testing Suite** | Vitest + React Testing Library + Playwright | Unit tests for scoring logic, component interaction tests, and end-to-end authorization tests. |
 
 ---
 
