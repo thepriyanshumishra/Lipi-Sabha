@@ -1,0 +1,143 @@
+'use client';
+
+import React, { useState } from 'react';
+import { ASSET_MANIFEST, AssetMetadata } from '@/lib/assets/manifest';
+import { Scroll, Image as ImageIcon, Sparkles, FileText, Compass } from 'lucide-react';
+
+export interface ImagePlaceholderProps {
+  assetId: string;
+  className?: string;
+  variant?: 'dark' | 'parchment' | 'hero' | 'specimen' | 'background';
+  aspectRatio?: string;
+  badgePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+  showDetails?: boolean;
+  children?: React.ReactNode;
+}
+
+export function ImagePlaceholder({
+  assetId,
+  className = '',
+  variant,
+  aspectRatio,
+  badgePosition = 'bottom-left',
+  showDetails = true,
+  children,
+}: ImagePlaceholderProps) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const asset: AssetMetadata | undefined = ASSET_MANIFEST[assetId];
+  const effectiveRatio = aspectRatio || asset?.aspectRatio || '16/9';
+  const effectiveVariant = variant || (asset?.section === 'fieldwork' || asset?.section === 'projects' ? 'parchment' : 'dark');
+
+  // Attempt to load real image if available in /images/ directory
+  const imageSrc = asset ? `/images/${asset.fileName}` : undefined;
+
+  const isParchment = effectiveVariant === 'parchment';
+  const isHero = effectiveVariant === 'hero';
+
+  return (
+    <div
+      className={`relative overflow-hidden group select-none transition-all ${
+        isParchment
+          ? 'bg-[#EADECE] text-[#3D3024] border border-[#C5B49E]'
+          : 'bg-[#0E1320] text-slate-300 border border-slate-800'
+      } ${className}`}
+      style={{
+        aspectRatio: effectiveRatio,
+      }}
+      role="img"
+      aria-label={asset ? `${asset.title}: ${asset.description}` : assetId}
+    >
+      {/* Real image if present in public/images/ */}
+      {imageSrc && !imageError && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageSrc}
+          alt={asset?.description || assetId}
+          className={`w-full h-full object-${asset?.objectFit || 'cover'} transition-opacity duration-300 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
+        />
+      )}
+
+      {/* Styled Placeholder Fallback (shown when real image has not yet been placed in /images/) */}
+      {(!imageLoaded || imageError) && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+          {/* Subtle Archival Blueprint / Grain Grid */}
+          <div
+            className={`absolute inset-0 opacity-15 pointer-events-none ${
+              isParchment
+                ? 'bg-[radial-gradient(#8C7355_1px,transparent_1px)] [background-size:16px_16px]'
+                : 'bg-[radial-gradient(#4F46E5_1px,transparent_1px)] [background-size:16px_16px]'
+            }`}
+          />
+
+          {/* Archival Corner Ticks */}
+          <div className={`absolute top-2 left-2 w-2.5 h-2.5 border-t border-l ${isParchment ? 'border-[#8C7355]' : 'border-amber-400/60'}`} />
+          <div className={`absolute top-2 right-2 w-2.5 h-2.5 border-t border-r ${isParchment ? 'border-[#8C7355]' : 'border-amber-400/60'}`} />
+          <div className={`absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l ${isParchment ? 'border-[#8C7355]' : 'border-amber-400/60'}`} />
+          <div className={`absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r ${isParchment ? 'border-[#8C7355]' : 'border-amber-400/60'}`} />
+
+          {/* Centered Graphic Icon & Label */}
+          <div className="relative z-10 flex flex-col items-center text-center max-w-[85%]">
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 shadow-inner ${
+                isParchment
+                  ? 'bg-[#DDD1BF] border border-[#BFAFA0] text-[#6E543D]'
+                  : 'bg-slate-900 border border-slate-700/80 text-amber-400/90'
+              }`}
+            >
+              {isHero ? (
+                <Scroll className="w-5 h-5 animate-pulse" />
+              ) : isParchment ? (
+                <FileText className="w-5 h-5" />
+              ) : (
+                <ImageIcon className="w-5 h-5" />
+              )}
+            </div>
+
+            {asset?.title && (
+              <h4 className={`text-xs font-serif font-bold tracking-tight line-clamp-1 ${isParchment ? 'text-[#2D2116]' : 'text-slate-100'}`}>
+                {asset.title}
+              </h4>
+            )}
+
+            {showDetails && asset?.description && (
+              <p
+                className={`text-[10px] line-clamp-2 mt-0.5 leading-relaxed ${
+                  isParchment ? 'text-[#615141]' : 'text-slate-400'
+                }`}
+              >
+                {asset.description}
+              </p>
+            )}
+          </div>
+
+          {/* Replaceable Asset Slot Tag Pill */}
+          <div
+            className={`absolute z-20 px-2 py-0.5 rounded text-[9px] font-mono tracking-wider uppercase border shadow-sm ${
+              badgePosition === 'top-left' ? 'top-2.5 left-2.5' :
+              badgePosition === 'top-right' ? 'top-2.5 right-2.5' :
+              badgePosition === 'bottom-right' ? 'bottom-2.5 right-2.5' :
+              badgePosition === 'center' ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' :
+              'bottom-2.5 left-2.5'
+            } ${
+              isParchment
+                ? 'bg-[#F2E8DC] border-[#B8A793] text-[#785E46]'
+                : 'bg-slate-950/90 border-slate-700 text-amber-300'
+            }`}
+          >
+            [slot: {assetId}]
+            {asset && <span className="opacity-70 ml-1">({asset.width}&times;{asset.height})</span>}
+          </div>
+        </div>
+      )}
+
+      {/* Optional Children overlay */}
+      {children && <div className="relative z-30 w-full h-full">{children}</div>}
+    </div>
+  );
+}

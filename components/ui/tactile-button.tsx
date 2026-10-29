@@ -4,7 +4,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface TactileButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'amber' | 'mint' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'amber' | 'mint' | 'danger' | 'ghost' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
 }
@@ -24,6 +24,8 @@ export const TactileButton = React.forwardRef<HTMLButtonElement, TactileButtonPr
         'bg-[#f43f5e] text-white border-2 border-[#f43f5e] shadow-[0_4px_0_#e11d48] hover:brightness-105 active:translate-y-1 active:shadow-[0_0_0_#e11d48]',
       ghost:
         'bg-transparent text-[#64748b] border-2 border-transparent hover:bg-[#f1f5f9] active:bg-[#e2e8f0]',
+      outline:
+        'bg-slate-900/60 text-slate-200 border-2 border-slate-700 shadow-[0_4px_0_#1e293b] hover:bg-slate-800 active:translate-y-1 active:shadow-[0_0_0_#1e293b]',
     };
 
     const sizeStyles = {

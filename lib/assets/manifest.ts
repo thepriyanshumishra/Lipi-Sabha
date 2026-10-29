@@ -1,0 +1,230 @@
+/**
+ * Lipi Sabha - Central Asset Manifest
+ * 
+ * Defines all visual image assets, backgrounds, and manuscript specimens.
+ * When real image files are created and placed in `/public/images/`,
+ * the `ImagePlaceholder` component will automatically display them.
+ */
+
+export interface AssetMetadata {
+  id: string;
+  fileName: string;
+  title: string;
+  description: string;
+  section: 'global' | 'hero' | 'fieldwork' | 'scripts' | 'projects' | 'ethics' | 'footer';
+  aspectRatio: string; // e.g. "16/9", "4/3", "1/1", "21/9"
+  width: number;
+  height: number;
+  isBackground: boolean;
+  objectFit?: 'cover' | 'contain' | 'fill';
+  historicalContext?: string;
+}
+
+export const ASSET_MANIFEST: Record<string, AssetMetadata> = {
+  // Global & Background Atmospheres
+  'bg-global-ink-texture': {
+    id: 'bg-global-ink-texture',
+    fileName: 'bg-global-ink-texture.webp',
+    title: 'Global Ink & Grain Texture',
+    description: 'Subtle wet calligraphic ink texture with micro-paper fiber grain for dark backgrounds.',
+    section: 'global',
+    aspectRatio: '16/9',
+    width: 1920,
+    height: 1080,
+    isBackground: true,
+    objectFit: 'cover',
+  },
+  'bg-hero-archive-atmosphere': {
+    id: 'bg-hero-archive-atmosphere',
+    fileName: 'bg-hero-archive-atmosphere.webp',
+    title: 'Hero Archive Atmospheric Backdrop',
+    description: 'Low-contrast archival library atmosphere with warm amber sidelight.',
+    section: 'hero',
+    aspectRatio: '16/9',
+    width: 1920,
+    height: 900,
+    isBackground: true,
+    objectFit: 'cover',
+  },
+  'bg-ethics-landscape': {
+    id: 'bg-ethics-landscape',
+    fileName: 'bg-ethics-landscape.webp',
+    title: 'Ethics Charter Archival Panorama',
+    description: 'Ancient Himalayan rock edicts and mist-covered mountain valleys representing community longevity.',
+    section: 'ethics',
+    aspectRatio: '21/9',
+    width: 1920,
+    height: 700,
+    isBackground: true,
+    objectFit: 'cover',
+  },
+  'bg-footer-archive-texture': {
+    id: 'bg-footer-archive-texture',
+    fileName: 'bg-footer-archive-texture.webp',
+    title: 'Footer Scribe Dark Texture',
+    description: 'Fine charcoal texture with subtle woodblock impression marks.',
+    section: 'footer',
+    aspectRatio: '16/9',
+    width: 1920,
+    height: 400,
+    isBackground: true,
+    objectFit: 'cover',
+  },
+
+  // Hero Section
+  'hero-modi-manuscript-specimen': {
+    id: 'hero-modi-manuscript-specimen',
+    fileName: 'hero-modi-manuscript-specimen.webp',
+    title: 'Marathi Modi Manuscript Specimen',
+    description: 'High-resolution archival macro photograph of an 18th-century Maratha administrative document in flowing Modi cursive script.',
+    section: 'hero',
+    aspectRatio: '4/3',
+    width: 780,
+    height: 585,
+    isBackground: false,
+    objectFit: 'cover',
+    historicalContext: 'Maharashtra, c. 1760 CE',
+  },
+  'hero-community-member-strip': {
+    id: 'hero-community-member-strip',
+    fileName: 'hero-community-member-strip.webp',
+    title: 'Fieldwork Scribes Portrait Strip',
+    description: 'Portraits of linguistic researchers, indigenous community elders, and young field scribes.',
+    section: 'hero',
+    aspectRatio: '4/1',
+    width: 180,
+    height: 44,
+    isBackground: false,
+    objectFit: 'cover',
+  },
+
+  // Fieldwork Architecture
+  'fieldwork-blind-first-quest': {
+    id: 'fieldwork-blind-first-quest',
+    fileName: 'fieldwork-blind-first-quest.webp',
+    title: 'Step 1: Blind-First Micro-Quest Specimen',
+    description: 'Historic manuscript snippet showing a reed pen (kalam) resting beside fresh iron-gall ink decipherment lines.',
+    section: 'fieldwork',
+    aspectRatio: '16/9',
+    width: 520,
+    height: 290,
+    isBackground: false,
+    objectFit: 'cover',
+  },
+  'fieldwork-community-mirror': {
+    id: 'fieldwork-community-mirror',
+    fileName: 'fieldwork-community-mirror.webp',
+    title: 'Step 2: Community Mirror Telemetry Graphic',
+    description: 'Bar chart visualization with N ≥ 5 privacy bracket highlighting cohort consensus without de-anonymization.',
+    section: 'fieldwork',
+    aspectRatio: '16/9',
+    width: 520,
+    height: 290,
+    isBackground: false,
+    objectFit: 'cover',
+  },
+  'fieldwork-sovereign-governance': {
+    id: 'fieldwork-sovereign-governance',
+    fileName: 'fieldwork-sovereign-governance.webp',
+    title: 'Step 3: Sovereign Governance Deliberation',
+    description: 'Community elders, speakers, and field linguists gathered around an orthography consensus manuscript table.',
+    section: 'fieldwork',
+    aspectRatio: '16/9',
+    width: 520,
+    height: 290,
+    isBackground: false,
+    objectFit: 'cover',
+  },
+
+  // Scripts & Writing Traditions Showcase
+  'script-specimen-modi': {
+    id: 'script-specimen-modi',
+    fileName: 'script-specimen-modi.webp',
+    title: 'Modi Script Specimen',
+    description: 'Continuous cursive Modi administrative record with unbroken shirorekha and looped character joins.',
+    section: 'scripts',
+    aspectRatio: '4/3',
+    width: 480,
+    height: 360,
+    isBackground: false,
+    objectFit: 'cover',
+    historicalContext: 'Maharashtra · 17th–20th century use',
+  },
+  'script-specimen-sharada': {
+    id: 'script-specimen-sharada',
+    fileName: 'script-specimen-sharada.webp',
+    title: 'Sharada Script Specimen',
+    description: 'Ancestral Kashmiri Sharada birch-bark manuscript showing classical Rajatarangini calligraphy.',
+    section: 'scripts',
+    aspectRatio: '4/3',
+    width: 480,
+    height: 360,
+    isBackground: false,
+    objectFit: 'cover',
+    historicalContext: 'Kashmir · from c. 8th century',
+  },
+  'script-specimen-ol-chiki': {
+    id: 'script-specimen-ol-chiki',
+    fileName: 'script-specimen-ol-chiki.webp',
+    title: 'Ol Chiki Typography Specimen',
+    description: 'Complete phonetic matrix of 30 Ol Chiki glyphs created by Guru Gomke Pt. Raghunath Murmu.',
+    section: 'scripts',
+    aspectRatio: '4/3',
+    width: 480,
+    height: 360,
+    isBackground: false,
+    objectFit: 'cover',
+    historicalContext: 'Santhali · developed 1925',
+  },
+  'script-specimen-brahmi': {
+    id: 'script-specimen-brahmi',
+    fileName: 'script-specimen-brahmi.webp',
+    title: 'Ashokan Brahmi Epigraph Specimen',
+    description: 'Carved sandstone epigraph depicting 3rd-century BCE Mauryan Brahmi rock edict letters.',
+    section: 'scripts',
+    aspectRatio: '4/3',
+    width: 480,
+    height: 360,
+    isBackground: false,
+    objectFit: 'cover',
+    historicalContext: 'South Asia · ancient inscription tradition',
+  },
+
+  // Active Field Studies
+  'project-image-modi-paleography': {
+    id: 'project-image-modi-paleography',
+    fileName: 'project-image-modi-paleography.webp',
+    title: 'Maharashtra Modi Paleography Study',
+    description: 'Archival Maratha revenue document being analyzed for character ligatures and digital legibility.',
+    section: 'projects',
+    aspectRatio: '16/10',
+    width: 580,
+    height: 360,
+    isBackground: false,
+    objectFit: 'cover',
+  },
+  'project-image-sharada-manuscript': {
+    id: 'project-image-sharada-manuscript',
+    fileName: 'project-image-sharada-manuscript.webp',
+    title: 'Kashmir Sharada Manuscript Fieldwork',
+    description: 'Carefully preserved birch-bark codex with diacritic vowel annotations in historic Sharada.',
+    section: 'projects',
+    aspectRatio: '16/10',
+    width: 580,
+    height: 360,
+    isBackground: false,
+    objectFit: 'cover',
+  },
+  'project-image-santhali-mapping': {
+    id: 'project-image-santhali-mapping',
+    fileName: 'project-image-santhali-mapping.webp',
+    title: 'Santhali Phonological Mapping',
+    description: 'Field researchers hands annotating Ol Chiki orthographic phonetic charts with community members.',
+    section: 'projects',
+    aspectRatio: '16/10',
+    width: 580,
+    height: 360,
+    isBackground: false,
+    objectFit: 'cover',
+  },
+};

@@ -6,20 +6,24 @@ import { cn } from '@/lib/utils';
 export interface TactileCardProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
   interactive?: boolean;
+  variant?: 'default' | 'parchment' | 'dark';
 }
 
 export const TactileCard = React.forwardRef<HTMLDivElement, TactileCardProps>(
-  ({ className, selected = false, interactive = false, children, ...props }, ref) => {
+  ({ className, selected = false, interactive = false, variant = 'default', children, ...props }, ref) => {
     return (
       <div
         ref={ref}
         className={cn(
-          'bg-white border-2 rounded-2xl p-5 transition-all duration-150',
+          'rounded-2xl transition-all duration-150',
+          variant === 'default' && 'bg-slate-900/90 border border-slate-800 shadow-[0_4px_0_#0f172a]',
+          variant === 'parchment' && 'bg-[#FAF5EE] border border-[#D5C7B6] shadow-[0_4px_0_#C5B49E]',
+          variant === 'dark' && 'bg-[#0C101C] border border-slate-800 shadow-[0_4px_0_#070A12]',
           selected
-            ? 'border-[#1cb0f6] bg-[#ddf4ff]/40 shadow-[0_4px_0_#bfe7fc]'
-            : 'border-[#e5e5e5] shadow-[0_3px_0_#f0f0f0]',
+            ? 'border-amber-400 bg-amber-950/20 shadow-[0_4px_0_#b45309]'
+            : '',
           interactive
-            ? 'cursor-pointer hover:border-[#1cb0f6] hover:shadow-[0_4px_0_#e5e5e5] active:translate-y-1 active:shadow-none'
+            ? 'cursor-pointer hover:border-amber-400 active:translate-y-1 active:shadow-none'
             : '',
           className
         )}
