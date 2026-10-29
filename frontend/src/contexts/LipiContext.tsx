@@ -54,6 +54,14 @@ interface LipiContextType {
   voteOnProject: (projectId: string, direction: 'up' | 'down') => void;
   userVotesMap: Record<string, 'up' | 'down'>;
   voteOnBranch: (projectId: string, branchId: string) => void;
+  userBranchVotesMap: Record<string, string>;
+  addCommentToProject: (
+    projectId: string,
+    content: string,
+    author: string,
+    authorRole?: string
+  ) => void;
+  likeComment: (projectId: string, commentId: string) => void;
   ratifyProject: (
     projectId: string,
     recommendedBranchId: string,
@@ -138,6 +146,14 @@ export function LipiProvider({ children }: { children: ReactNode }) {
   const [userVotesMap, setUserVotesMap] = useState<Record<string, 'up' | 'down'>>(() => {
     try {
       const saved = localStorage.getItem('lipi_sabha_user_card_votes');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {};
+  });
+
+  const [userBranchVotesMap, setUserBranchVotesMap] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('lipi_sabha_user_branch_votes');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {};
@@ -387,16 +403,82 @@ export function LipiProvider({ children }: { children: ReactNode }) {
   };
 
   const voteOnBranch = (projectId: string, branchId: string) => {
-    const updated = projects.map((proj) => {
+    const currentVotedBranch = userBranchVotesMap[projectId];
+    let updatedBranchVote = currentVotedBranch === branchId ? '' : branchId;
+
+    const updatedProjects = projects.map((proj) => {
       if (proj.id === projectId) {
         const branches = proj.branches || [];
         const updatedBranches = branches.map((b) => {
+          if (currentVotedBranch === branchId && b.id === branchId) {
+            // Unvoting (toggle off)
+            return { ...b, communityVotes: Math.max(0, b.communityVotes - 1) };
+          }
+          if (currentVotedBranch && currentVotedBranch !== branchId && b.id === currentVotedBranch) {
+            // Decrement previous branch
+            return { ...b, communityVotes: Math.max(0, b.communityVotes - 1) };
+          }
           if (b.id === branchId) {
+            // Increment newly voted branch
             return { ...b, communityVotes: b.communityVotes + 1 };
           }
           return b;
         });
         return { ...proj, branches: updatedBranches };
+      }
+      return proj;
+    });
+
+    const updatedMap = { ...userBranchVotesMap };
+    if (updatedBranchVote) {
+      updatedMap[projectId] = updatedBranchVote;
+    } else {
+      delete updatedMap[projectId];
+    }
+
+    setUserBranchVotesMap(updatedMap);
+    try {
+      localStorage.setItem('lipi_sabha_user_branch_votes', JSON.stringify(updatedMap));
+    } catch {}
+
+    saveProjects(updatedProjects);
+  };
+
+  const addCommentToProject = (
+    projectId: string,
+    content: string,
+    author: string,
+    authorRole?: string
+  ) => {
+    if (!content.trim()) return;
+    const newComment = {
+      id: `comm-${Date.now()}`,
+      author: author.trim() || 'Community Contributor',
+      authorRole: authorRole || 'Speaker',
+      content: content.trim(),
+      createdAt: 'Just now',
+      likes: 0
+    };
+
+    const updated = projects.map((proj) => {
+      if (proj.id === projectId) {
+        return {
+          ...proj,
+          comments: [...(proj.comments || []), newComment]
+        };
+      }
+      return proj;
+    });
+    saveProjects(updated);
+  };
+
+  const likeComment = (projectId: string, commentId: string) => {
+    const updated = projects.map((proj) => {
+      if (proj.id === projectId) {
+        const updatedComments = (proj.comments || []).map((c) =>
+          c.id === commentId ? { ...c, likes: (c.likes || 0) + 1 } : c
+        );
+        return { ...proj, comments: updatedComments };
       }
       return proj;
     });
@@ -456,6 +538,9 @@ export function LipiProvider({ children }: { children: ReactNode }) {
         voteOnProject,
         userVotesMap,
         voteOnBranch,
+        userBranchVotesMap,
+        addCommentToProject,
+        likeComment,
         ratifyProject
       }}
     >

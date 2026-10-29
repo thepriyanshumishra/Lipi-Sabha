@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { ShieldCheck, User as UserIcon } from 'lucide-react';
 
 export function SignUpPage() {
   const { register } = useAuth();
@@ -9,6 +10,7 @@ export function SignUpPage() {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'learner' | 'reviewer'>('learner');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,8 +23,12 @@ export function SignUpPage() {
     setLoading(true);
     setError('');
     try {
-      await register(email, password, displayName);
-      navigate('/dashboard');
+      await register(email, password, displayName, role);
+      if (role === 'reviewer') {
+        navigate('/review');
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       setError(err?.message || 'Failed to create account.');
     } finally {
@@ -39,7 +45,7 @@ export function SignUpPage() {
           </div>
           <h2 className="font-display text-3xl font-bold text-ink">Join Lipi Sabha</h2>
           <p className="text-xs text-muted">
-            Create an account to cultivate your Progress Garden, explore orthographies, and contribute.
+            Create an authentic persona to ask doubts, verify orthographies, and shape community standards.
           </p>
         </div>
 
@@ -56,7 +62,7 @@ export function SignUpPage() {
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="e.g. Suman"
+              placeholder="e.g. Vikram Sharma, Dr. Anand"
               className="w-full px-4 py-2.5 rounded-xl border border-border bg-cream text-ink text-sm focus:outline-none focus:border-purple"
               required
             />
@@ -86,6 +92,38 @@ export function SignUpPage() {
             />
           </div>
 
+          {/* Role Choice */}
+          <div>
+            <label className="block text-xs font-semibold text-ink mb-1.5">Join Community As:</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setRole('learner')}
+                className={`p-2.5 rounded-xl border text-xs font-display font-bold flex flex-col items-center gap-1 cursor-pointer transition-all ${
+                  role === 'learner'
+                    ? 'bg-purple text-white border-purple shadow-soft'
+                    : 'bg-cream border-border text-ink'
+                }`}
+              >
+                <span>🌱 Community Learner</span>
+                <span className="text-[10px] opacity-80">Ask doubts & vote</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole('reviewer')}
+                className={`p-2.5 rounded-xl border text-xs font-display font-bold flex flex-col items-center gap-1 cursor-pointer transition-all ${
+                  role === 'reviewer'
+                    ? 'bg-mint-dark text-white border-mint-dark shadow-soft'
+                    : 'bg-cream border-border text-ink'
+                }`}
+              >
+                <span>⚖️ Lipi Reviewer</span>
+                <span className="text-[10px] opacity-80">Verify & calibrate</span>
+              </button>
+            </div>
+          </div>
+
           <div className="p-3 bg-neutral/50 rounded-xl border border-border text-[11px] text-muted">
             By creating an account, you respect our core principle: &quot;The community is the decision-maker, not just the dataset.&quot;
           </div>
@@ -93,7 +131,7 @@ export function SignUpPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-purple text-white font-semibold text-sm hover:bg-purple-hover transition-colors shadow-soft"
+            className="w-full py-3 rounded-xl bg-purple text-white font-semibold text-sm hover:bg-purple-hover transition-colors shadow-soft cursor-pointer"
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>

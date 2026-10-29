@@ -25,10 +25,13 @@ import {
 } from 'lucide-react';
 import { playPronunciation, playAcousticChime, playSuccessChime } from '@/utils/audio';
 import { useLipi } from '@/contexts/LipiContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { CreateProjectModal } from '@/components/CreateProjectModal';
 import { ImageLightboxModal } from '@/components/ImageLightboxModal';
+import { ProjectDiscussionPanel } from '@/components/ProjectDiscussionPanel';
 
 export function HomePage() {
+  const { user, awardXP } = useAuth();
   const {
     activeLipi,
     allLipis,
@@ -36,6 +39,7 @@ export function HomePage() {
     activeLipiNodes,
     projects,
     voteOnBranch,
+    userBranchVotesMap,
     voteOnProject,
     userVotesMap
   } = useLipi();
@@ -92,19 +96,20 @@ export function HomePage() {
   const handleQuizAnswer = (index: number) => {
     setQuizSelection(index);
     setQuizSubmitted(true);
-    if (activeNode.quizOptions[index]?.isCorrect) {
+    const isCorrect = activeNode.quizOptions[index]?.isCorrect;
+    if (isCorrect) {
       playSuccessChime();
       setEarnedXP((prev) => prev + 50);
+      awardXP(50, `Mastered ${activeNode.glyph} orthographic rule!`);
     } else {
       playAcousticChime(300, 0.35);
     }
   };
 
   const handleVote = (branchId: string) => {
-    if (votedBranches[branchId]) return;
     voteOnBranch(activeProject.id, branchId);
-    setVotedBranches((prev) => ({ ...prev, [branchId]: true }));
     playSuccessChime();
+    awardXP(5, 'Cast community vote on orthography branch');
   };
 
   return (
@@ -307,7 +312,7 @@ export function HomePage() {
                   {activeProject.branches.map((branch, bIdx) => {
                     const isWinningVerdict =
                       activeProject.reviewerVerdict?.recommendedBranchId === branch.id;
-                    const hasVoted = votedBranches[branch.id];
+                    const hasVoted = userBranchVotesMap[activeProject.id] === branch.id;
 
                     return (
                       <div
@@ -392,6 +397,15 @@ export function HomePage() {
                       </div>
                     );
                   })}
+                </div>
+
+                {/* Proposal Community Discussion Panel */}
+                <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border-[1.5px] border-border shadow-card">
+                  <ProjectDiscussionPanel
+                    projectId={activeProject.id}
+                    projectTitle={activeProject.title}
+                    comments={activeProject.comments}
+                  />
                 </div>
               </div>
             )}
@@ -598,6 +612,15 @@ export function HomePage() {
                             <span>{item.downvotes || 0}</span>
                           </button>
                         </div>
+                      </div>
+
+                      {/* Expandable Community Discussion Panel (Instagram style) */}
+                      <div className="pt-2 border-t border-border/70">
+                        <ProjectDiscussionPanel
+                          projectId={item.id}
+                          projectTitle={item.title}
+                          comments={item.comments}
+                        />
                       </div>
                     </div>
                   );

@@ -1752,6 +1752,15 @@ export const DEFAULT_SUBMISSIONS: LipiTestSubmission[] = [
   }
 ];
 
+export interface ProjectComment {
+  id: string;
+  author: string;
+  authorRole?: string;
+  content: string;
+  createdAt: string;
+  likes?: number;
+}
+
 export interface ScriptProjectBranch {
   id: string;
   label: string; // e.g. "R-I-N-A"
@@ -1781,6 +1790,7 @@ export interface ScriptProject {
   options?: string[];
   upvotes?: number;
   downvotes?: number;
+  comments?: ProjectComment[];
   reviewerVerdict?: {
     recommendedBranchId?: string;
     acceptedOption?: string;
@@ -1799,12 +1809,30 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     lipiId: 'devanagari',
     lipiName: 'देवनागरी (Devanagari)',
     description: 'Community members are debating between ASCII mobile typing (R-I-N-A), English digraphs (R-E-E-N-A), and native Devanagari (रीना). Outsiders should not decide for native speakers. Compare learning ease against acoustic fidelity.',
-    author: 'Aria (User)',
+    author: 'Aria Patel (Community Speaker)',
     submittedAt: 'Today, 10:15 AM',
     status: 'verified',
     upvotes: 16,
     downvotes: 1,
     options: ['R-I-N-A', 'R-E-E-N-A', 'रीना'],
+    comments: [
+      {
+        id: 'comm-101',
+        author: 'Kavi Sharma',
+        authorRole: 'Community Contributor',
+        content: 'For rapid texting on older keypad phones, R-I-N-A is unavoidable. But on official records, the long vowel in रीना avoids ambiguity with short /i/.',
+        createdAt: '15m ago',
+        likes: 5
+      },
+      {
+        id: 'comm-102',
+        author: 'Prof. Raghavan',
+        authorRole: 'Epigraphy Reviewer',
+        content: 'Orthographic recommendation: Keep both valid in community standard. ASCII for informal SMS; native Devanagari रीना as canonical education standard.',
+        createdAt: 'Just now',
+        likes: 8
+      }
+    ],
     branches: [
       {
         id: 'branch-rina',
@@ -1843,7 +1871,7 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     reviewerVerdict: {
       recommendedBranchId: 'branch-deva-reena',
       acceptedOption: 'रीना',
-      reviewerName: 'Meera (Lipi Specialist)',
+      reviewerName: 'Meera Desai (Lipi Specialist)',
       rationale: 'Lossless phonetic truth: Ra + Dirgha Ee Matra (ी) + Na + Aa Matra (ा). Devanagari captures the long vowel /iː/ natively, while ASCII "R-I-N-A" is acceptable for SMS.',
       ratifiedAt: 'Yesterday, 3:30 PM'
     }
@@ -1856,15 +1884,25 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     lipiId: 'devanagari',
     lipiName: 'देवनागरी (Devanagari)',
     description: 'User submitted whether half-ma ligature should be written as full broken conjunct or standard bindu.',
-    author: 'Ravi (Student)',
+    author: 'Ravi Verma (Student Contributor)',
     submittedAt: 'Yesterday, 2:15 PM',
     status: 'flagged',
     upvotes: 4,
     downvotes: 11,
     options: ['कम्प्यूटर', 'कंप्यूटर'],
+    comments: [
+      {
+        id: 'comm-201',
+        author: 'Dr. Sunil Kaul',
+        authorRole: 'Linguistic Reviewer',
+        content: 'While Sanskrit allows explicit homorganic stop ligature (कम्प्यूटर), modern Hindi print standardizes on bindu (कंप्यूटर) for OCR consistency.',
+        createdAt: '1h ago',
+        likes: 3
+      }
+    ],
     reviewerVerdict: {
       acceptedOption: 'कंप्यूटर',
-      reviewerName: 'Meera (Devanagari Specialist)',
+      reviewerName: 'Prof. Raghavan (Orthography Reviewer)',
       rationale: 'Flagged Non-Standard: Under Directorate of Hindi standards, homorganic nasal stops before pa-varga are codified as bindu (कंप्यूटर) for unified digital search.',
       ratifiedAt: 'Yesterday, 5:00 PM'
     }
@@ -1877,10 +1915,11 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     lipiId: 'devanagari',
     lipiName: 'देवनागरी (Devanagari)',
     description: 'A speaker can pronounce the greeting naturally but wonders whether mobile keyboards should use half-sa ligature (स्त) or full letters.',
-    author: 'Kunal (Community Contributor)',
+    author: 'Kunal Sen (Fieldwork Contributor)',
     submittedAt: 'Just now',
     status: 'unverified',
     options: ['नमस्ते (with conjunct स्त)', 'नमसते (separate letters)'],
+    comments: [],
     branches: [
       {
         id: 'b-namaste-1',
@@ -1915,9 +1954,21 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     lipiName: 'शारदा (Sharada Script)',
     imageUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80',
     description: 'A villager found an eroded stone carving in Himachal Pradesh. The community recites the sacred phrase verbally but debates whether to standardize the inscription in Devanagari or Sharada.',
-    author: 'Kavi (Fieldwork Contributor)',
+    author: 'Tenzing Norbu (Epigraphy Fellow)',
     submittedAt: 'Yesterday, 4:30 PM',
     status: 'verified',
+    upvotes: 28,
+    downvotes: 0,
+    comments: [
+      {
+        id: 'comm-301',
+        author: 'Dr. Ananya Sen',
+        authorRole: 'Epigraphy Specialist',
+        content: 'The Birch-bark ductus shows typical 9th century Sharada loopings. Very rare specimen! Community consensus to document it in Sharada is historically sound.',
+        createdAt: '3h ago',
+        likes: 12
+      }
+    ],
     branches: [
       {
         id: 'branch-inscr-deva',
@@ -1944,7 +1995,8 @@ export const DEFAULT_PROJECTS: ScriptProject[] = [
     ],
     reviewerVerdict: {
       recommendedBranchId: 'branch-inscr-sharada',
-      reviewerName: 'Meera (Sharada Specialist)',
+      acceptedOption: '𑆤𑆩𑆃 𑆯𑆴𑆮𑆳𑆪',
+      reviewerName: 'Dr. Sunil Kaul (Sharada Specialist)',
       rationale: 'Ratified by community Sabha: The primary epigraphical record shall preserve Sharada script for cultural dignity, with parallel Devanagari glosses for learners.',
       ratifiedAt: 'Yesterday, 6:00 PM'
     }

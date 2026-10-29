@@ -19,6 +19,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLipi } from '@/contexts/LipiContext';
+import { UserSwitcherModal } from '@/components/UserSwitcherModal';
 
 // 1. User Experience: Two Dedicated Pages (Learn Tree & Script Studio)
 const userNavLinks = [
@@ -35,6 +36,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [lipiDropdownOpen, setLipiDropdownOpen] = useState(false);
+  const [userSwitcherOpen, setUserSwitcherOpen] = useState(false);
   const lipiMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -261,6 +263,20 @@ export function Navbar() {
                             </div>
                           </div>
                         )}
+
+                        <div className="px-2 py-1 border-b border-border">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUserSwitcherOpen(true);
+                              setUserMenuOpen(false);
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-[#78350F] dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-slate-800 transition-colors w-full text-left cursor-pointer"
+                          >
+                            <Users size={14} className="text-[#B45309]" />
+                            <span>Switch / Create Persona...</span>
+                          </button>
+                        </div>
 
                         <div className="px-2 py-1">
                           <Link
@@ -555,6 +571,12 @@ export function Navbar() {
           )}
         </AnimatePresence>
       </nav>
+
+      {/* User Switcher & Instance Creator Modal */}
+      <UserSwitcherModal
+        isOpen={userSwitcherOpen}
+        onClose={() => setUserSwitcherOpen(false)}
+      />
     </header>
   );
 }
